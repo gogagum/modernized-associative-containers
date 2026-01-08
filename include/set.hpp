@@ -1,0 +1,1547 @@
+// -*- C++ -*-
+//===----------------------------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef MSTD_SET
+#define MSTD_SET
+
+/*
+ *
+ s et synopsis     *
+
+ namespace std
+ {
+
+ template <class Key, class Compare = less<Key>,
+class Allocator = allocator<Key>>
+class set
+{
+public:
+    // types:
+    typedef Key                                      key_type;
+    typedef key_type                                 value_type;
+    typedef Compare                                  key_compare;
+    typedef key_compare                              value_compare;
+    typedef Allocator                                allocator_type;
+    typedef typename allocator_type::reference       reference;
+    typedef typename allocator_type::const_reference const_reference;
+    typedef typename allocator_type::size_type       size_type;
+    typedef typename allocator_type::difference_type difference_type;
+    typedef typename allocator_type::pointer         pointer;
+    typedef typename allocator_type::const_pointer   const_pointer;
+
+    typedef implementation-defined                   iterator;
+    typedef implementation-defined                   const_iterator;
+    typedef std::reverse_iterator<iterator>          reverse_iterator;
+    typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+    typedef unspecified                              node_type;               // C++17
+    typedef INSERT_RETURN_TYPE<iterator, node_type>  insert_return_type;      // C++17
+
+    // construct/copy/destroy:
+    set()
+    noexcept(
+        std::is_nothrow_default_constructible<allocator_type>::value &&
+        std::is_nothrow_default_constructible<key_compare>::value &&
+        std::is_nothrow_copy_constructible<key_compare>::value);
+        explicit set(const value_compare& comp);
+        set(const value_compare& comp, const allocator_type& a);
+        template <class InputIterator>
+        set(InputIterator first, InputIterator last,
+        const value_compare& comp = value_compare());
+        template <class InputIterator>
+        set(InputIterator first, InputIterator last, const value_compare& comp,
+        const allocator_type& a);
+        template<container-compatible-range<value_type> R>
+        set (std::from_range_t, R&& rg, const Compare& comp = Compare(), const Allocator& = Allocator()); // C++23
+        set(const set& s);
+        set(set&& s)
+        noexcept(
+            std::is_nothrow_move_constructible<allocator_type>::value &&
+            std::is_nothrow_move_constructible<key_compare>::value);
+            explicit set(const allocator_type& a);
+            set(const set& s, const allocator_type& a);
+            set(set&& s, const allocator_type& a);
+            set(initializer_list<value_type> il, const value_compare& comp = value_compare());
+            set(initializer_list<value_type> il, const value_compare& comp,
+            const allocator_type& a);
+            template <class InputIterator>
+            set(InputIterator first, InputIterator last, const allocator_type& a)
+            : set(first, last, Compare(), a) {}  // C++14
+            template<container-compatible-range<value_type> R>
+            set (std::from_range_t, R&& rg, const Allocator& a))
+            : set (std::from_range, std::forward<R>(rg), Compare(), a) { } // C++23
+            set(initializer_list<value_type> il, const allocator_type& a)
+            : set(il, Compare(), a) {}  // C++14
+            ~set();
+
+            set& operator=(const set& s);
+            set& operator=(set&& s)
+            noexcept(
+                allocator_type::propagate_on_container_move_assignment::value &&
+                std::is_nothrow_move_assignable<allocator_type>::value &&
+                std::is_nothrow_move_assignable<key_compare>::value);
+                set& operator=(initializer_list<value_type> il);
+
+                // iterators:
+                iterator begin() noexcept;
+                const_iterator begin() const noexcept;
+                iterator end() noexcept;
+                const_iterator end()   const noexcept;
+
+                reverse_iterator rbegin() noexcept;
+                const_reverse_iterator rbegin() const noexcept;
+                reverse_iterator rend() noexcept;
+                const_reverse_iterator rend()   const noexcept;
+
+                const_iterator         cbegin()  const noexcept;
+                const_iterator         cend()    const noexcept;
+                const_reverse_iterator crbegin() const noexcept;
+                const_reverse_iterator crend()   const noexcept;
+
+                // capacity:
+                bool      empty()    const noexcept;
+                size_type size()     const noexcept;
+                size_type max_size() const noexcept;
+
+                // modifiers:
+                template <class... Args>
+                std::pair<iterator, bool> emplace(Args&&... args);
+                template <class... Args>
+                iterator emplace_hint(const_iterator position, Args&&... args);
+                std::pair<iterator,bool> insert(const value_type& v);
+                std::pair<iterator,bool> insert(value_type&& v);
+                iterator insert(const_iterator position, const value_type& v);
+                iterator insert(const_iterator position, value_type&& v);
+                template <class InputIterator>
+                void insert(InputIterator first, InputIterator last);
+                template<container-compatible-range<value_type> R>
+                void insert_range(R&& rg);                                                      // C++23
+                void insert(initializer_list<value_type> il);
+
+                node_type extract(const_iterator position);                                       // C++17
+                node_type extract(const key_type& x);                                             // C++17
+                insert_return_type insert(node_type&& nh);                                        // C++17
+                iterator insert(const_iterator hint, node_type&& nh);                             // C++17
+
+                iterator  erase(const_iterator position);
+                iterator  erase(iterator position);  // C++14
+                size_type erase(const key_type& k);
+                iterator  erase(const_iterator first, const_iterator last);
+                void clear() noexcept;
+
+                template<class C2>
+                void merge(set<Key, C2, Allocator>& source);         // C++17
+                template<class C2>
+                void merge(set<Key, C2, Allocator>&& source);        // C++17
+                template<class C2>
+                void merge(multiset<Key, C2, Allocator>& source);    // C++17
+                template<class C2>
+                void merge(multiset<Key, C2, Allocator>&& source);   // C++17
+
+                void swap(set& s)
+                noexcept(
+                    __is_nothrow_swappable<key_compare>::value &&
+                    (!allocator_type::propagate_on_container_swap::value ||
+                    __is_nothrow_swappable<allocator_type>::value));
+
+                    // observers:
+                    allocator_type get_allocator() const noexcept;
+                    key_compare    key_comp()      const;
+                    value_compare  value_comp()    const;
+
+                    // set operations:
+                    iterator find(const key_type& k);
+                    const_iterator find(const key_type& k) const;
+                    template<typename K>
+                    iterator find(const K& x);
+                    template<typename K>
+                    const_iterator find(const K& x) const;  // C++14
+
+                    template<typename K>
+                    size_type count(const K& x) const;        // C++14
+                    size_type      count(const key_type& k) const;
+
+                    bool           contains(const key_type& x) const;  // C++20
+                    template<class K> bool contains(const K& x) const; // C++20
+
+                    iterator lower_bound(const key_type& k);
+                    const_iterator lower_bound(const key_type& k) const;
+                    template<typename K>
+                    iterator lower_bound(const K& x);              // C++14
+                    template<typename K>
+                    const_iterator lower_bound(const K& x) const;  // C++14
+
+                    iterator upper_bound(const key_type& k);
+                    const_iterator upper_bound(const key_type& k) const;
+                    template<typename K>
+                    iterator upper_bound(const K& x);              // C++14
+                    template<typename K>
+                    const_iterator upper_bound(const K& x) const;  // C++14
+                    std::pair<iterator,iterator>             equal_range(const key_type& k);
+                    std::pair<const_iterator,const_iterator> equal_range(const key_type& k) const;
+                    template<typename K>
+                    std::pair<iterator,iterator>             equal_range(const K& x);        // C++14
+                    template<typename K>
+                    std::pair<const_iterator,const_iterator> equal_range(const K& x) const;  // C++14
+                    };
+
+                    template <class InputIterator,
+class Compare = less<typename iterator_traits<InputIterator>::value_type>,
+class Allocator = allocator<typename iterator_traits<InputIterator>::value_type>>
+set(InputIterator, InputIterator,
+Compare = Compare(), Allocator = Allocator())
+-> set<typename iterator_traits<InputIterator>::value_type, Compare, Allocator>; // C++17
+
+template<ranges::input_range R, class Compare = less<ranges::range_value_t<R>>,
+class Allocator = allocator<ranges::range_value_t<R>>>
+set (std::from_range_t, R&&, Compare = Compare(), Allocator = Allocator())
+-> set<ranges::range_value_t<R>, Compare, Allocator>; // C++23
+
+template<class Key, class Compare = less<Key>, class Allocator = allocator<Key>>
+set(initializer_list<Key>, Compare = Compare(), Allocator = Allocator())
+-> set<Key, Compare, Allocator>; // C++17
+
+template<class InputIterator, class Allocator>
+set(InputIterator, InputIterator, Allocator)
+-> set<typename iterator_traits<InputIterator>::value_type,
+less<typename iterator_traits<InputIterator>::value_type>, Allocator>; // C++17
+
+template<ranges::input_range R, class Allocator>
+set (std::from_range_t, R&&, Allocator)
+-> set<ranges::range_value_t<R>, less<ranges::range_value_t<R>>, Allocator>; // C++23
+
+template<class Key, class Allocator>
+set(initializer_list<Key>, Allocator) -> set<Key, less<Key>, Allocator>; // C++17
+
+template <class Key, class Compare, class Allocator>
+bool
+operator==(const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);
+
+template <class Key, class Compare, class Allocator>
+bool
+operator< (const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator!=(const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator> (const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator>=(const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator<=(const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template<class Key, class Compare, class Allocator>
+synth-three-way-result<Key> operator<=>(const set<Key, Compare, Allocator>& x,
+const set<Key, Compare, Allocator>& y); // since C++20
+
+// specialized algorithms:
+template <class Key, class Compare, class Allocator>
+void
+swap(set<Key, Compare, Allocator>& x, set<Key, Compare, Allocator>& y)
+noexcept(noexcept(x.swap(y)));
+
+template <class Key, class Compare, class Allocator, class Predicate>
+typename set<Key, Compare, Allocator>::size_type
+erase_if(set<Key, Compare, Allocator>& c, Predicate pred);  // C++20
+
+template <class Key, class Compare = less<Key>,
+class Allocator = allocator<Key>>
+class multiset
+{
+public:
+    // types:
+    typedef Key                                      key_type;
+    typedef key_type                                 value_type;
+    typedef Compare                                  key_compare;
+    typedef key_compare                              value_compare;
+    typedef Allocator                                allocator_type;
+    typedef typename allocator_type::reference       reference;
+    typedef typename allocator_type::const_reference const_reference;
+    typedef typename allocator_type::size_type       size_type;
+    typedef typename allocator_type::difference_type difference_type;
+    typedef typename allocator_type::pointer         pointer;
+    typedef typename allocator_type::const_pointer   const_pointer;
+
+    typedef implementation-defined                   iterator;
+    typedef implementation-defined                   const_iterator;
+    typedef std::reverse_iterator<iterator>          reverse_iterator;
+    typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+    typedef unspecified                              node_type;               // C++17
+
+    // construct/copy/destroy:
+    multiset()
+    noexcept(
+        std::is_nothrow_default_constructible<allocator_type>::value &&
+        std::is_nothrow_default_constructible<key_compare>::value &&
+        std::is_nothrow_copy_constructible<key_compare>::value);
+        explicit multiset(const value_compare& comp);
+        multiset(const value_compare& comp, const allocator_type& a);
+        template <class InputIterator>
+        multiset(InputIterator first, InputIterator last,
+        const value_compare& comp = value_compare());
+        template <class InputIterator>
+        multiset(InputIterator first, InputIterator last,
+        const value_compare& comp, const allocator_type& a);
+        template<container-compatible-range<value_type> R>
+        multiset (std::from_range_t, R&& rg,
+        const Compare& comp = Compare(), const Allocator& = Allocator()); // C++23
+        multiset(const multiset& s);
+        multiset(multiset&& s)
+        noexcept(
+            std::is_nothrow_move_constructible<allocator_type>::value &&
+            std::is_nothrow_move_constructible<key_compare>::value);
+            explicit multiset(const allocator_type& a);
+            multiset(const multiset& s, const allocator_type& a);
+            multiset(multiset&& s, const allocator_type& a);
+            multiset(initializer_list<value_type> il, const value_compare& comp = value_compare());
+            multiset(initializer_list<value_type> il, const value_compare& comp,
+            const allocator_type& a);
+            template <class InputIterator>
+            multiset(InputIterator first, InputIterator last, const allocator_type& a)
+            : set(first, last, Compare(), a) {}  // C++14
+            template<container-compatible-range<value_type> R>
+            multiset (std::from_range_t, R&& rg, const Allocator& a))
+            : multiset (std::from_range, std::forward<R>(rg), Compare(), a) { } // C++23
+            multiset(initializer_list<value_type> il, const allocator_type& a)
+            : set(il, Compare(), a) {}  // C++14
+            ~multiset();
+
+            multiset& operator=(const multiset& s);
+            multiset& operator=(multiset&& s)
+            noexcept(
+                allocator_type::propagate_on_container_move_assignment::value &&
+                std::is_nothrow_move_assignable<allocator_type>::value &&
+                std::is_nothrow_move_assignable<key_compare>::value);
+                multiset& operator=(initializer_list<value_type> il);
+
+                // iterators:
+                iterator begin() noexcept;
+                const_iterator begin() const noexcept;
+                iterator end() noexcept;
+                const_iterator end()   const noexcept;
+
+                reverse_iterator rbegin() noexcept;
+                const_reverse_iterator rbegin() const noexcept;
+                reverse_iterator rend() noexcept;
+                const_reverse_iterator rend()   const noexcept;
+
+                const_iterator         cbegin()  const noexcept;
+                const_iterator         cend()    const noexcept;
+                const_reverse_iterator crbegin() const noexcept;
+                const_reverse_iterator crend()   const noexcept;
+
+                // capacity:
+                bool      empty()    const noexcept;
+                size_type size()     const noexcept;
+                size_type max_size() const noexcept;
+
+                // modifiers:
+                template <class... Args>
+                iterator emplace(Args&&... args);
+                template <class... Args>
+                iterator emplace_hint(const_iterator position, Args&&... args);
+                iterator insert(const value_type& v);
+                iterator insert(value_type&& v);
+                iterator insert(const_iterator position, const value_type& v);
+                iterator insert(const_iterator position, value_type&& v);
+                template <class InputIterator>
+                void insert(InputIterator first, InputIterator last);
+                template<container-compatible-range<value_type> R>
+                void insert_range(R&& rg);                                                      // C++23
+                void insert(initializer_list<value_type> il);
+
+                node_type extract(const_iterator position);                                       // C++17
+                node_type extract(const key_type& x);                                             // C++17
+                iterator insert(node_type&& nh);                                                  // C++17
+                iterator insert(const_iterator hint, node_type&& nh);                             // C++17
+
+                iterator  erase(const_iterator position);
+                iterator  erase(iterator position);  // C++14
+                size_type erase(const key_type& k);
+                iterator  erase(const_iterator first, const_iterator last);
+                void clear() noexcept;
+
+                template<class C2>
+                void merge(multiset<Key, C2, Allocator>& source);    // C++17
+                template<class C2>
+                void merge(multiset<Key, C2, Allocator>&& source);   // C++17
+                template<class C2>
+                void merge(set<Key, C2, Allocator>& source);         // C++17
+                template<class C2>
+                void merge(set<Key, C2, Allocator>&& source);        // C++17
+
+                void swap(multiset& s)
+                noexcept(
+                    __is_nothrow_swappable<key_compare>::value &&
+                    (!allocator_type::propagate_on_container_swap::value ||
+                    __is_nothrow_swappable<allocator_type>::value));
+
+                    // observers:
+                    allocator_type get_allocator() const noexcept;
+                    key_compare    key_comp()      const;
+                    value_compare  value_comp()    const;
+
+                    // set operations:
+                    iterator find(const key_type& k);
+                    const_iterator find(const key_type& k) const;
+                    template<typename K>
+                    iterator find(const K& x);
+                    template<typename K>
+                    const_iterator find(const K& x) const;  // C++14
+
+                    template<typename K>
+                    size_type count(const K& x) const;      // C++14
+                    size_type      count(const key_type& k) const;
+
+                    bool           contains(const key_type& x) const;  // C++20
+                    template<class K> bool contains(const K& x) const; // C++20
+
+                    iterator lower_bound(const key_type& k);
+                    const_iterator lower_bound(const key_type& k) const;
+                    template<typename K>
+                    iterator lower_bound(const K& x);              // C++14
+                    template<typename K>
+                    const_iterator lower_bound(const K& x) const;  // C++14
+
+                    iterator upper_bound(const key_type& k);
+                    const_iterator upper_bound(const key_type& k) const;
+                    template<typename K>
+                    iterator upper_bound(const K& x);              // C++14
+                    template<typename K>
+                    const_iterator upper_bound(const K& x) const;  // C++14
+
+                    std::pair<iterator,iterator>             equal_range(const key_type& k);
+                    std::pair<const_iterator,const_iterator> equal_range(const key_type& k) const;
+                    template<typename K>
+                    std::pair<iterator,iterator>             equal_range(const K& x);        // C++14
+                    template<typename K>
+                    std::pair<const_iterator,const_iterator> equal_range(const K& x) const;  // C++14
+                    };
+
+                    template <class InputIterator,
+class Compare = less<typename iterator_traits<InputIterator>::value_type>,
+class Allocator = allocator<typename iterator_traits<InputIterator>::value_type>>
+multiset(InputIterator, InputIterator,
+Compare = Compare(), Allocator = Allocator())
+-> multiset<typename iterator_traits<InputIterator>::value_type, Compare, Allocator>; // C++17
+
+template<ranges::input_range R, class Compare = less<ranges::range_value_t<R>>,
+class Allocator = allocator<ranges::range_value_t<R>>>
+multiset (std::from_range_t, R&&, Compare = Compare(), Allocator = Allocator())
+-> multiset<ranges::range_value_t<R>, Compare, Allocator>;
+
+template<class Key, class Compare = less<Key>, class Allocator = allocator<Key>>
+multiset(initializer_list<Key>, Compare = Compare(), Allocator = Allocator())
+-> multiset<Key, Compare, Allocator>; // C++17
+
+template<class InputIterator, class Allocator>
+multiset(InputIterator, InputIterator, Allocator)
+-> multiset<typename iterator_traits<InputIterator>::value_type,
+less<typename iterator_traits<InputIterator>::value_type>, Allocator>; // C++17
+
+template<ranges::input_range R, class Allocator>
+multiset (std::from_range_t, R&&, Allocator)
+-> multiset<ranges::range_value_t<R>, less<ranges::range_value_t<R>>, Allocator>;
+
+template<class Key, class Allocator>
+multiset(initializer_list<Key>, Allocator) -> multiset<Key, less<Key>, Allocator>; // C++17
+
+template <class Key, class Compare, class Allocator>
+bool
+operator==(const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);
+
+template <class Key, class Compare, class Allocator>
+bool
+operator< (const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator!=(const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator> (const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator>=(const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template <class Key, class Compare, class Allocator>
+bool
+operator<=(const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y);                                // removed in C++20
+
+template<class Key, class Compare, class Allocator>
+synth-three-way-result<Key> operator<=>(const multiset<Key, Compare, Allocator>& x,
+const multiset<Key, Compare, Allocator>& y); // since C++20
+
+// specialized algorithms:
+template <class Key, class Compare, class Allocator>
+void
+swap(multiset<Key, Compare, Allocator>& x, multiset<Key, Compare, Allocator>& y)
+noexcept(noexcept(x.swap(y)));
+
+template <class Key, class Compare, class Allocator, class Predicate>
+typename multiset<Key, Compare, Allocator>::size_type
+erase_if(multiset<Key, Compare, Allocator>& c, Predicate pred);  // C++20
+
+}  // std
+
+*/
+
+#if __cplusplus < 201103L && defined(MSTD_USE_FROZEN_CXX03_HEADERS)
+#  include <__cxx03/set>
+#else
+#  include <algorithm>
+//#  include <__algorithm/lexicographical_compare.h>
+//#  include <__algorithm/lexicographical_compare_three_way.h>
+#include <detail/algorithm/specialized_algorithms.hpp>
+#include <detail/functional/is_transparent.hpp>
+#include <cassert>
+#include <detail/config.hpp>
+#include <functional>
+//#  include <__functional/is_transparent.h>
+//#  include <__functional/operations.h>
+#include <iterator>
+//#  include <__iterator/erase_if_container.h>
+//#  include <__iterator/iterator_traits.h>
+//#  include <__iterator/reverse_iterator.h>
+#include <memory>
+//#  include <__memory/allocator.h>
+//#  include <__memory/allocator_traits.h>
+//#  include <__memory_resource/polymorphic_allocator.h>
+#  include <detail/node_handle.hpp>
+#include <detail/iterator/iterator_traits.hpp>
+#include <detail/compare/synth_three_way.hpp>
+#include <ranges>
+#  include <detail/tree.hpp>
+#include <type_traits>
+#include <detail/iterator/erase_if_container.hpp>
+#include <detail/type_traits/is_allocator.hpp>
+#include <detail/type_traits/container_traits.hpp>
+#include <detail/ranges/container_compatible_range.hpp>
+#include <memory_resource>
+#  include <utility>
+#  include <version>
+
+// standard-mandated includes
+
+// [associative.set.syn]
+#  include <compare>
+#  include <initializer_list>
+
+#  if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
+#    pragma GCC system_header
+#  endif
+
+MSTD_PUSH_MACROS
+#  include <detail/undef_macros.hpp>
+
+MSTD_BEGIN_NAMESPACE_STD
+
+template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >
+class multiset;
+
+template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >
+class set {
+public:
+    // types:
+    typedef _Key key_type;
+    typedef key_type value_type;
+    typedef std::type_identity_t<_Compare> key_compare;
+    typedef key_compare value_compare;
+    typedef std::type_identity_t<_Allocator> allocator_type;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+
+    static_assert(std::is_same<typename allocator_type::value_type, value_type>::value,
+                  "Allocator::value_type must be same type as value_type");
+
+private:
+    typedef __tree<value_type, value_compare, allocator_type> __base;
+    typedef std::allocator_traits<allocator_type> __alloc_traits;
+
+    static_assert(__check_valid_allocator<allocator_type>::value, "");
+
+    __base __tree_;
+
+public:
+    typedef typename __base::pointer pointer;
+    typedef typename __base::const_pointer const_pointer;
+    typedef typename __base::size_type size_type;
+    typedef typename __base::difference_type difference_type;
+    typedef typename __base::const_iterator iterator;
+    typedef typename __base::const_iterator const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    #  if MSTD_STD_VER >= 17
+    typedef __set_node_handle<typename __base::__node, allocator_type> node_type;
+    typedef __insert_return_type<iterator, node_type> insert_return_type;
+    #  endif
+
+    template <class _Key2, class _Compare2, class _Alloc2>
+    friend class set;
+    template <class _Key2, class _Compare2, class _Alloc2>
+    friend class multiset;
+
+    MSTD_HIDE_FROM_ABI set() _NOEXCEPT_(
+        std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
+        std::is_nothrow_copy_constructible<key_compare>::value)
+    : __tree_(value_compare()) {}
+
+    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp) _NOEXCEPT_(
+        std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
+    : __tree_(__comp) {}
+
+    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp, const allocator_type& __a) : __tree_(__comp, __a) {}
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI set(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    : __tree_(__comp) {
+        insert(__f, __l);
+    }
+
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI
+    set(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
+    : __tree_(__comp, __a) {
+        insert(__f, __l);
+    }
+
+    #  if MSTD_STD_VER >= 23
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI
+    set(std::from_range_t,
+        _Range&& __range,
+        const key_compare& __comp = key_compare(),
+        const allocator_type& __a = allocator_type())
+    : __tree_(__comp, __a) {
+        insert_range(std::forward<_Range>(__range));
+    }
+    #  endif
+
+    #  if MSTD_STD_VER >= 14
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI set(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    : set(__f, __l, key_compare(), __a) {}
+    #  endif
+
+    #  if MSTD_STD_VER >= 23
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI set(std::from_range_t, _Range&& __range, const allocator_type& __a)
+    : set (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
+    #  endif
+
+    MSTD_HIDE_FROM_ABI set(const set& __s) = default;
+
+    MSTD_HIDE_FROM_ABI set& operator=(const set& __s) = default;
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI set(set&& __s) = default;
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI explicit set(const allocator_type& __a) : __tree_(__a) {}
+
+    MSTD_HIDE_FROM_ABI set(const set& __s, const allocator_type& __alloc) : __tree_(__s.__tree_, __alloc) {}
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI set(set&& __s, const allocator_type& __alloc) : __tree_(std::move(__s.__tree_), __alloc) {}
+
+    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    : __tree_(__comp) {
+        insert(__il.begin(), __il.end());
+    }
+
+    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
+    : __tree_(__comp, __a) {
+        insert(__il.begin(), __il.end());
+    }
+
+    #    if MSTD_STD_VER >= 14
+    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const allocator_type& __a)
+    : set(__il, key_compare(), __a) {}
+    #    endif
+
+    MSTD_HIDE_FROM_ABI set& operator=(std::initializer_list<value_type> __il) {
+        clear();
+        insert(__il.begin(), __il.end());
+        return *this;
+    }
+
+    MSTD_HIDE_FROM_ABI set& operator=(set&& __s) = default;
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() _NOEXCEPT { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const _NOEXCEPT { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() _NOEXCEPT { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const _NOEXCEPT { return __tree_.end(); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() _NOEXCEPT { return reverse_iterator(end()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const _NOEXCEPT {
+        return const_reverse_iterator(end());
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() _NOEXCEPT { return reverse_iterator(begin()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const _NOEXCEPT {
+        return const_reverse_iterator(begin());
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const _NOEXCEPT { return begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const _NOEXCEPT { return end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const _NOEXCEPT { return rbegin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const _NOEXCEPT { return rend(); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const _NOEXCEPT { return __tree_.size() == 0; }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const _NOEXCEPT { return __tree_.size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT { return __tree_.max_size(); }
+
+    // modifiers:
+    #  ifndef MSTD_CXX03_LANG
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> emplace(_Args&&... __args) {
+        return __tree_.__emplace_unique(std::forward<_Args>(__args)...);
+    }
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI iterator emplace_hint(const_iterator __p, _Args&&... __args) {
+        return __tree_.__emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
+    }
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(const value_type& __v) { return __tree_.__emplace_unique(__v); }
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
+        return __tree_.__emplace_hint_unique(__p, __v).first;
+    }
+
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI void insert(_InputIterator __first, _InputIterator __last) {
+        __tree_.__insert_range_unique(__first, __last);
+    }
+
+    #  if MSTD_STD_VER >= 23
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
+        __tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
+    }
+    #  endif
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(value_type&& __v) {
+        return __tree_.__emplace_unique(std::move(__v));
+    }
+
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, value_type&& __v) {
+        return __tree_.__emplace_hint_unique(__p, std::move(__v)).first;
+    }
+
+    MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
+    MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
+    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
+    MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
+
+    #  if MSTD_STD_VER >= 17
+    MSTD_HIDE_FROM_ABI insert_return_type insert(node_type&& __nh) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
+                                            "node_type with incompatible allocator passed to set::insert()");
+        return __tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(__nh));
+    }
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __hint, node_type&& __nh) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
+                                            "node_type with incompatible allocator passed to set::insert()");
+        return __tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(key_type const& __key) {
+        return __tree_.template __node_handle_extract<node_type>(__key);
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(const_iterator __it) {
+        return __tree_.template __node_handle_extract<node_type>(__it);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_unique(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>&& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_unique(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_unique(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_unique(__source.__tree_);
+    }
+    #  endif
+
+    MSTD_HIDE_FROM_ABI void swap(set& __s) _NOEXCEPT_(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const _NOEXCEPT { return __tree_.__alloc(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
+
+    // set operations:
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const _K2& __k) {
+        return __tree_.find(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
+        return __tree_.find(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
+        return __tree_.__count_unique(__k);
+    }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
+        return __tree_.__count_multi(__k);
+    }
+    #  endif
+
+    #  if MSTD_STD_VER >= 20
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
+        return find(__k) != end();
+    }
+    #  endif // MSTD_STD_VER >= 20
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
+        return __tree_.__lower_bound_unique(__k);
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const key_type& __k) const {
+        return __tree_.__lower_bound_unique(__k);
+    }
+
+    // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
+    // match multiple elements.
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const _K2& __k) {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
+        return __tree_.__lower_bound_multi(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
+        return __tree_.__upper_bound_unique(__k);
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const key_type& __k) const {
+        return __tree_.__upper_bound_unique(__k);
+    }
+
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const _K2& __k) {
+        return __tree_.__upper_bound_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
+        return __tree_.__upper_bound_multi(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
+        return __tree_.__equal_range_unique(__k);
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
+        return __tree_.__equal_range_unique(__k);
+    }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
+        return __tree_.__equal_range_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+        return __tree_.__equal_range_multi(__k);
+    }
+    #  endif
+
+    template <class, class...>
+    friend struct __specialized_algorithm;
+};
+
+#  if MSTD_STD_VER >= 17
+template <class _InputIterator,
+class _Compare   = std::less<__iterator_value_type<_InputIterator>>,
+class _Allocator = std::allocator<__iterator_value_type<_InputIterator>>,
+class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
+set(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
+-> set<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
+
+#    if MSTD_STD_VER >= 23
+template <std::ranges::input_range _Range,
+class _Compare   = std::less<std::ranges::range_value_t<_Range>>,
+class _Allocator = std::allocator<std::ranges::range_value_t<_Range>>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
+set(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
+-> set<std::ranges::range_value_t<_Range>, _Compare, _Allocator>;
+#    endif
+
+template <class _Key,
+class _Compare   = std::less<_Key>,
+class _Allocator = std::allocator<_Key>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(std::initializer_list<_Key>, _Compare = _Compare(), _Allocator = _Allocator()) -> set<_Key, _Compare, _Allocator>;
+
+template <class _InputIterator,
+class _Allocator,
+class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value>,
+class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(_InputIterator, _InputIterator, _Allocator)
+-> set<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
+
+#    if MSTD_STD_VER >= 23
+template <std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(std::from_range_t, _Range&&, _Allocator)
+-> set<std::ranges::range_value_t<_Range>, std::less<std::ranges::range_value_t<_Range>>, _Allocator>;
+#    endif
+
+template <class _Key, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(std::initializer_list<_Key>, _Allocator) -> set<_Key, std::less<_Key>, _Allocator>;
+#  endif
+
+#  if MSTD_STD_VER >= 14
+template <class _Alg, class _Key, class _Compare, class _Allocator>
+struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocator>>> {
+    using __set MSTD_NODEBUG = set<_Key, _Compare, _Allocator>;
+
+    static const bool __has_algorithm =
+    __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;
+
+    // set's begin() and end() are identical with and without const qualification
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI static auto operator()(const __set& __set, _Args&&... __args) {
+        return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
+            __set.__tree_, std::forward<_Args>(__args)...);
+    }
+};
+#  endif
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator==(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
+}
+
+#  if MSTD_STD_VER <= 17
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator<(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return std::lexicographical_compare(__x.begin(), __x.end(), __y.begin(), __y.end());
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator!=(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return !(__x == __y);
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator>(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return __y < __x;
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator>=(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return !(__x < __y);
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator<=(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return !(__y < __x);
+}
+
+#  else // MSTD_STD_VER <= 17
+
+template <class _Key, class _Compare, class _Allocator>
+MSTD_HIDE_FROM_ABI __synth_three_way_result<_Key>
+operator<=>(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+    return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), mstd::__synth_three_way);
+}
+
+#  endif // MSTD_STD_VER <= 17
+
+// specialized algorithms:
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI void swap(set<_Key, _Compare, _Allocator>& __x, set<_Key, _Compare, _Allocator>& __y)
+_NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
+    __x.swap(__y);
+}
+
+#  if MSTD_STD_VER >= 20
+template <class _Key, class _Compare, class _Allocator, class _Predicate>
+inline MSTD_HIDE_FROM_ABI typename set<_Key, _Compare, _Allocator>::size_type
+erase_if(set<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
+    return mstd::_MSTD_erase_if_container(__c, __pred);
+}
+#  endif
+
+template <class _Key, class _Compare, class _Allocator>
+struct __container_traits<set<_Key, _Compare, _Allocator> > {
+    // http://eel.is/c++draft/associative.reqmts.except#2
+    // For associative containers, if an exception is thrown by any operation from within
+    // an insert or emplace function inserting a single element, the insertion has no effect.
+    static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+
+    static MSTD_CONSTEXPR const bool __reservable = false;
+};
+
+template <class _Key, class _Compare, class _Allocator>
+class multiset {
+public:
+    // types:
+    typedef _Key key_type;
+    typedef key_type value_type;
+    typedef std::type_identity_t<_Compare> key_compare;
+    typedef key_compare value_compare;
+    typedef std::type_identity_t<_Allocator> allocator_type;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+
+    static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
+                  "Allocator::value_type must be same type as value_type");
+
+private:
+    typedef __tree<value_type, value_compare, allocator_type> __base;
+    typedef allocator_traits<allocator_type> __alloc_traits;
+
+    static_assert(__check_valid_allocator<allocator_type>::value, "");
+
+    __base __tree_;
+
+public:
+    typedef typename __base::pointer pointer;
+    typedef typename __base::const_pointer const_pointer;
+    typedef typename __base::size_type size_type;
+    typedef typename __base::difference_type difference_type;
+    typedef typename __base::const_iterator iterator;
+    typedef typename __base::const_iterator const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+    #  if MSTD_STD_VER >= 17
+    typedef __set_node_handle<typename __base::__node, allocator_type> node_type;
+    #  endif
+
+    template <class _Key2, class _Compare2, class _Alloc2>
+    friend class set;
+    template <class _Key2, class _Compare2, class _Alloc2>
+    friend class multiset;
+
+    // construct/copy/destroy:
+    MSTD_HIDE_FROM_ABI multiset() _NOEXCEPT_(
+        std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
+        std::is_nothrow_copy_constructible<key_compare>::value)
+    : __tree_(value_compare()) {}
+
+    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp) _NOEXCEPT_(
+        std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
+    : __tree_(__comp) {}
+
+    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp, const allocator_type& __a)
+    : __tree_(__comp, __a) {}
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    : __tree_(__comp) {
+        insert(__f, __l);
+    }
+
+    #  if MSTD_STD_VER >= 14
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI multiset(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    : multiset(__f, __l, key_compare(), __a) {}
+    #  endif
+
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI
+    multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
+    : __tree_(__comp, __a) {
+        insert(__f, __l);
+    }
+
+    #  if MSTD_STD_VER >= 23
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI
+    multiset(std::from_range_t,
+             _Range&& __range,
+             const key_compare& __comp = key_compare(),
+             const allocator_type& __a = allocator_type())
+    : __tree_(__comp, __a) {
+        insert_range(std::forward<_Range>(__range));
+    }
+
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI multiset(std::from_range_t, _Range&& __range, const allocator_type& __a)
+    : multiset (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
+    #  endif
+
+    MSTD_HIDE_FROM_ABI multiset(const multiset& __s) = default;
+
+    MSTD_HIDE_FROM_ABI multiset& operator=(const multiset& __s) = default;
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI multiset(multiset&& __s) = default;
+
+    MSTD_HIDE_FROM_ABI multiset(multiset&& __s, const allocator_type& __a) : __tree_(std::move(__s.__tree_), __a) {}
+    #  endif // MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI explicit multiset(const allocator_type& __a) : __tree_(__a) {}
+    MSTD_HIDE_FROM_ABI multiset(const multiset& __s, const allocator_type& __a) : __tree_(__s.__tree_, __a) {}
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI multiset(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    : __tree_(__comp) {
+        insert(__il.begin(), __il.end());
+    }
+
+    MSTD_HIDE_FROM_ABI
+    multiset(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
+    : __tree_(__comp, __a) {
+        insert(__il.begin(), __il.end());
+    }
+
+    #    if MSTD_STD_VER >= 14
+    MSTD_HIDE_FROM_ABI multiset(std::initializer_list<value_type> __il, const allocator_type& __a)
+    : multiset(__il, key_compare(), __a) {}
+    #    endif
+
+    MSTD_HIDE_FROM_ABI multiset& operator=(std::initializer_list<value_type> __il) {
+        clear();
+        insert(__il.begin(), __il.end());
+        return *this;
+    }
+
+    MSTD_HIDE_FROM_ABI multiset& operator=(multiset&& __s) = default;
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI ~multiset() {
+        static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() _NOEXCEPT { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const _NOEXCEPT { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() _NOEXCEPT { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const _NOEXCEPT { return __tree_.end(); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() _NOEXCEPT { return reverse_iterator(end()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const _NOEXCEPT {
+        return const_reverse_iterator(end());
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() _NOEXCEPT { return reverse_iterator(begin()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const _NOEXCEPT {
+        return const_reverse_iterator(begin());
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const _NOEXCEPT { return begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const _NOEXCEPT { return end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const _NOEXCEPT { return rbegin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const _NOEXCEPT { return rend(); }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const _NOEXCEPT { return __tree_.size() == 0; }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const _NOEXCEPT { return __tree_.size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT { return __tree_.max_size(); }
+
+    // modifiers:
+    #  ifndef MSTD_CXX03_LANG
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI iterator emplace(_Args&&... __args) {
+        return __tree_.__emplace_multi(std::forward<_Args>(__args)...);
+    }
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI iterator emplace_hint(const_iterator __p, _Args&&... __args) {
+        return __tree_.__emplace_hint_multi(__p, std::forward<_Args>(__args)...);
+    }
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI iterator insert(const value_type& __v) { return __tree_.__emplace_multi(__v); }
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
+        return __tree_.__emplace_hint_multi(__p, __v);
+    }
+
+    template <class _InputIterator>
+    MSTD_HIDE_FROM_ABI void insert(_InputIterator __first, _InputIterator __last) {
+        __tree_.__insert_range_multi(__first, __last);
+    }
+
+    #  if MSTD_STD_VER >= 23
+    template <_ContainerCompatibleRange<value_type> _Range>
+    MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
+        __tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
+    }
+    #  endif
+
+    #  ifndef MSTD_CXX03_LANG
+    MSTD_HIDE_FROM_ABI iterator insert(value_type&& __v) { return __tree_.__emplace_multi(std::move(__v)); }
+
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, value_type&& __v) {
+        return __tree_.__emplace_hint_multi(__p, std::move(__v));
+    }
+
+    MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
+    #  endif // MSTD_CXX03_LANG
+
+    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
+    MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_multi(__k); }
+    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
+    MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
+
+    #  if MSTD_STD_VER >= 17
+    MSTD_HIDE_FROM_ABI iterator insert(node_type&& __nh) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
+                                            "node_type with incompatible allocator passed to multiset::insert()");
+        return __tree_.template __node_handle_insert_multi<node_type>(std::move(__nh));
+    }
+    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __hint, node_type&& __nh) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
+                                            "node_type with incompatible allocator passed to multiset::insert()");
+        return __tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(key_type const& __key) {
+        return __tree_.template __node_handle_extract<node_type>(__key);
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(const_iterator __it) {
+        return __tree_.template __node_handle_extract<node_type>(__it);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_multi(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_multi(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_multi(__source.__tree_);
+    }
+    template <class _Compare2>
+    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>&& __source) {
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+        __tree_.__node_handle_merge_multi(__source.__tree_);
+    }
+    #  endif
+
+    MSTD_HIDE_FROM_ABI void swap(multiset& __s) _NOEXCEPT_(std::is_nothrow_swappable_v<__base>) {
+        __tree_.swap(__s.__tree_);
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const _NOEXCEPT { return __tree_.__alloc(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
+
+    // set operations:
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const _K2& __k) {
+        return __tree_.find(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
+        return __tree_.find(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
+        return __tree_.__count_multi(__k);
+    }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
+        return __tree_.__count_multi(__k);
+    }
+    #  endif
+
+    #  if MSTD_STD_VER >= 20
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
+        return find(__k) != end();
+    }
+    #  endif // MSTD_STD_VER >= 20
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const key_type& __k) const {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const _K2& __k) {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
+        return __tree_.__lower_bound_multi(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
+        return __tree_.__upper_bound_multi(__k);
+    }
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const key_type& __k) const {
+        return __tree_.__upper_bound_multi(__k);
+    }
+
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const _K2& __k) {
+        return __tree_.__upper_bound_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
+        return __tree_.__upper_bound_multi(__k);
+    }
+    #  endif
+
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
+        return __tree_.__equal_range_multi(__k);
+    }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
+        return __tree_.__equal_range_multi(__k);
+    }
+    #  if MSTD_STD_VER >= 14
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
+        return __tree_.__equal_range_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+        return __tree_.__equal_range_multi(__k);
+    }
+    #  endif
+
+    template <class, class...>
+    friend struct __specialized_algorithm;
+};
+
+#  if MSTD_STD_VER >= 17
+template <class _InputIterator,
+class _Compare   = std::less<__iterator_value_type<_InputIterator>>,
+class _Allocator = std::allocator<__iterator_value_type<_InputIterator>>,
+class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
+multiset(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
+
+#    if MSTD_STD_VER >= 23
+template <std::ranges::input_range _Range,
+class _Compare   = std::less<std::ranges::range_value_t<_Range>>,
+class _Allocator = std::allocator<std::ranges::range_value_t<_Range>>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
+multiset(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<std::ranges::range_value_t<_Range>, _Compare, _Allocator>;
+#    endif
+
+template <class _Key,
+class _Compare   = std::less<_Key>,
+class _Allocator = std::allocator<_Key>,
+class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
+class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
+multiset(std::initializer_list<_Key>, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<_Key, _Compare, _Allocator>;
+
+template <class _InputIterator,
+class _Allocator,
+class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+multiset(_InputIterator, _InputIterator, _Allocator)
+-> multiset<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
+
+#    if MSTD_STD_VER >= 23
+template <std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+multiset(std::from_range_t, _Range&&, _Allocator)
+-> multiset<std::ranges::range_value_t<_Range>, std::less<std::ranges::range_value_t<_Range>>, _Allocator>;
+#    endif
+
+template <class _Key, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+multiset(std::initializer_list<_Key>, _Allocator) -> multiset<_Key, std::less<_Key>, _Allocator>;
+#  endif
+
+#  if MSTD_STD_VER >= 14
+template <class _Alg, class _Key, class _Compare, class _Allocator>
+struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Allocator>>> {
+    using __set MSTD_NODEBUG = multiset<_Key, _Compare, _Allocator>;
+
+    static const bool __has_algorithm =
+    __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;
+
+    // set's begin() and end() are identical with and without const qualification
+    template <class... _Args>
+    MSTD_HIDE_FROM_ABI static auto operator()(const __set& __set, _Args&&... __args) {
+        return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
+            __set.__tree_, std::forward<_Args>(__args)...);
+    }
+};
+#  endif
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator==(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
+}
+
+#  if MSTD_STD_VER <= 17
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator<(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return std::lexicographical_compare(__x.begin(), __x.end(), __y.begin(), __y.end());
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator!=(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return !(__x == __y);
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator>(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return __y < __x;
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator>=(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return !(__x < __y);
+}
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI bool
+operator<=(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return !(__y < __x);
+}
+
+#  else // MSTD_STD_VER <= 17
+
+template <class _Key, class _Compare, class _Allocator>
+MSTD_HIDE_FROM_ABI __synth_three_way_result<_Key>
+operator<=>(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+    return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), __synth_three_way);
+}
+
+#  endif // MSTD_STD_VER <= 17
+
+template <class _Key, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI void
+swap(multiset<_Key, _Compare, _Allocator>& __x, multiset<_Key, _Compare, _Allocator>& __y)
+_NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
+    __x.swap(__y);
+}
+
+#  if MSTD_STD_VER >= 20
+template <class _Key, class _Compare, class _Allocator, class _Predicate>
+inline MSTD_HIDE_FROM_ABI typename multiset<_Key, _Compare, _Allocator>::size_type
+erase_if(multiset<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
+    return mstd::_MSTD_erase_if_container(__c, __pred);
+}
+#  endif
+
+template <class _Key, class _Compare, class _Allocator>
+struct __container_traits<multiset<_Key, _Compare, _Allocator> > {
+    // http://eel.is/c++draft/associative.reqmts.except#2
+    // For associative containers, if an exception is thrown by any operation from within
+    // an insert or emplace function inserting a single element, the insertion has no effect.
+    static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+
+    static MSTD_CONSTEXPR const bool __reservable = false;
+};
+
+MSTD_END_NAMESPACE
+
+#  if MSTD_STD_VER >= 17
+MSTD_BEGIN_NAMESPACE_STD
+namespace pmr {
+    template <class _KeyT, class _CompareT = std::less<_KeyT>>
+    using set MSTD_AVAILABILITY_PMR = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
+
+    template <class _KeyT, class _CompareT = std::less<_KeyT>>
+    using multiset MSTD_AVAILABILITY_PMR = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
+} // namespace pmr
+MSTD_END_NAMESPACE
+#  endif
+
+MSTD_POP_MACROS
+
+#  if !defined(MSTD_REMOVE_TRANSITIVE_INCLUDES) && MSTD_STD_VER <= 20
+#    include <concepts>
+#    include <cstdlib>
+#    include <functional>
+#    include <iterator>
+#    include <stdexcept>
+#    include <type_traits>
+#  endif
+#endif // __cplusplus < 201103L && defined(MSTD_USE_FROZEN_CXX03_HEADERS)
+
+#endif // MSTD_SET

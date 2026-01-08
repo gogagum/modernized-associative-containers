@@ -1,0 +1,31 @@
+//===----------------------------------------------------------------------===//
+//
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef MSTD_TYPE_TRAITS_NAT_HPP
+#define MSTD_TYPE_TRAITS_NAT_HPP
+
+#include "detail/config.hpp"
+
+#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
+#  pragma GCC system_header
+#endif
+
+MSTD_BEGIN_NAMESPACE_STD
+
+struct __nat {
+#ifndef MSTD_CXX03_LANG
+  __nat()                        = delete;
+  __nat(const __nat&)            = delete;
+  __nat& operator=(const __nat&) = delete;
+  ~__nat()                       = delete;
+#endif
+};
+
+MSTD_END_NAMESPACE
+
+#endif // MSTD_TYPE_TRAITS_NAT_HPP
