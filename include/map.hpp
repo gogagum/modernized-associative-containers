@@ -1909,11 +1909,9 @@ struct __container_traits<multimap<_Key, _Tp, _Compare, _Allocator> > {
 namespace mstd {
 namespace pmr {
     template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-    using map MSTD_AVAILABILITY_PMR =
-    mstd::map<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
+    using map = mstd::map<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
     template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-    using multimap MSTD_AVAILABILITY_PMR =
-    mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
+    using multimap = mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
 } // namespace pmr
 } // namespace mstd
 
