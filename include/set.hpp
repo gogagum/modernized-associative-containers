@@ -591,31 +591,29 @@ public:
     template <class _Key2, class _Compare2, class _Alloc2>
     friend class multiset;
 
-    MSTD_HIDE_FROM_ABI set() noexcept(
+    set() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(value_compare()) {}
 
-    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp) noexcept(
+    explicit set(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(__comp) {}
 
-    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp, const allocator_type& __a) : __tree_(__comp, __a) {}
+    explicit set(const value_compare& __comp, const allocator_type& __a) : __tree_(__comp, __a) {}
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI set(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    set(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
     : __tree_(__comp) {
         insert(__f, __l);
     }
 
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI
     set(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
     : __tree_(__comp, __a) {
         insert(__f, __l);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI
     set(std::from_range_t,
         _Range&& __range,
         const key_compare& __comp = key_compare(),
@@ -625,233 +623,233 @@ public:
     }
     
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI set(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    set(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : set(__f, __l, key_compare(), __a) {}
     
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI set(std::from_range_t, _Range&& __range, const allocator_type& __a)
+    set(std::from_range_t, _Range&& __range, const allocator_type& __a)
     : set (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
     
-    MSTD_HIDE_FROM_ABI set(const set& __s) = default;
+    set(const set& __s) = default;
 
-    MSTD_HIDE_FROM_ABI set& operator=(const set& __s) = default;
+    set& operator=(const set& __s) = default;
 
-    MSTD_HIDE_FROM_ABI set(set&& __s) = default;
+    set(set&& __s) = default;
 
-    MSTD_HIDE_FROM_ABI explicit set(const allocator_type& __a) : __tree_(__a) {}
+    explicit set(const allocator_type& __a) : __tree_(__a) {}
 
-    MSTD_HIDE_FROM_ABI set(const set& __s, const allocator_type& __alloc) : __tree_(__s.__tree_, __alloc) {}
+    set(const set& __s, const allocator_type& __alloc) : __tree_(__s.__tree_, __alloc) {}
 
-    MSTD_HIDE_FROM_ABI set(set&& __s, const allocator_type& __alloc) : __tree_(std::move(__s.__tree_), __alloc) {}
+    set(set&& __s, const allocator_type& __alloc) : __tree_(std::move(__s.__tree_), __alloc) {}
 
-    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    set(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
     : __tree_(__comp) {
         insert(__il.begin(), __il.end());
     }
 
-    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
+    set(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
     : __tree_(__comp, __a) {
         insert(__il.begin(), __il.end());
     }
 
-    MSTD_HIDE_FROM_ABI set(std::initializer_list<value_type> __il, const allocator_type& __a)
+    set(std::initializer_list<value_type> __il, const allocator_type& __a)
     : set(__il, key_compare(), __a) {}
 
-    MSTD_HIDE_FROM_ABI set& operator=(std::initializer_list<value_type> __il) {
+    set& operator=(std::initializer_list<value_type> __il) {
         clear();
         insert(__il.begin(), __il.end());
         return *this;
     }
 
-    MSTD_HIDE_FROM_ABI set& operator=(set&& __s) = default;
+    set& operator=(set&& __s) = default;
 
-    MSTD_HIDE_FROM_ABI ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
+    ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() noexcept { return __tree_.end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const noexcept { return __tree_.end(); }
+    [[__nodiscard__]] iterator begin() noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] iterator end() noexcept { return __tree_.end(); }
+    [[__nodiscard__]] const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const noexcept {
+    [[__nodiscard__]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[__nodiscard__]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const noexcept {
+    [[__nodiscard__]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[__nodiscard__]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const noexcept { return begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const noexcept { return end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const noexcept { return rend(); }
+    [[__nodiscard__]] const_iterator cbegin() const noexcept { return begin(); }
+    [[__nodiscard__]] const_iterator cend() const noexcept { return end(); }
+    [[__nodiscard__]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[__nodiscard__]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const noexcept { return __tree_.size() == 0; }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const noexcept { return __tree_.size(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[__nodiscard__]] bool empty() const noexcept { return __tree_.size() == 0; }
+    [[__nodiscard__]] size_type size() const noexcept { return __tree_.size(); }
+    [[__nodiscard__]] size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> emplace(_Args&&... __args) {
+    std::pair<iterator, bool> emplace(_Args&&... __args) {
         return __tree_.__emplace_unique(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI iterator emplace_hint(const_iterator __p, _Args&&... __args) {
+    iterator emplace_hint(const_iterator __p, _Args&&... __args) {
         return __tree_.__emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
     }
 
-    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(const value_type& __v) { return __tree_.__emplace_unique(__v); }
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
+    std::pair<iterator, bool> insert(const value_type& __v) { return __tree_.__emplace_unique(__v); }
+    iterator insert(const_iterator __p, const value_type& __v) {
         return __tree_.__emplace_hint_unique(__p, __v).first;
     }
 
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI void insert(_InputIterator __first, _InputIterator __last) {
+    void insert(_InputIterator __first, _InputIterator __last) {
         __tree_.__insert_range_unique(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
+    void insert_range(_Range&& __range) {
         __tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
-    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(value_type&& __v) {
+    std::pair<iterator, bool> insert(value_type&& __v) {
         return __tree_.__emplace_unique(std::move(__v));
     }
 
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, value_type&& __v) {
+    iterator insert(const_iterator __p, value_type&& __v) {
         return __tree_.__emplace_hint_unique(__p, std::move(__v)).first;
     }
 
-    MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
+    void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
     
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
-    MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    MSTD_HIDE_FROM_ABI void clear() noexcept { __tree_.clear(); }
+    iterator erase(const_iterator __p) { return __tree_.erase(__p); }
+    size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
+    iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
+    void clear() noexcept { __tree_.clear(); }
 
-    MSTD_HIDE_FROM_ABI insert_return_type insert(node_type&& __nh) {
+    insert_return_type insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
         return __tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(__nh));
     }
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __hint, node_type&& __nh) {
+    iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
         return __tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(key_type const& __key) {
+    [[__nodiscard__]] node_type extract(key_type const& __key) {
         return __tree_.template __node_handle_extract<node_type>(__key);
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(const_iterator __it) {
+    [[__nodiscard__]] node_type extract(const_iterator __it) {
         return __tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>& __source) {
+    void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>&& __source) {
+    void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
+    void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
+    void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
     
-    MSTD_HIDE_FROM_ABI void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
+    void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
+    [[__nodiscard__]] key_compare key_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] value_compare value_comp() const { return __tree_.value_comp(); }
 
     // set operations:
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[__nodiscard__]] iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[__nodiscard__]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const _K2& __k) {
+    [[__nodiscard__]] iterator find(const _K2& __k) {
         return __tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
+    [[__nodiscard__]] const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
+    [[__nodiscard__]] size_type count(const key_type& __k) const {
         return __tree_.__count_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
+    [[__nodiscard__]] size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
+    [[__nodiscard__]] bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
+    [[__nodiscard__]] bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
+    [[__nodiscard__]] iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_unique(__k);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const key_type& __k) const {
+    [[__nodiscard__]] const_iterator lower_bound(const key_type& __k) const {
         return __tree_.__lower_bound_unique(__k);
     }
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
     // match multiple elements.
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const _K2& __k) {
+    [[__nodiscard__]] iterator lower_bound(const _K2& __k) {
         return __tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
+    [[__nodiscard__]] const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
+    [[__nodiscard__]] iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_unique(__k);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const key_type& __k) const {
+    [[__nodiscard__]] const_iterator upper_bound(const key_type& __k) const {
         return __tree_.__upper_bound_unique(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const _K2& __k) {
+    [[__nodiscard__]] iterator upper_bound(const _K2& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
+    [[__nodiscard__]] const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
+    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_unique(__k);
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
+    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
+    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
         return __tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     
@@ -906,33 +904,33 @@ struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocat
 
     // set's begin() and end() are identical with and without const qualification
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI static auto operator()(const __set& __set, _Args&&... __args) {
+    static auto operator()(const __set& __set, _Args&&... __args) {
         return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
             __set.__tree_, std::forward<_Args>(__args)...);
     }
 };
 
 template <class _Key, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
+inline bool
 operator==(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
 template <class _Key, class _Compare, class _Allocator>
-MSTD_HIDE_FROM_ABI __synth_three_way_result<_Key>
+__synth_three_way_result<_Key>
 operator<=>(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), mstd::__synth_three_way);
 }
 
 // specialized algorithms:
 template <class _Key, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI void swap(set<_Key, _Compare, _Allocator>& __x, set<_Key, _Compare, _Allocator>& __y)
+inline void swap(set<_Key, _Compare, _Allocator>& __x, set<_Key, _Compare, _Allocator>& __y)
 noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
 template <class _Key, class _Compare, class _Allocator, class _Predicate>
-inline MSTD_HIDE_FROM_ABI typename set<_Key, _Compare, _Allocator>::size_type
+inline typename set<_Key, _Compare, _Allocator>::size_type
 erase_if(set<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }
@@ -987,36 +985,34 @@ public:
     friend class multiset;
 
     // construct/copy/destroy:
-    MSTD_HIDE_FROM_ABI multiset() noexcept(
+    multiset() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(value_compare()) {}
 
-    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp) noexcept(
+    explicit multiset(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(__comp) {}
 
-    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp, const allocator_type& __a)
+    explicit multiset(const value_compare& __comp, const allocator_type& __a)
     : __tree_(__comp, __a) {}
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
     : __tree_(__comp) {
         insert(__f, __l);
     }
 
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI multiset(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    multiset(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : multiset(__f, __l, key_compare(), __a) {}
 
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI
     multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
     : __tree_(__comp, __a) {
         insert(__f, __l);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI
     multiset(std::from_range_t,
              _Range&& __range,
              const key_compare& __comp = key_compare(),
@@ -1026,228 +1022,227 @@ public:
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI multiset(std::from_range_t, _Range&& __range, const allocator_type& __a)
+    multiset(std::from_range_t, _Range&& __range, const allocator_type& __a)
     : multiset (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
     
-    MSTD_HIDE_FROM_ABI multiset(const multiset& __s) = default;
+    multiset(const multiset& __s) = default;
 
-    MSTD_HIDE_FROM_ABI multiset& operator=(const multiset& __s) = default;
+    multiset& operator=(const multiset& __s) = default;
 
-    MSTD_HIDE_FROM_ABI multiset(multiset&& __s) = default;
+    multiset(multiset&& __s) = default;
 
-    MSTD_HIDE_FROM_ABI multiset(multiset&& __s, const allocator_type& __a) : __tree_(std::move(__s.__tree_), __a) {}
-    MSTD_HIDE_FROM_ABI explicit multiset(const allocator_type& __a) : __tree_(__a) {}
-    MSTD_HIDE_FROM_ABI multiset(const multiset& __s, const allocator_type& __a) : __tree_(__s.__tree_, __a) {}
+    multiset(multiset&& __s, const allocator_type& __a) : __tree_(std::move(__s.__tree_), __a) {}
+    explicit multiset(const allocator_type& __a) : __tree_(__a) {}
+    multiset(const multiset& __s, const allocator_type& __a) : __tree_(__s.__tree_, __a) {}
 
-    MSTD_HIDE_FROM_ABI multiset(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
+    multiset(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
     : __tree_(__comp) {
         insert(__il.begin(), __il.end());
     }
 
-    MSTD_HIDE_FROM_ABI
     multiset(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
     : __tree_(__comp, __a) {
         insert(__il.begin(), __il.end());
     }
 
-    MSTD_HIDE_FROM_ABI multiset(std::initializer_list<value_type> __il, const allocator_type& __a)
+    multiset(std::initializer_list<value_type> __il, const allocator_type& __a)
     : multiset(__il, key_compare(), __a) {}
 
-    MSTD_HIDE_FROM_ABI multiset& operator=(std::initializer_list<value_type> __il) {
+    multiset& operator=(std::initializer_list<value_type> __il) {
         clear();
         insert(__il.begin(), __il.end());
         return *this;
     }
 
-    MSTD_HIDE_FROM_ABI multiset& operator=(multiset&& __s) = default;
+    multiset& operator=(multiset&& __s) = default;
 
-    MSTD_HIDE_FROM_ABI ~multiset() {
+    ~multiset() {
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() noexcept { return __tree_.end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const noexcept { return __tree_.end(); }
+    [[__nodiscard__]] iterator begin() noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] iterator end() noexcept { return __tree_.end(); }
+    [[__nodiscard__]] const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const noexcept {
+    [[__nodiscard__]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[__nodiscard__]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const noexcept {
+    [[__nodiscard__]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[__nodiscard__]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const noexcept { return begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const noexcept { return end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const noexcept { return rend(); }
+    [[__nodiscard__]] const_iterator cbegin() const noexcept { return begin(); }
+    [[__nodiscard__]] const_iterator cend() const noexcept { return end(); }
+    [[__nodiscard__]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[__nodiscard__]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const noexcept { return __tree_.size() == 0; }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const noexcept { return __tree_.size(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[__nodiscard__]] bool empty() const noexcept { return __tree_.size() == 0; }
+    [[__nodiscard__]] size_type size() const noexcept { return __tree_.size(); }
+    [[__nodiscard__]] size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI iterator emplace(_Args&&... __args) {
+    iterator emplace(_Args&&... __args) {
         return __tree_.__emplace_multi(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI iterator emplace_hint(const_iterator __p, _Args&&... __args) {
+    iterator emplace_hint(const_iterator __p, _Args&&... __args) {
         return __tree_.__emplace_hint_multi(__p, std::forward<_Args>(__args)...);
     }
 
-    MSTD_HIDE_FROM_ABI iterator insert(const value_type& __v) { return __tree_.__emplace_multi(__v); }
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
+    iterator insert(const value_type& __v) { return __tree_.__emplace_multi(__v); }
+    iterator insert(const_iterator __p, const value_type& __v) {
         return __tree_.__emplace_hint_multi(__p, __v);
     }
 
     template <class _InputIterator>
-    MSTD_HIDE_FROM_ABI void insert(_InputIterator __first, _InputIterator __last) {
+    void insert(_InputIterator __first, _InputIterator __last) {
         __tree_.__insert_range_multi(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
-    MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
+    void insert_range(_Range&& __range) {
         __tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
-    MSTD_HIDE_FROM_ABI iterator insert(value_type&& __v) { return __tree_.__emplace_multi(std::move(__v)); }
+    iterator insert(value_type&& __v) { return __tree_.__emplace_multi(std::move(__v)); }
 
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, value_type&& __v) {
+    iterator insert(const_iterator __p, value_type&& __v) {
         return __tree_.__emplace_hint_multi(__p, std::move(__v));
     }
 
-    MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
+    void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
 
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
-    MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_multi(__k); }
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    MSTD_HIDE_FROM_ABI void clear() noexcept { __tree_.clear(); }
+    iterator erase(const_iterator __p) { return __tree_.erase(__p); }
+    size_type erase(const key_type& __k) { return __tree_.__erase_multi(__k); }
+    iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
+    void clear() noexcept { __tree_.clear(); }
 
-    MSTD_HIDE_FROM_ABI iterator insert(node_type&& __nh) {
+    iterator insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
         return __tree_.template __node_handle_insert_multi<node_type>(std::move(__nh));
     }
-    MSTD_HIDE_FROM_ABI iterator insert(const_iterator __hint, node_type&& __nh) {
+    iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
         return __tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(key_type const& __key) {
+    [[__nodiscard__]] node_type extract(key_type const& __key) {
         return __tree_.template __node_handle_extract<node_type>(__key);
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI node_type extract(const_iterator __it) {
+    [[__nodiscard__]] node_type extract(const_iterator __it) {
         return __tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
+    void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_multi(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
+    void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_multi(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>& __source) {
+    void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_multi(__source.__tree_);
     }
     template <class _Compare2>
-    MSTD_HIDE_FROM_ABI void merge(set<key_type, _Compare2, allocator_type>&& __source) {
+    void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_multi(__source.__tree_);
     }
     
-    MSTD_HIDE_FROM_ABI void swap(multiset& __s) noexcept(std::is_nothrow_swappable_v<__base>) {
+    void swap(multiset& __s) noexcept(std::is_nothrow_swappable_v<__base>) {
         __tree_.swap(__s.__tree_);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
+    [[__nodiscard__]] key_compare key_comp() const { return __tree_.value_comp(); }
+    [[__nodiscard__]] value_compare value_comp() const { return __tree_.value_comp(); }
 
     // set operations:
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[__nodiscard__]] iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[__nodiscard__]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const _K2& __k) {
+    [[__nodiscard__]] iterator find(const _K2& __k) {
         return __tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
+    [[__nodiscard__]] const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
+    [[__nodiscard__]] size_type count(const key_type& __k) const {
         return __tree_.__count_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
+    [[__nodiscard__]] size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
+    [[__nodiscard__]] bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
+    [[__nodiscard__]] bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
+    [[__nodiscard__]] iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_multi(__k);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const key_type& __k) const {
-        return __tree_.__lower_bound_multi(__k);
-    }
-
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const _K2& __k) {
+    [[__nodiscard__]] const_iterator lower_bound(const key_type& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
+    [[__nodiscard__]] iterator lower_bound(const _K2& __k) {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
+    [[__nodiscard__]] iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const key_type& __k) const {
+    [[__nodiscard__]] const_iterator upper_bound(const key_type& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const _K2& __k) {
+    [[__nodiscard__]] iterator upper_bound(const _K2& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
+    [[__nodiscard__]] const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
     
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
+    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_multi(__k);
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
-        return __tree_.__equal_range_multi(__k);
-    }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
+    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
+        return __tree_.__equal_range_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     
@@ -1303,33 +1298,33 @@ struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Al
 
     // set's begin() and end() are identical with and without const qualification
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI static auto operator()(const __set& __set, _Args&&... __args) {
+    static auto operator()(const __set& __set, _Args&&... __args) {
         return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
             __set.__tree_, std::forward<_Args>(__args)...);
     }
 };
 
 template <class _Key, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
+inline bool
 operator==(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
 template <class _Key, class _Compare, class _Allocator>
-MSTD_HIDE_FROM_ABI __synth_three_way_result<_Key>
+__synth_three_way_result<_Key>
 operator<=>(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), __synth_three_way);
 }
 
 template <class _Key, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI void
+inline void
 swap(multiset<_Key, _Compare, _Allocator>& __x, multiset<_Key, _Compare, _Allocator>& __y)
 noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
 template <class _Key, class _Compare, class _Allocator, class _Predicate>
-inline MSTD_HIDE_FROM_ABI typename multiset<_Key, _Compare, _Allocator>::size_type
+inline typename multiset<_Key, _Compare, _Allocator>::size_type
 erase_if(multiset<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }

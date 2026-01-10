@@ -96,12 +96,12 @@ private:
   __node_pointer_type __ptr_ = nullptr;
   std::optional<allocator_type> __alloc_;
 
-  MSTD_HIDE_FROM_ABI void __release_ptr() {
+  void __release_ptr() {
     __ptr_   = nullptr;
     __alloc_ = std::nullopt;
   }
 
-  MSTD_HIDE_FROM_ABI void __destroy_node_pointer() {
+  void __destroy_node_pointer() {
     if (__ptr_ != nullptr) {
       typedef typename __allocator_traits_rebind< allocator_type, _NodeType>::type __node_alloc_type;
       __node_alloc_type __alloc(*__alloc_);
@@ -110,19 +110,19 @@ private:
     }
   }
 
-  MSTD_HIDE_FROM_ABI __basic_node_handle(__node_pointer_type __ptr, allocator_type const& __alloc)
+  __basic_node_handle(__node_pointer_type __ptr, allocator_type const& __alloc)
       : __ptr_(__ptr), __alloc_(__alloc) {}
 
 public:
-  MSTD_HIDE_FROM_ABI __basic_node_handle() = default;
+  __basic_node_handle() = default;
 
-  MSTD_HIDE_FROM_ABI __basic_node_handle(__basic_node_handle&& __other) noexcept
+  __basic_node_handle(__basic_node_handle&& __other) noexcept
       : __ptr_(__other.__ptr_), __alloc_(std::move(__other.__alloc_)) {
     __other.__ptr_   = nullptr;
     __other.__alloc_ = std::nullopt;
   }
 
-  MSTD_HIDE_FROM_ABI __basic_node_handle& operator=(__basic_node_handle&& __other) {
+  __basic_node_handle& operator=(__basic_node_handle&& __other) {
     MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
         __alloc_ == std::nullopt || __alloc_traits::propagate_on_container_move_assignment::value ||
             __alloc_ == __other.__alloc_,
@@ -141,13 +141,13 @@ public:
     return *this;
   }
 
-  MSTD_HIDE_FROM_ABI allocator_type get_allocator() const { return *__alloc_; }
+  allocator_type get_allocator() const { return *__alloc_; }
 
-  MSTD_HIDE_FROM_ABI explicit operator bool() const { return __ptr_ != nullptr; }
+  explicit operator bool() const { return __ptr_ != nullptr; }
 
-  [[nodiscard]] MSTD_HIDE_FROM_ABI bool empty() const { return __ptr_ == nullptr; }
+  [[nodiscard]] bool empty() const { return __ptr_ == nullptr; }
 
-  MSTD_HIDE_FROM_ABI void swap(__basic_node_handle& __other) noexcept(
+  void swap(__basic_node_handle& __other) noexcept(
       __alloc_traits::propagate_on_container_swap::value || __alloc_traits::is_always_equal::value) {
     using std::swap;
     swap(__ptr_, __other.__ptr_);
@@ -156,19 +156,19 @@ public:
       swap(__alloc_, __other.__alloc_);
   }
 
-  MSTD_HIDE_FROM_ABI friend void
+  friend void
   swap(__basic_node_handle& __a, __basic_node_handle& __b) noexcept(noexcept(__a.swap(__b))) {
     __a.swap(__b);
   }
 
-  MSTD_HIDE_FROM_ABI ~__basic_node_handle() { __destroy_node_pointer(); }
+  ~__basic_node_handle() { __destroy_node_pointer(); }
 };
 
 template <class _NodeType, class _Derived>
 struct __set_node_handle_specifics {
   typedef typename _NodeType::__node_value_type value_type;
 
-  MSTD_HIDE_FROM_ABI value_type& value() const { return static_cast<_Derived const*>(this)->__ptr_->__get_value(); }
+  value_type& value() const { return static_cast<_Derived const*>(this)->__ptr_->__get_value(); }
 };
 
 template <class _NodeType, class _Derived>
@@ -176,11 +176,11 @@ struct __map_node_handle_specifics {
   using key_type    = std::remove_const_t<typename _NodeType::__node_value_type::first_type>;
   using mapped_type = typename _NodeType::__node_value_type::second_type;
 
-  MSTD_HIDE_FROM_ABI key_type& key() const {
+  key_type& key() const {
     return const_cast<key_type&>(static_cast<_Derived const*>(this)->__ptr_->__get_value().first);
   }
 
-  MSTD_HIDE_FROM_ABI mapped_type& mapped() const {
+  mapped_type& mapped() const {
     return static_cast<_Derived const*>(this)->__ptr_->__get_value().second;
   }
 };

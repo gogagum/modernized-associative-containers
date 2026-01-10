@@ -34,14 +34,13 @@ struct __lazy_compare_result {
   const _LHS& __lhs_;
   const _RHS& __rhs_;
 
-  MSTD_HIDE_FROM_ABI
   __lazy_compare_result(MSTD_CTOR_LIFETIMEBOUND const _Comparator& __comp,
                         MSTD_CTOR_LIFETIMEBOUND const _LHS& __lhs,
                         MSTD_CTOR_LIFETIMEBOUND const _RHS& __rhs)
       : __comp_(__comp), __lhs_(__lhs), __rhs_(__rhs) {}
 
-  MSTD_HIDE_FROM_ABI bool __less() const { return __comp_(__lhs_, __rhs_); }
-  MSTD_HIDE_FROM_ABI bool __greater() const { return __comp_(__rhs_, __lhs_); }
+  bool __less() const { return __comp_(__lhs_, __rhs_); }
+  bool __greater() const { return __comp_(__rhs_, __lhs_); }
 };
 
 // This class provides three way comparison between _LHS and _RHS as efficiently as possible. This can be specialized if
@@ -51,10 +50,10 @@ template <class _Comparator, class _LHS, class _RHS, class = void>
 struct __lazy_synth_three_way_comparator {
   const _Comparator& __comp_;
 
-  MSTD_HIDE_FROM_ABI __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator& __comp)
+  __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator& __comp)
       : __comp_(__comp) {}
 
-  MSTD_HIDE_FROM_ABI __lazy_compare_result<_Comparator, _LHS, _RHS>
+  __lazy_compare_result<_Comparator, _LHS, _RHS>
   operator()(MSTD_LIFETIMEBOUND const _LHS& __lhs, MSTD_LIFETIMEBOUND const _RHS& __rhs) const {
     return __lazy_compare_result<_Comparator, _LHS, _RHS>(__comp_, __lhs, __rhs);
   }
@@ -63,10 +62,10 @@ struct __lazy_synth_three_way_comparator {
 struct __eager_compare_result {
   int __res_;
 
-  MSTD_HIDE_FROM_ABI explicit __eager_compare_result(int __res) : __res_(__res) {}
+  explicit __eager_compare_result(int __res) : __res_(__res) {}
 
-  MSTD_HIDE_FROM_ABI bool __less() const { return __res_ < 0; }
-  MSTD_HIDE_FROM_ABI bool __greater() const { return __res_ > 0; }
+  bool __less() const { return __res_ < 0; }
+  bool __greater() const { return __res_ > 0; }
 };
 
 template <class _Comparator, class _LHS, class _RHS>
@@ -77,10 +76,10 @@ struct __lazy_synth_three_way_comparator<_Comparator,
                                                             __has_default_three_way_comparator<_LHS, _RHS> >::value> > {
   // This lifetimebound annotation is technically incorrect, but other specializations actually capture the lifetime of
   // the comparator.
-  MSTD_HIDE_FROM_ABI __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator&) {}
+  __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator&) {}
 
   // Same comment as above.
-  MSTD_HIDE_FROM_ABI static __eager_compare_result
+  static __eager_compare_result
   operator()(MSTD_LIFETIMEBOUND const _LHS& __lhs, MSTD_LIFETIMEBOUND const _RHS& __rhs) {
     return __eager_compare_result(__default_three_way_comparator<_LHS, _RHS>()(__lhs, __rhs));
   }
@@ -94,10 +93,10 @@ struct __lazy_synth_three_way_comparator<_Comparator,
                                                             __has_default_three_way_comparator<_LHS, _RHS> >::value> > {
   // This lifetimebound annotation is technically incorrect, but other specializations actually capture the lifetime of
   // the comparator.
-  MSTD_HIDE_FROM_ABI __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator&) {}
+  __lazy_synth_three_way_comparator(MSTD_CTOR_LIFETIMEBOUND const _Comparator&) {}
 
   // Same comment as above.
-  MSTD_HIDE_FROM_ABI static __eager_compare_result
+  static __eager_compare_result
   operator()(MSTD_LIFETIMEBOUND const _LHS& __lhs, MSTD_LIFETIMEBOUND const _RHS& __rhs) {
     return __eager_compare_result(-__default_three_way_comparator<_LHS, _RHS>()(__lhs, __rhs));
   }

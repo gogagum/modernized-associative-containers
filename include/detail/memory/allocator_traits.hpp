@@ -215,24 +215,24 @@ struct allocator_traits {
   template <class _Tp>
   using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
 
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
+  [[__nodiscard__]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n) {
     return __a.allocate(__n);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
+  [[__nodiscard__]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer __hint) {
     return __a.allocate(__n, __hint);
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
+  [[__nodiscard__]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer) {
     return __a.allocate(__n);
   }
 
   template <class _Ap = _Alloc>
-  [[nodiscard]] MSTD_HIDE_FROM_ABI static constexpr allocation_result<pointer, size_type>
+  [[nodiscard]] static constexpr allocation_result<pointer, size_type>
   allocate_at_least(_Ap& __alloc, size_type __n) {
     if constexpr (requires { __alloc.allocate_at_least(__n); }) {
       return __alloc.allocate_at_least(__n);
@@ -241,49 +241,49 @@ struct allocator_traits {
     }
   }
 
-  MSTD_HIDE_FROM_ABI constexpr static void
+  constexpr static void
   deallocate(allocator_type& __a, pointer __p, size_type __n) noexcept {
     __a.deallocate(__p, __n);
   }
 
   template <class _Tp, class... _Args, std::enable_if_t<__has_construct_v<allocator_type, _Tp*, _Args...>, int> = 0>
-  MSTD_HIDE_FROM_ABI constexpr static void
+  constexpr static void
   construct(allocator_type& __a, _Tp* __p, _Args&&... __args) {
     __a.construct(__p, std::forward<_Args>(__args)...);
   }
   template <class _Tp, class... _Args, std::enable_if_t<!__has_construct_v<allocator_type, _Tp*, _Args...>, int> = 0>
-  MSTD_HIDE_FROM_ABI constexpr static void
+  constexpr static void
   construct(allocator_type&, _Tp* __p, _Args&&... __args) {
     std::construct_at(__p, std::forward<_Args>(__args)...);
   }
 
   template <class _Tp, std::enable_if_t<__has_destroy_v<allocator_type, _Tp*>, int> = 0>
-  MSTD_HIDE_FROM_ABI constexpr static void destroy(allocator_type& __a, _Tp* __p) {
+  constexpr static void destroy(allocator_type& __a, _Tp* __p) {
     __a.destroy(__p);
   }
   template <class _Tp, std::enable_if_t<!__has_destroy_v<allocator_type, _Tp*>, int> = 0>
-  MSTD_HIDE_FROM_ABI constexpr static void destroy(allocator_type&, _Tp* __p) {
+  constexpr static void destroy(allocator_type&, _Tp* __p) {
     std::destroy_at(__p);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static size_type
+  [[__nodiscard__]] constexpr static size_type
   max_size(const allocator_type& __a) noexcept {
     return __a.max_size();
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static size_type
+  [[__nodiscard__]] constexpr static size_type
   max_size(const allocator_type&) noexcept {
     return std::numeric_limits<size_type>::max() / sizeof(value_type);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static allocator_type
+  [[__nodiscard__]] constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a.select_on_container_copy_construction();
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static allocator_type
+  [[__nodiscard__]] constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a;
   }

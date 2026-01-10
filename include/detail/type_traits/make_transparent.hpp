@@ -30,12 +30,12 @@ template <class _Comparator>
 using __make_transparent_t MSTD_NODEBUG = typename __make_transparent<_Comparator>::type;
 
 template <class _Comparator, std::enable_if_t<std::is_same<_Comparator, __make_transparent_t<_Comparator> >::value, int> = 0>
-MSTD_HIDE_FROM_ABI _Comparator& __as_transparent(_Comparator& __comp) {
+_Comparator& __as_transparent(_Comparator& __comp) {
   return __comp;
 }
 
 template <class _Comparator, std::enable_if_t<!std::is_same<_Comparator, __make_transparent_t<_Comparator> >::value, int> = 0>
-MSTD_HIDE_FROM_ABI __make_transparent_t<_Comparator> __as_transparent(_Comparator&) {
+__make_transparent_t<_Comparator> __as_transparent(_Comparator&) {
   static_assert(std::is_empty<_Comparator>::value);
   return __make_transparent_t<_Comparator>();
 }

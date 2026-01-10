@@ -30,7 +30,7 @@ template <class _LHS, class _RHS>
 struct __default_three_way_comparator<_LHS,
                                       _RHS,
                                       std::enable_if_t<std::is_arithmetic<_LHS>::value && std::is_arithmetic<_RHS>::value> > {
-  MSTD_HIDE_FROM_ABI static int operator()(_LHS __lhs, _RHS __rhs) {
+  static int operator()(_LHS __lhs, _RHS __rhs) {
     if (__lhs < __rhs)
       return -1;
     if (__lhs > __rhs)
@@ -46,7 +46,7 @@ struct __default_three_way_comparator<
     _RHS,
     __enable_if_t<!(is_arithmetic<_LHS>::value && is_arithmetic<_RHS>::value) &&
                   __builtin_lt_synthesizes_from_spaceship(const _LHS&, const _RHS&)>> {
-  MSTD_HIDE_FROM_ABI static int operator()(const _LHS& __lhs, const _RHS& __rhs) {
+  static int operator()(const _LHS& __lhs, const _RHS& __rhs) {
     auto __res = __lhs <=> __rhs;
     if (__res < 0)
       return -1;

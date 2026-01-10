@@ -20,17 +20,17 @@
 namespace mstd {
 
 template <typename _Alloc>
-MSTD_HIDE_FROM_ABI constexpr void __swap_allocator(_Alloc& __a1, _Alloc& __a2, std::true_type) noexcept
+constexpr void __swap_allocator(_Alloc& __a1, _Alloc& __a2, std::true_type) noexcept
 {
   std::swap(__a1, __a2);
 }
 
 template <typename _Alloc>
-inline MSTD_HIDE_FROM_ABI constexpr void
+inline constexpr void
 __swap_allocator(_Alloc&, _Alloc&, std::false_type) noexcept {}
 
 template <typename _Alloc>
-inline MSTD_HIDE_FROM_ABI constexpr void __swap_allocator(_Alloc& __a1, _Alloc& __a2) noexcept
+inline constexpr void __swap_allocator(_Alloc& __a1, _Alloc& __a2) noexcept
 {
   mstd::__swap_allocator(
       __a1, __a2, std::integral_constant<bool, std::allocator_traits<_Alloc>::propagate_on_container_swap::value>());

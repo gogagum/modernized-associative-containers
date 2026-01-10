@@ -20,7 +20,7 @@
 namespace mstd {
 
 template <class _Container, class _Predicate>
-MSTD_HIDE_FROM_ABI typename _Container::size_type _MSTD_erase_if_container(_Container& __c, _Predicate& __pred) {
+typename _Container::size_type _MSTD_erase_if_container(_Container& __c, _Predicate& __pred) {
   typename _Container::size_type __old_size = __c.size();
 
   const typename _Container::iterator __last = __c.end();
