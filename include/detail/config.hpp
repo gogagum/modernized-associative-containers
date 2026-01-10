@@ -10,15 +10,9 @@
 #ifndef MSTD_CONFIG_HPP
 #define MSTD_CONFIG_HPP
 
-#include "configuration/abi.hpp"
-#include "configuration/availability.hpp"
 #include "configuration/compiler.hpp"
-#include "configuration/language.hpp"
-#include "configuration/platform.hpp"
 
 #ifdef __cplusplus
-
-// The attributes supported by clang are documented at https://clang.llvm.org/docs/AttributeReference.html
 
 #  define MSTD_CONCAT_IMPL(_X, _Y) _X##_Y
 #  define MSTD_CONCAT(_X, _Y) MSTD_CONCAT_IMPL(_X, _Y)

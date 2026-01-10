@@ -1339,10 +1339,10 @@ struct __container_traits<multiset<_Key, _Compare, _Allocator> > {
 namespace mstd {
 namespace pmr {
     template <class _KeyT, class _CompareT = std::less<_KeyT>>
-    using set MSTD_AVAILABILITY_PMR = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
+    using set = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 
     template <class _KeyT, class _CompareT = std::less<_KeyT>>
-    using multiset MSTD_AVAILABILITY_PMR = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
+    using multiset = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 } // namespace pmr
 } // namespace mstd
 
