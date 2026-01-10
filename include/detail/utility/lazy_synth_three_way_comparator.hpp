@@ -15,10 +15,6 @@
 #include <detail/type_traits/conjunction.hpp>
 #include <detail/utility/default_three_way_comparator.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 // This file implements a __lazy_synth_three_way_comparator, which tries to build an efficient three way comparison from
 // a binary comparator. That is done in multiple steps:
 // 1) Check whether the comparator desugars to a less-than operator

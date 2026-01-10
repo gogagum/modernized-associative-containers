@@ -13,10 +13,6 @@
 #include "allocator_traits.hpp"
 #include <utility>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <typename _Alloc>

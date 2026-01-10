@@ -540,11 +540,6 @@ erase_if(multiset<Key, Compare, Allocator>& c, Predicate pred);  // C++20
 #  include <compare>
 #  include <initializer_list>
 
-#  if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#    pragma GCC system_header
-#  endif
-
-
 namespace mstd {
 
 template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >

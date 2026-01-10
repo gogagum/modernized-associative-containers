@@ -14,10 +14,6 @@
 
 #include <type_traits>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _Tp, class _Key = void, class = void>

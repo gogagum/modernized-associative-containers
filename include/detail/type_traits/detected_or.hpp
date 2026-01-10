@@ -11,10 +11,6 @@
 
 #include <detail/config.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _Default, class _Void, template <class...> class _Op, class... _Args>

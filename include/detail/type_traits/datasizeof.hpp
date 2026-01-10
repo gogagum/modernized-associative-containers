@@ -12,10 +12,6 @@
 #include <detail/config.hpp>
 #include <cstddef>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 // This trait provides the size of a type excluding any tail padding.
 //
 // It is useful in contexts where performing an operation using the full size of the class (including padding) may

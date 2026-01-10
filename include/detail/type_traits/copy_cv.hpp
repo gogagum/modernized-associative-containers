@@ -11,10 +11,6 @@
 
 #include <detail/config.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 // Let COPYCV(FROM, TO) be an alias for type TO with the addition of FROM's

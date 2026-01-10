@@ -15,10 +15,6 @@
 #include <detail/type_traits/remove_const_ref.hpp>
 #include <detail/utility/priority_tag.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _Type>

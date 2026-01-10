@@ -11,10 +11,6 @@
 
 #include <detail/config.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 // Tags to represent the canonical operations.

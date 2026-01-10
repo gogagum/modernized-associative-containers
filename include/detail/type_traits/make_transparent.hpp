@@ -11,10 +11,6 @@
 
 #include <detail/config.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 // __make_transparent tries to create a transparent comparator from its non-transparent counterpart, e.g. obtain
