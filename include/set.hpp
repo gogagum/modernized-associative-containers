@@ -665,28 +665,28 @@ public:
 
     ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
 
-    [[__nodiscard__]] iterator begin() noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] iterator end() noexcept { return __tree_.end(); }
-    [[__nodiscard__]] const_iterator end() const noexcept { return __tree_.end(); }
+    [[nodiscard]] iterator begin() noexcept { return __tree_.begin(); }
+    [[nodiscard]] const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[nodiscard]] iterator end() noexcept { return __tree_.end(); }
+    [[nodiscard]] const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    [[__nodiscard__]] const_reverse_iterator rbegin() const noexcept {
+    [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    [[__nodiscard__]] const_reverse_iterator rend() const noexcept {
+    [[nodiscard]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[nodiscard]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] const_iterator cbegin() const noexcept { return begin(); }
-    [[__nodiscard__]] const_iterator cend() const noexcept { return end(); }
-    [[__nodiscard__]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[__nodiscard__]] const_reverse_iterator crend() const noexcept { return rend(); }
+    [[nodiscard]] const_iterator cbegin() const noexcept { return begin(); }
+    [[nodiscard]] const_iterator cend() const noexcept { return end(); }
+    [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] bool empty() const noexcept { return __tree_.size() == 0; }
-    [[__nodiscard__]] size_type size() const noexcept { return __tree_.size(); }
-    [[__nodiscard__]] size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[nodiscard]] bool empty() const noexcept { return __tree_.size() == 0; }
+    [[nodiscard]] size_type size() const noexcept { return __tree_.size(); }
+    [[nodiscard]] size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
@@ -738,10 +738,10 @@ public:
                                             "node_type with incompatible allocator passed to set::insert()");
         return __tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
     }
-    [[__nodiscard__]] node_type extract(key_type const& __key) {
+    [[nodiscard]] node_type extract(key_type const& __key) {
         return __tree_.template __node_handle_extract<node_type>(__key);
     }
-    [[__nodiscard__]] node_type extract(const_iterator __it) {
+    [[nodiscard]] node_type extract(const_iterator __it) {
         return __tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
@@ -771,85 +771,85 @@ public:
     
     void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
 
-    [[__nodiscard__]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[__nodiscard__]] key_compare key_comp() const { return __tree_.value_comp(); }
-    [[__nodiscard__]] value_compare value_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
+    [[nodiscard]] key_compare key_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] value_compare value_comp() const { return __tree_.value_comp(); }
 
     // set operations:
-    [[__nodiscard__]] iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[__nodiscard__]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[nodiscard]] iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[nodiscard]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator find(const _K2& __k) {
+    [[nodiscard]] iterator find(const _K2& __k) {
         return __tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator find(const _K2& __k) const {
+    [[nodiscard]] const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
     
-    [[__nodiscard__]] size_type count(const key_type& __k) const {
+    [[nodiscard]] size_type count(const key_type& __k) const {
         return __tree_.__count_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] size_type count(const _K2& __k) const {
+    [[nodiscard]] size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
 
-    [[__nodiscard__]] bool contains(const key_type& __k) const { return find(__k) != end(); }
+    [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] bool contains(const _K2& __k) const {
+    [[nodiscard]] bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
 
-    [[__nodiscard__]] iterator lower_bound(const key_type& __k) {
+    [[nodiscard]] iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_unique(__k);
     }
 
-    [[__nodiscard__]] const_iterator lower_bound(const key_type& __k) const {
+    [[nodiscard]] const_iterator lower_bound(const key_type& __k) const {
         return __tree_.__lower_bound_unique(__k);
     }
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
     // match multiple elements.
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator lower_bound(const _K2& __k) {
+    [[nodiscard]] iterator lower_bound(const _K2& __k) {
         return __tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator lower_bound(const _K2& __k) const {
+    [[nodiscard]] const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
     
-    [[__nodiscard__]] iterator upper_bound(const key_type& __k) {
+    [[nodiscard]] iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_unique(__k);
     }
 
-    [[__nodiscard__]] const_iterator upper_bound(const key_type& __k) const {
+    [[nodiscard]] const_iterator upper_bound(const key_type& __k) const {
         return __tree_.__upper_bound_unique(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator upper_bound(const _K2& __k) {
+    [[nodiscard]] iterator upper_bound(const _K2& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator upper_bound(const _K2& __k) const {
+    [[nodiscard]] const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
     
-    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
+    [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_unique(__k);
     }
-    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
+    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
+    [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
         return __tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     
@@ -1060,28 +1060,28 @@ public:
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
     }
 
-    [[__nodiscard__]] iterator begin() noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[__nodiscard__]] iterator end() noexcept { return __tree_.end(); }
-    [[__nodiscard__]] const_iterator end() const noexcept { return __tree_.end(); }
+    [[nodiscard]] iterator begin() noexcept { return __tree_.begin(); }
+    [[nodiscard]] const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[nodiscard]] iterator end() noexcept { return __tree_.end(); }
+    [[nodiscard]] const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    [[__nodiscard__]] const_reverse_iterator rbegin() const noexcept {
+    [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    [[__nodiscard__]] const_reverse_iterator rend() const noexcept {
+    [[nodiscard]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[nodiscard]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] const_iterator cbegin() const noexcept { return begin(); }
-    [[__nodiscard__]] const_iterator cend() const noexcept { return end(); }
-    [[__nodiscard__]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[__nodiscard__]] const_reverse_iterator crend() const noexcept { return rend(); }
+    [[nodiscard]] const_iterator cbegin() const noexcept { return begin(); }
+    [[nodiscard]] const_iterator cend() const noexcept { return end(); }
+    [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] bool empty() const noexcept { return __tree_.size() == 0; }
-    [[__nodiscard__]] size_type size() const noexcept { return __tree_.size(); }
-    [[__nodiscard__]] size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[nodiscard]] bool empty() const noexcept { return __tree_.size() == 0; }
+    [[nodiscard]] size_type size() const noexcept { return __tree_.size(); }
+    [[nodiscard]] size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
@@ -1131,10 +1131,10 @@ public:
                                             "node_type with incompatible allocator passed to multiset::insert()");
         return __tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
     }
-    [[__nodiscard__]] node_type extract(key_type const& __key) {
+    [[nodiscard]] node_type extract(key_type const& __key) {
         return __tree_.template __node_handle_extract<node_type>(__key);
     }
-    [[__nodiscard__]] node_type extract(const_iterator __it) {
+    [[nodiscard]] node_type extract(const_iterator __it) {
         return __tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
@@ -1166,83 +1166,83 @@ public:
         __tree_.swap(__s.__tree_);
     }
 
-    [[__nodiscard__]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[__nodiscard__]] key_compare key_comp() const { return __tree_.value_comp(); }
-    [[__nodiscard__]] value_compare value_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
+    [[nodiscard]] key_compare key_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] value_compare value_comp() const { return __tree_.value_comp(); }
 
     // set operations:
-    [[__nodiscard__]] iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[__nodiscard__]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[nodiscard]] iterator find(const key_type& __k) { return __tree_.find(__k); }
+    [[nodiscard]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator find(const _K2& __k) {
+    [[nodiscard]] iterator find(const _K2& __k) {
         return __tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator find(const _K2& __k) const {
+    [[nodiscard]] const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
     
-    [[__nodiscard__]] size_type count(const key_type& __k) const {
+    [[nodiscard]] size_type count(const key_type& __k) const {
         return __tree_.__count_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] size_type count(const _K2& __k) const {
+    [[nodiscard]] size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
     
-    [[__nodiscard__]] bool contains(const key_type& __k) const { return find(__k) != end(); }
+    [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] bool contains(const _K2& __k) const {
+    [[nodiscard]] bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
 
-    [[__nodiscard__]] iterator lower_bound(const key_type& __k) {
+    [[nodiscard]] iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_multi(__k);
     }
 
-    [[__nodiscard__]] const_iterator lower_bound(const key_type& __k) const {
-        return __tree_.__lower_bound_multi(__k);
-    }
-
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator lower_bound(const _K2& __k) {
+    [[nodiscard]] const_iterator lower_bound(const key_type& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator lower_bound(const _K2& __k) const {
+    [[nodiscard]] iterator lower_bound(const _K2& __k) {
+        return __tree_.__lower_bound_multi(__k);
+    }
+
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[nodiscard]] const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
     
-    [[__nodiscard__]] iterator upper_bound(const key_type& __k) {
+    [[nodiscard]] iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
 
-    [[__nodiscard__]] const_iterator upper_bound(const key_type& __k) const {
+    [[nodiscard]] const_iterator upper_bound(const key_type& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] iterator upper_bound(const _K2& __k) {
+    [[nodiscard]] iterator upper_bound(const _K2& __k) {
         return __tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] const_iterator upper_bound(const _K2& __k) const {
+    [[nodiscard]] const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
     
-    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
+    [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_multi(__k);
     }
-    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
-        return __tree_.__equal_range_multi(__k);
-    }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
+    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
-    [[__nodiscard__]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
+    [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
+        return __tree_.__equal_range_multi(__k);
+    }
+    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
     

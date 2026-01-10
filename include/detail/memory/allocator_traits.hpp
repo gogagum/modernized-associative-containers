@@ -215,18 +215,18 @@ struct allocator_traits {
   template <class _Tp>
   using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
 
-  [[__nodiscard__]] constexpr static pointer
+  [[nodiscard]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n) {
     return __a.allocate(__n);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] constexpr static pointer
+  [[nodiscard]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer __hint) {
     return __a.allocate(__n, __hint);
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] constexpr static pointer
+  [[nodiscard]] constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer) {
     return __a.allocate(__n);
   }
@@ -267,23 +267,23 @@ struct allocator_traits {
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] constexpr static size_type
+  [[nodiscard]] constexpr static size_type
   max_size(const allocator_type& __a) noexcept {
     return __a.max_size();
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] constexpr static size_type
+  [[nodiscard]] constexpr static size_type
   max_size(const allocator_type&) noexcept {
     return std::numeric_limits<size_type>::max() / sizeof(value_type);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] constexpr static allocator_type
+  [[nodiscard]] constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a.select_on_container_copy_construction();
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] constexpr static allocator_type
+  [[nodiscard]] constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a;
   }
