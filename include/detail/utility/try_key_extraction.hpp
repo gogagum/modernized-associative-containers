@@ -34,7 +34,7 @@ template <class... _Tp>
 inline const bool __is_tuple_v<std::tuple<_Tp...>> = true;
 
 template <class _KeyT, class _Ret, class _WithKey, class _WithoutKey, class... _Args>
-MSTD_HIDE_FROM_ABI _Ret
+_Ret
 __try_key_extraction_impl(__priority_tag<0>, _WithKey, _WithoutKey __without_key, _Args&&... __args) {
   return __without_key(std::forward<_Args>(__args)...);
 }
@@ -45,7 +45,7 @@ template <class _KeyT,
           class _WithoutKey,
           class _Arg,
           std::enable_if_t<std::is_same<_KeyT, __remove_const_ref_t<_Arg> >::value, int> = 0>
-MSTD_HIDE_FROM_ABI _Ret
+_Ret
 __try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg&& __arg) {
   return __with_key(__arg, std::forward<_Arg>(__arg));
 }
@@ -58,7 +58,7 @@ template <class _KeyT,
           std::enable_if_t<__is_pair_v<__remove_const_ref_t<_Arg> > &&
                             std::is_same<std::remove_const_t<typename __remove_const_ref_t<_Arg>::first_type>, _KeyT>::value,
                         int> = 0>
-MSTD_HIDE_FROM_ABI _Ret
+_Ret
 __try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg&& __arg) {
   return __with_key(__arg.first, std::forward<_Arg>(__arg));
 }
@@ -70,7 +70,7 @@ template <class _KeyT,
           class _Arg1,
           class _Arg2,
           std::enable_if_t<std::is_same<_KeyT, __remove_const_ref_t<_Arg1> >::value, int> = 0>
-MSTD_HIDE_FROM_ABI _Ret
+_Ret
 __try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg1&& __arg1, _Arg2&& __arg2) {
   return __with_key(__arg1, std::forward<_Arg1>(__arg1), std::forward<_Arg2>(__arg2));
 }
@@ -86,7 +86,7 @@ template <class _KeyT,
                             __is_tuple_v<_Tuple1> && std::tuple_size<_Tuple1>::value == 1 &&
                             std::is_same<__remove_const_ref_t<typename std::tuple_element<0, _Tuple1>::type>, _KeyT>::value,
                         int> = 0>
-MSTD_HIDE_FROM_ABI _Ret __try_key_extraction_impl(
+_Ret __try_key_extraction_impl(
     __priority_tag<1>,
     _WithKey __with_key,
     _WithoutKey,
@@ -106,7 +106,7 @@ MSTD_HIDE_FROM_ABI _Ret __try_key_extraction_impl(
 //
 // Both `__with_key` and `__without_key` must take all arguments by reference.
 template <class _KeyT, class _WithKey, class _WithoutKey, class... _Args>
-MSTD_HIDE_FROM_ABI decltype(std::declval<_WithoutKey>()(std::declval<_Args>()...))
+decltype(std::declval<_WithoutKey>()(std::declval<_Args>()...))
 __try_key_extraction(_WithKey __with_key, _WithoutKey __without_key, _Args&&... __args) {
   using _Ret = decltype(__without_key(std::forward<_Args>(__args)...));
   return mstd::__try_key_extraction_impl<_KeyT, _Ret>(

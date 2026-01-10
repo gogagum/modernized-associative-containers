@@ -24,7 +24,7 @@ namespace mstd {
 
 // [expos.only.func]
 
-MSTD_HIDE_FROM_ABI inline constexpr auto __synth_three_way = []<class _Tp, class _Up>(const _Tp& __t, const _Up& __u)
+inline constexpr auto __synth_three_way = []<class _Tp, class _Up>(const _Tp& __t, const _Up& __u)
   requires requires {
     { __t < __u } -> std::convertible_to<bool>;
     { __u < __t } -> std::convertible_to<bool>;

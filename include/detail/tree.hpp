@@ -100,7 +100,7 @@ struct __value_type;
 // Returns:  true if __x is a left child of its parent, else false
 // Precondition:  __x != nullptr.
 template <class _NodePtr>
-inline MSTD_HIDE_FROM_ABI bool __tree_is_left_child(_NodePtr __x) noexcept {
+inline bool __tree_is_left_child(_NodePtr __x) noexcept {
     return __x == __x->__parent_->__left_;
 }
 
@@ -140,7 +140,7 @@ unsigned __tree_sub_invariant(_NodePtr __x) {
 //    __root == nullptr is a proper tree.  Returns true if __root is a proper
 //    red black tree, else returns false.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI bool __tree_invariant(_NodePtr __root) {
+bool __tree_invariant(_NodePtr __root) {
     if (__root == nullptr)
         return true;
     // check __x->__parent_ consistency
@@ -157,7 +157,7 @@ MSTD_HIDE_FROM_ABI bool __tree_invariant(_NodePtr __root) {
 
 // Returns:  pointer to the left-most node under __x.
 template <class _NodePtr>
-inline MSTD_HIDE_FROM_ABI _NodePtr __tree_min(_NodePtr __x) noexcept {
+inline _NodePtr __tree_min(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "Root node shouldn't be null");
     while (__x->__left_ != nullptr)
         __x = __x->__left_;
@@ -166,7 +166,7 @@ inline MSTD_HIDE_FROM_ABI _NodePtr __tree_min(_NodePtr __x) noexcept {
 
 // Returns:  pointer to the right-most node under __x.
 template <class _NodePtr>
-inline MSTD_HIDE_FROM_ABI _NodePtr __tree_max(_NodePtr __x) noexcept {
+inline _NodePtr __tree_max(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "Root node shouldn't be null");
     while (__x->__right_ != nullptr)
         __x = __x->__right_;
@@ -175,7 +175,7 @@ inline MSTD_HIDE_FROM_ABI _NodePtr __tree_max(_NodePtr __x) noexcept {
 
 // Returns:  pointer to the next in-order node after __x.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI _NodePtr __tree_next(_NodePtr __x) noexcept {
+_NodePtr __tree_next(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     if (__x->__right_ != nullptr)
         return mstd::__tree_min(__x->__right_);
@@ -190,7 +190,7 @@ MSTD_HIDE_FROM_ABI _NodePtr __tree_next(_NodePtr __x) noexcept {
 // to the actual root of the tree through a __left_ pointer. Incrementing the end() pointer is UB, so we can assume that
 // never happens.
 template <class _EndNodePtr, class _NodePtr>
-inline MSTD_HIDE_FROM_ABI _EndNodePtr __tree_next_iter(_NodePtr __x) noexcept {
+inline _EndNodePtr __tree_next_iter(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     if (__x->__right_ != nullptr)
         return static_cast<_EndNodePtr>(mstd::__tree_min(__x->__right_));
@@ -202,7 +202,7 @@ inline MSTD_HIDE_FROM_ABI _EndNodePtr __tree_next_iter(_NodePtr __x) noexcept {
 // Returns:  pointer to the previous in-order node before __x.
 // Note: __x may be the end node.
 template <class _NodePtr, class _EndNodePtr>
-inline MSTD_HIDE_FROM_ABI _NodePtr __tree_prev_iter(_EndNodePtr __x) noexcept {
+inline _NodePtr __tree_prev_iter(_EndNodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     if (__x->__left_ != nullptr)
         return mstd::__tree_max(__x->__left_);
@@ -214,7 +214,7 @@ inline MSTD_HIDE_FROM_ABI _NodePtr __tree_prev_iter(_EndNodePtr __x) noexcept {
 
 // Returns:  pointer to a node which has no children
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI _NodePtr __tree_leaf(_NodePtr __x) noexcept {
+_NodePtr __tree_leaf(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     while (true) {
         if (__x->__left_ != nullptr) {
@@ -233,7 +233,7 @@ MSTD_HIDE_FROM_ABI _NodePtr __tree_leaf(_NodePtr __x) noexcept {
 // Effects:  Makes __x->__right_ the subtree root with __x as its left child
 //           while preserving in-order order.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI void __tree_left_rotate(_NodePtr __x) noexcept {
+void __tree_left_rotate(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     MSTD_ASSERT_INTERNAL(__x->__right_ != nullptr, "node should have a right child");
     _NodePtr __y  = __x->__right_;
@@ -252,7 +252,7 @@ MSTD_HIDE_FROM_ABI void __tree_left_rotate(_NodePtr __x) noexcept {
 // Effects:  Makes __x->__left_ the subtree root with __x as its right child
 //           while preserving in-order order.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI void __tree_right_rotate(_NodePtr __x) noexcept {
+void __tree_right_rotate(_NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__x != nullptr, "node shouldn't be null");
     MSTD_ASSERT_INTERNAL(__x->__left_ != nullptr, "node should have a left child");
     _NodePtr __y = __x->__left_;
@@ -276,7 +276,7 @@ MSTD_HIDE_FROM_ABI void __tree_right_rotate(_NodePtr __x) noexcept {
 // Postcondition: __tree_invariant(end_node->__left_) == true.  end_node->__left_
 //                may be different than the value passed in as __root.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI void __tree_balance_after_insert(_NodePtr __root, _NodePtr __x) noexcept {
+void __tree_balance_after_insert(_NodePtr __root, _NodePtr __x) noexcept {
     MSTD_ASSERT_INTERNAL(__root != nullptr, "Root of the tree shouldn't be null");
     MSTD_ASSERT_INTERNAL(__x != nullptr, "Can't attach null node to a leaf");
     __x->__is_black_ = __x == __root;
@@ -332,7 +332,7 @@ MSTD_HIDE_FROM_ABI void __tree_balance_after_insert(_NodePtr __root, _NodePtr __
 //                nor any of its children refer to __z.  end_node->__left_
 //                may be different than the value passed in as __root.
 template <class _NodePtr>
-MSTD_HIDE_FROM_ABI void __tree_remove(_NodePtr __root, _NodePtr __z) noexcept {
+void __tree_remove(_NodePtr __root, _NodePtr __z) noexcept {
     MSTD_ASSERT_INTERNAL(__root != nullptr, "Root node should not be null");
     MSTD_ASSERT_INTERNAL(__z != nullptr, "The node to remove should not be null");
     MSTD_ASSERT_INTERNAL(mstd::__tree_invariant(__root), "The tree invariants should hold");
@@ -547,7 +547,7 @@ public:
     using pointer = _Pointer;
     pointer __left_;
 
-    MSTD_HIDE_FROM_ABI __tree_end_node() noexcept : __left_() {}
+    __tree_end_node() noexcept : __left_() {}
 };
 
 template <class _VoidPtr>
@@ -560,11 +560,11 @@ public:
     __end_node_pointer __parent_;
     bool __is_black_;
 
-    MSTD_HIDE_FROM_ABI pointer __parent_unsafe() const { return static_cast<pointer>(__parent_); }
+    pointer __parent_unsafe() const { return static_cast<pointer>(__parent_); }
 
-    MSTD_HIDE_FROM_ABI void __set_parent(pointer __p) { __parent_ = static_cast<__end_node_pointer>(__p); }
+    void __set_parent(pointer __p) { __parent_ = static_cast<__end_node_pointer>(__p); }
 
-    MSTD_HIDE_FROM_ABI __tree_node_base()             = default;
+    __tree_node_base()             = default;
     __tree_node_base(__tree_node_base const&)            = delete;
     __tree_node_base& operator=(__tree_node_base const&) = delete;
 };
@@ -584,10 +584,10 @@ private:
     };
 
 public:
-    MSTD_HIDE_FROM_ABI __node_value_type& __get_value() { return __value_; }
+    __node_value_type& __get_value() { return __value_; }
 
     template <class _Alloc, class... _Args>
-    MSTD_HIDE_FROM_ABI explicit __tree_node(_Alloc& __na, _Args&&... __args) {
+    explicit __tree_node(_Alloc& __na, _Args&&... __args) {
         std::allocator_traits<_Alloc>::construct(__na, std::addressof(__get_value()), std::forward<_Args>(__args)...);
     }
     ~__tree_node()                             = delete;
@@ -609,14 +609,14 @@ private:
 public:
     bool __value_constructed;
 
-    MSTD_HIDE_FROM_ABI __tree_node_destructor(const __tree_node_destructor&) = default;
+    __tree_node_destructor(const __tree_node_destructor&) = default;
     __tree_node_destructor& operator=(const __tree_node_destructor&)            = delete;
 
-    MSTD_HIDE_FROM_ABI explicit __tree_node_destructor(allocator_type& __na, bool __val = false) noexcept
+    explicit __tree_node_destructor(allocator_type& __na, bool __val = false) noexcept
     : __na_(__na),
     __value_constructed(__val) {}
 
-    MSTD_HIDE_FROM_ABI void operator()(pointer __p) noexcept {
+    void operator()(pointer __p) noexcept {
         if (__value_constructed)
             __alloc_traits::destroy(__na_, std::addressof(__p->__get_value()));
         if (__p)
@@ -636,9 +636,6 @@ struct __generic_container_node_destructor<__tree_node<_Tp, _VoidPtr>, _Alloc> :
 
 // Do an in-order traversal of the tree until `__break` returns true. Takes the root node of the tree.
 template <class _Reference, class _Break, class _NodePtr, class _Func, class _Proj>
-#ifndef MSTD_COMPILER_GCC // This function is recursive, so GCC complains about always_inline.
-MSTD_HIDE_FROM_ABI
-#endif
 bool __tree_iterate_from_root(_Break __break, _NodePtr __root, _Func& __func, _Proj& __proj) {
     if (__root->__left_) {
         if (mstd::__tree_iterate_from_root<_Reference>(__break, static_cast<_NodePtr>(__root->__left_), __func, __proj))
@@ -654,7 +651,7 @@ bool __tree_iterate_from_root(_Break __break, _NodePtr __root, _Func& __func, _P
 
 // Do an in-order traversal of the tree from __first to __last.
 template <class _NodeIter, class _Func, class _Proj>
-MSTD_HIDE_FROM_ABI void
+void
 __tree_iterate_subrange(_NodeIter __first_it, _NodeIter __last_it, _Func& __func, _Proj& __proj) {
     using _NodePtr   = typename _NodeIter::__node_pointer;
     using _Reference = typename _NodeIter::reference;
@@ -698,44 +695,44 @@ public:
     using reference         = value_type&;
     using pointer           = __rebind_pointer_t<_NodePtr, value_type>;
 
-    MSTD_HIDE_FROM_ABI __tree_iterator() noexcept : __ptr_(nullptr) {}
+    __tree_iterator() noexcept : __ptr_(nullptr) {}
 
-    MSTD_HIDE_FROM_ABI reference operator*() const { return __get_np()->__get_value(); }
-    MSTD_HIDE_FROM_ABI pointer operator->() const {
+    reference operator*() const { return __get_np()->__get_value(); }
+    pointer operator->() const {
         return std::pointer_traits<pointer>::pointer_to(__get_np()->__get_value());
     }
 
-    MSTD_HIDE_FROM_ABI __tree_iterator& operator++() {
+    __tree_iterator& operator++() {
         __ptr_ = mstd::__tree_next_iter<__end_node_pointer>(static_cast<__node_base_pointer>(__ptr_));
         return *this;
     }
-    MSTD_HIDE_FROM_ABI __tree_iterator operator++(int) {
+    __tree_iterator operator++(int) {
         __tree_iterator __t(*this);
         ++(*this);
         return __t;
     }
 
-    MSTD_HIDE_FROM_ABI __tree_iterator& operator--() {
+    __tree_iterator& operator--() {
         __ptr_ = static_cast<__end_node_pointer>(mstd::__tree_prev_iter<__node_base_pointer>(__ptr_));
         return *this;
     }
-    MSTD_HIDE_FROM_ABI __tree_iterator operator--(int) {
+    __tree_iterator operator--(int) {
         __tree_iterator __t(*this);
         --(*this);
         return __t;
     }
 
-    friend MSTD_HIDE_FROM_ABI bool operator==(const __tree_iterator& __x, const __tree_iterator& __y) {
+    friend bool operator==(const __tree_iterator& __x, const __tree_iterator& __y) {
         return __x.__ptr_ == __y.__ptr_;
     }
-    friend MSTD_HIDE_FROM_ABI bool operator!=(const __tree_iterator& __x, const __tree_iterator& __y) {
+    friend bool operator!=(const __tree_iterator& __x, const __tree_iterator& __y) {
         return !(__x == __y);
     }
 
 private:
-    MSTD_HIDE_FROM_ABI explicit __tree_iterator(__node_pointer __p) noexcept : __ptr_(__p) {}
-    MSTD_HIDE_FROM_ABI explicit __tree_iterator(__end_node_pointer __p) noexcept : __ptr_(__p) {}
-    MSTD_HIDE_FROM_ABI __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
+    explicit __tree_iterator(__node_pointer __p) noexcept : __ptr_(__p) {}
+    explicit __tree_iterator(__end_node_pointer __p) noexcept : __ptr_(__p) {}
+    __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
     template <class, class, class>
     friend class __tree;
     template <class, class, class>
@@ -755,7 +752,7 @@ __iterator_pair<__tree_iterator<_Tp, _NodePtr, _DiffType>, __tree_iterator<_Tp, 
     using __iterator MSTD_NODEBUG = __tree_iterator<_Tp, _NodePtr, _DiffType>;
 
     template <class _Func, class _Proj>
-    MSTD_HIDE_FROM_ABI static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
+    static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
         mstd::__tree_iterate_subrange(__first, __last, __func, __proj);
     }
 };
@@ -778,48 +775,48 @@ public:
     using pointer                              = __rebind_pointer_t<_NodePtr, const value_type>;
     using __non_const_iterator MSTD_NODEBUG = __tree_iterator<_Tp, __node_pointer, difference_type>;
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator() noexcept : __ptr_(nullptr) {}
+    __tree_const_iterator() noexcept : __ptr_(nullptr) {}
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator(__non_const_iterator __p) noexcept : __ptr_(__p.__ptr_) {}
+    __tree_const_iterator(__non_const_iterator __p) noexcept : __ptr_(__p.__ptr_) {}
 
-    MSTD_HIDE_FROM_ABI reference operator*() const { return __get_np()->__get_value(); }
-    MSTD_HIDE_FROM_ABI pointer operator->() const {
+    reference operator*() const { return __get_np()->__get_value(); }
+    pointer operator->() const {
         return std::pointer_traits<pointer>::pointer_to(__get_np()->__get_value());
     }
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator& operator++() {
+    __tree_const_iterator& operator++() {
         __ptr_ = mstd::__tree_next_iter<__end_node_pointer>(static_cast<__node_base_pointer>(__ptr_));
         return *this;
     }
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator operator++(int) {
+    __tree_const_iterator operator++(int) {
         __tree_const_iterator __t(*this);
         ++(*this);
         return __t;
     }
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator& operator--() {
+    __tree_const_iterator& operator--() {
         __ptr_ = static_cast<__end_node_pointer>(mstd::__tree_prev_iter<__node_base_pointer>(__ptr_));
         return *this;
     }
 
-    MSTD_HIDE_FROM_ABI __tree_const_iterator operator--(int) {
+    __tree_const_iterator operator--(int) {
         __tree_const_iterator __t(*this);
         --(*this);
         return __t;
     }
 
-    friend MSTD_HIDE_FROM_ABI bool operator==(const __tree_const_iterator& __x, const __tree_const_iterator& __y) {
+    friend bool operator==(const __tree_const_iterator& __x, const __tree_const_iterator& __y) {
         return __x.__ptr_ == __y.__ptr_;
     }
-    friend MSTD_HIDE_FROM_ABI bool operator!=(const __tree_const_iterator& __x, const __tree_const_iterator& __y) {
+    friend bool operator!=(const __tree_const_iterator& __x, const __tree_const_iterator& __y) {
         return !(__x == __y);
     }
 
 private:
-    MSTD_HIDE_FROM_ABI explicit __tree_const_iterator(__node_pointer __p) noexcept : __ptr_(__p) {}
-    MSTD_HIDE_FROM_ABI explicit __tree_const_iterator(__end_node_pointer __p) noexcept : __ptr_(__p) {}
-    MSTD_HIDE_FROM_ABI __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
+    explicit __tree_const_iterator(__node_pointer __p) noexcept : __ptr_(__p) {}
+    explicit __tree_const_iterator(__end_node_pointer __p) noexcept : __ptr_(__p) {}
+    __node_pointer __get_np() const { return static_cast<__node_pointer>(__ptr_); }
 
     template <class, class, class>
     friend class __tree;
@@ -838,7 +835,7 @@ __iterator_pair<__tree_const_iterator<_Tp, _NodePtr, _DiffType>, __tree_const_it
     using __iterator MSTD_NODEBUG = __tree_const_iterator<_Tp, _NodePtr, _DiffType>;
 
     template <class _Func, class _Proj>
-    MSTD_HIDE_FROM_ABI static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
+    static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
         mstd::__tree_iterate_subrange(__first, __last, __func, __proj);
     }
 };
@@ -897,55 +894,55 @@ private:
     MSTD_COMPRESSED_PAIR(size_type, __size_, value_compare, __value_comp_);
 
 public:
-    MSTD_HIDE_FROM_ABI __end_node_pointer __end_node() noexcept {
+    __end_node_pointer __end_node() noexcept {
         return std::pointer_traits<__end_node_pointer>::pointer_to(__end_node_);
     }
-    MSTD_HIDE_FROM_ABI __end_node_pointer __end_node() const noexcept {
+    __end_node_pointer __end_node() const noexcept {
         return std::pointer_traits<__end_node_pointer>::pointer_to(const_cast<__end_node_t&>(__end_node_));
     }
-    MSTD_HIDE_FROM_ABI __node_allocator& __node_alloc() noexcept { return __node_alloc_; }
+    __node_allocator& __node_alloc() noexcept { return __node_alloc_; }
 
 private:
-    MSTD_HIDE_FROM_ABI const __node_allocator& __node_alloc() const noexcept { return __node_alloc_; }
+    const __node_allocator& __node_alloc() const noexcept { return __node_alloc_; }
 
 public:
-    MSTD_HIDE_FROM_ABI allocator_type __alloc() const noexcept { return allocator_type(__node_alloc()); }
+    allocator_type __alloc() const noexcept { return allocator_type(__node_alloc()); }
 
-    MSTD_HIDE_FROM_ABI size_type size() const noexcept { return __size_; }
-    MSTD_HIDE_FROM_ABI value_compare& value_comp() noexcept { return __value_comp_; }
-    MSTD_HIDE_FROM_ABI const value_compare& value_comp() const noexcept { return __value_comp_; }
+    size_type size() const noexcept { return __size_; }
+    value_compare& value_comp() noexcept { return __value_comp_; }
+    const value_compare& value_comp() const noexcept { return __value_comp_; }
 
 public:
-    MSTD_HIDE_FROM_ABI __node_pointer __root() const noexcept {
+    __node_pointer __root() const noexcept {
         return static_cast<__node_pointer>(__end_node()->__left_);
     }
 
-    MSTD_HIDE_FROM_ABI __node_base_pointer* __root_ptr() const noexcept {
+    __node_base_pointer* __root_ptr() const noexcept {
         return std::addressof(__end_node()->__left_);
     }
 
     using iterator       = __tree_iterator<_Tp, __node_pointer, difference_type>;
     using const_iterator = __tree_const_iterator<_Tp, __node_pointer, difference_type>;
 
-    MSTD_HIDE_FROM_ABI explicit __tree(const value_compare& __comp) noexcept(
+    explicit __tree(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<__node_allocator>::value&& std::is_nothrow_copy_constructible<value_compare>::value)
     : __size_(0), __value_comp_(__comp) {
         __begin_node_ = __end_node();
     }
 
-    MSTD_HIDE_FROM_ABI explicit __tree(const allocator_type& __a)
+    explicit __tree(const allocator_type& __a)
     : __begin_node_(), __node_alloc_(__node_allocator(__a)), __size_(0) {
         __begin_node_ = __end_node();
     }
 
-    MSTD_HIDE_FROM_ABI __tree(const value_compare& __comp, const allocator_type& __a)
+    __tree(const value_compare& __comp, const allocator_type& __a)
     : __begin_node_(), __node_alloc_(__node_allocator(__a)), __size_(0), __value_comp_(__comp) {
         __begin_node_ = __end_node();
     }
 
-    MSTD_HIDE_FROM_ABI __tree(const __tree& __t);
+    __tree(const __tree& __t);
 
-    MSTD_HIDE_FROM_ABI __tree(const __tree& __other, const allocator_type& __alloc)
+    __tree(const __tree& __other, const allocator_type& __alloc)
     : __begin_node_(__end_node()), __node_alloc_(__alloc), __size_(0), __value_comp_(__other.value_comp()) {
         if (__other.size() == 0)
             return;
@@ -956,14 +953,14 @@ public:
         __size_             = __other.size();
     }
 
-    MSTD_HIDE_FROM_ABI __tree& operator=(const __tree& __t);
+    __tree& operator=(const __tree& __t);
     template <class _ForwardIterator>
-    MSTD_HIDE_FROM_ABI void __assign_unique(_ForwardIterator __first, _ForwardIterator __last);
-    MSTD_HIDE_FROM_ABI __tree(__tree&& __t) noexcept(
+    void __assign_unique(_ForwardIterator __first, _ForwardIterator __last);
+    __tree(__tree&& __t) noexcept(
         std::is_nothrow_move_constructible<__node_allocator>::value && std::is_nothrow_move_constructible<value_compare>::value);
-    MSTD_HIDE_FROM_ABI __tree(__tree&& __t, const allocator_type& __a);
+    __tree(__tree&& __t, const allocator_type& __a);
 
-    MSTD_HIDE_FROM_ABI __tree& operator=(__tree&& __t)
+    __tree& operator=(__tree&& __t)
     noexcept(std::is_nothrow_move_assignable<value_compare>::value &&
     ((__node_traits::propagate_on_container_move_assignment::value &&
     std::is_nothrow_move_assignable<__node_allocator>::value) ||
@@ -972,33 +969,33 @@ public:
         return *this;
     }
 
-    MSTD_HIDE_FROM_ABI ~__tree() {
+    ~__tree() {
         static_assert(std::is_copy_constructible<value_compare>::value, "Comparator must be copy-constructible.");
         destroy(__root());
     }
 
-    MSTD_HIDE_FROM_ABI iterator begin() noexcept { return iterator(__begin_node_); }
-    MSTD_HIDE_FROM_ABI const_iterator begin() const noexcept { return const_iterator(__begin_node_); }
-    MSTD_HIDE_FROM_ABI iterator end() noexcept { return iterator(__end_node()); }
-    MSTD_HIDE_FROM_ABI const_iterator end() const noexcept { return const_iterator(__end_node()); }
+    iterator begin() noexcept { return iterator(__begin_node_); }
+    const_iterator begin() const noexcept { return const_iterator(__begin_node_); }
+    iterator end() noexcept { return iterator(__end_node()); }
+    const_iterator end() const noexcept { return const_iterator(__end_node()); }
 
-    MSTD_HIDE_FROM_ABI size_type max_size() const noexcept {
+    size_type max_size() const noexcept {
         return std::min<size_type>(__node_traits::max_size(__node_alloc()), std::numeric_limits<difference_type >::max());
     }
 
-    MSTD_HIDE_FROM_ABI void clear() noexcept;
+    void clear() noexcept;
 
-    MSTD_HIDE_FROM_ABI void swap(__tree& __t)
+    void swap(__tree& __t)
     noexcept(std::is_nothrow_swappable_v<value_compare>);
 
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI iterator __emplace_multi(_Args&&... __args);
+    iterator __emplace_multi(_Args&&... __args);
 
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI iterator __emplace_hint_multi(const_iterator __p, _Args&&... __args);
+    iterator __emplace_hint_multi(const_iterator __p, _Args&&... __args);
 
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> __emplace_unique(_Args&&... __args) {
+    std::pair<iterator, bool> __emplace_unique(_Args&&... __args) {
         return mstd::__try_key_extraction<key_type>(
             [this](const key_type& __key, _Args&&... __args2) {
                 auto [__parent, __child] = __find_equal(__key);
@@ -1028,7 +1025,7 @@ public:
     }
 
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI std::pair<iterator, bool> __emplace_hint_unique(const_iterator __p, _Args&&... __args) {
+    std::pair<iterator, bool> __emplace_hint_unique(const_iterator __p, _Args&&... __args) {
         return mstd::__try_key_extraction<key_type>(
             [this, __p](const key_type& __key, _Args&&... __args2) {
                 __node_base_pointer __dummy;
@@ -1058,7 +1055,7 @@ public:
     }
 
     template <class _InIter, class _Sent>
-    MSTD_HIDE_FROM_ABI void __insert_range_multi(_InIter __first, _Sent __last) {
+    void __insert_range_multi(_InIter __first, _Sent __last) {
         if (__first == __last)
             return;
 
@@ -1087,7 +1084,7 @@ public:
     }
 
     template <class _InIter, class _Sent>
-    MSTD_HIDE_FROM_ABI void __insert_range_unique(_InIter __first, _Sent __last) {
+    void __insert_range_unique(_InIter __first, _Sent __last) {
         if (__first == __last)
             return;
 
@@ -1136,39 +1133,39 @@ public:
         }
     }
 
-    MSTD_HIDE_FROM_ABI iterator __remove_node_pointer(__node_pointer) noexcept;
+    iterator __remove_node_pointer(__node_pointer) noexcept;
 
     template <class _NodeHandle, class _InsertReturnType>
-    MSTD_HIDE_FROM_ABI _InsertReturnType __node_handle_insert_unique(_NodeHandle&&);
+    _InsertReturnType __node_handle_insert_unique(_NodeHandle&&);
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI iterator __node_handle_insert_unique(const_iterator, _NodeHandle&&);
+    iterator __node_handle_insert_unique(const_iterator, _NodeHandle&&);
     template <class _Comp2>
-    MSTD_HIDE_FROM_ABI void __node_handle_merge_unique(__tree<_Tp, _Comp2, _Allocator>& __source);
+    void __node_handle_merge_unique(__tree<_Tp, _Comp2, _Allocator>& __source);
 
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI iterator __node_handle_insert_multi(_NodeHandle&&);
+    iterator __node_handle_insert_multi(_NodeHandle&&);
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI iterator __node_handle_insert_multi(const_iterator, _NodeHandle&&);
+    iterator __node_handle_insert_multi(const_iterator, _NodeHandle&&);
     template <class _Comp2>
-    MSTD_HIDE_FROM_ABI void __node_handle_merge_multi(__tree<_Tp, _Comp2, _Allocator>& __source);
+    void __node_handle_merge_multi(__tree<_Tp, _Comp2, _Allocator>& __source);
 
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI _NodeHandle __node_handle_extract(key_type const&);
+    _NodeHandle __node_handle_extract(key_type const&);
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI _NodeHandle __node_handle_extract(const_iterator);
+    _NodeHandle __node_handle_extract(const_iterator);
 
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p);
-    MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l);
+    iterator erase(const_iterator __p);
+    iterator erase(const_iterator __f, const_iterator __l);
     template <class _Key>
-    MSTD_HIDE_FROM_ABI size_type __erase_unique(const _Key& __k);
+    size_type __erase_unique(const _Key& __k);
     template <class _Key>
-    MSTD_HIDE_FROM_ABI size_type __erase_multi(const _Key& __k);
+    size_type __erase_multi(const _Key& __k);
 
-    MSTD_HIDE_FROM_ABI void
+    void
     __insert_node_at(__end_node_pointer __parent, __node_base_pointer& __child, __node_base_pointer __new_node) noexcept;
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator find(const _Key& __key) {
+    iterator find(const _Key& __key) {
         auto [__, __match] = __find_equal(__key);
         if (__match == nullptr)
             return end();
@@ -1176,7 +1173,7 @@ public:
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator find(const _Key& __key) const {
+    const_iterator find(const _Key& __key) const {
         auto [__, __match] = __find_equal(__key);
         if (__match == nullptr)
             return end();
@@ -1184,12 +1181,12 @@ public:
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI size_type __count_unique(const _Key& __k) const;
+    size_type __count_unique(const _Key& __k) const;
     template <class _Key>
-    MSTD_HIDE_FROM_ABI size_type __count_multi(const _Key& __k) const;
+    size_type __count_multi(const _Key& __k) const;
 
     template <bool _LowerBound, class _Key>
-    MSTD_HIDE_FROM_ABI __end_node_pointer __lower_upper_bound_unique_impl(const _Key& __v) const {
+    __end_node_pointer __lower_upper_bound_unique_impl(const _Key& __v) const {
         auto __rt     = __root();
         auto __result = __end_node();
         auto __comp   = __lazy_synth_three_way_comparator<_Compare, _Key, value_type>(value_comp());
@@ -1211,136 +1208,135 @@ public:
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator __lower_bound_unique(const _Key& __v) {
+    iterator __lower_bound_unique(const _Key& __v) {
         return iterator(__lower_upper_bound_unique_impl<true>(__v));
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator __lower_bound_unique(const _Key& __v) const {
+    const_iterator __lower_bound_unique(const _Key& __v) const {
         return const_iterator(__lower_upper_bound_unique_impl<true>(__v));
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator __upper_bound_unique(const _Key& __v) {
+    iterator __upper_bound_unique(const _Key& __v) {
         return iterator(__lower_upper_bound_unique_impl<false>(__v));
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator __upper_bound_unique(const _Key& __v) const {
+    const_iterator __upper_bound_unique(const _Key& __v) const {
         return iterator(__lower_upper_bound_unique_impl<false>(__v));
     }
 
 private:
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator
+    iterator
     __lower_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result);
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator
+    const_iterator
     __lower_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result) const;
 
 public:
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator __lower_bound_multi(const _Key& __v) {
+    iterator __lower_bound_multi(const _Key& __v) {
         return __lower_bound_multi(__v, __root(), __end_node());
     }
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator __lower_bound_multi(const _Key& __v) const {
+    const_iterator __lower_bound_multi(const _Key& __v) const {
         return __lower_bound_multi(__v, __root(), __end_node());
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator __upper_bound_multi(const _Key& __v) {
+    iterator __upper_bound_multi(const _Key& __v) {
         return __upper_bound_multi(__v, __root(), __end_node());
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator __upper_bound_multi(const _Key& __v) const {
+    const_iterator __upper_bound_multi(const _Key& __v) const {
         return __upper_bound_multi(__v, __root(), __end_node());
     }
 
 private:
     template <class _Key>
-    MSTD_HIDE_FROM_ABI iterator
+    iterator
     __upper_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result);
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI const_iterator
+    const_iterator
     __upper_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result) const;
 
 public:
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> __equal_range_unique(const _Key& __k);
+    std::pair<iterator, iterator> __equal_range_unique(const _Key& __k);
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> __equal_range_unique(const _Key& __k) const;
+    std::pair<const_iterator, const_iterator> __equal_range_unique(const _Key& __k) const;
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> __equal_range_multi(const _Key& __k);
+    std::pair<iterator, iterator> __equal_range_multi(const _Key& __k);
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> __equal_range_multi(const _Key& __k) const;
+    std::pair<const_iterator, const_iterator> __equal_range_multi(const _Key& __k) const;
 
     using _Dp MSTD_NODEBUG           = __tree_node_destructor<__node_allocator>;
     using __node_holder MSTD_NODEBUG = std::unique_ptr<__node, _Dp>;
 
-    MSTD_HIDE_FROM_ABI __node_holder remove(const_iterator __p) noexcept;
+    __node_holder remove(const_iterator __p) noexcept;
 
     // FIXME: Make this function const qualified. Unfortunately doing so
     // breaks existing code which uses non-const callable comparators.
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v);
+    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v);
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v) const {
+    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v) const {
         return const_cast<__tree*>(this)->__find_equal(__v);
     }
 
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<__end_node_pointer, __node_base_pointer&>
+    std::pair<__end_node_pointer, __node_base_pointer&>
     __find_equal(const_iterator __hint, __node_base_pointer& __dummy, const _Key& __v);
 
-    MSTD_HIDE_FROM_ABI void __copy_assign_alloc(const __tree& __t) {
+    void __copy_assign_alloc(const __tree& __t) {
         __copy_assign_alloc(__t, std::integral_constant<bool, __node_traits::propagate_on_container_copy_assignment::value>());
     }
 
-    MSTD_HIDE_FROM_ABI void __copy_assign_alloc(const __tree& __t, std::true_type) {
+    void __copy_assign_alloc(const __tree& __t, std::true_type) {
         if (__node_alloc() != __t.__node_alloc())
             clear();
         __node_alloc() = __t.__node_alloc();
     }
-    MSTD_HIDE_FROM_ABI void __copy_assign_alloc(const __tree&, std::false_type) {}
+    void __copy_assign_alloc(const __tree&, std::false_type) {}
 
 private:
-    MSTD_HIDE_FROM_ABI __node_base_pointer& __find_leaf_low(__end_node_pointer& __parent, const value_type& __v);
+    __node_base_pointer& __find_leaf_low(__end_node_pointer& __parent, const value_type& __v);
 
-    MSTD_HIDE_FROM_ABI __node_base_pointer& __find_leaf_high(__end_node_pointer& __parent, const value_type& __v);
+    __node_base_pointer& __find_leaf_high(__end_node_pointer& __parent, const value_type& __v);
 
-    MSTD_HIDE_FROM_ABI __node_base_pointer&
+    __node_base_pointer&
     __find_leaf(const_iterator __hint, __end_node_pointer& __parent, const value_type& __v);
 
     template <class... _Args>
-    MSTD_HIDE_FROM_ABI __node_holder __construct_node(_Args&&... __args);
+    __node_holder __construct_node(_Args&&... __args);
 
-    // TODO: Make this MSTD_HIDE_FROM_ABI
-    MSTD_HIDDEN void destroy(__node_pointer __nd) noexcept { (__tree_deleter(__node_alloc_))(__nd); }
+    void destroy(__node_pointer __nd) noexcept { (__tree_deleter(__node_alloc_))(__nd); }
 
-    MSTD_HIDE_FROM_ABI void __move_assign(__tree& __t, std::false_type);
-    MSTD_HIDE_FROM_ABI void __move_assign(__tree& __t, std::true_type) noexcept(
+    void __move_assign(__tree& __t, std::false_type);
+    void __move_assign(__tree& __t, std::true_type) noexcept(
         std::is_nothrow_move_assignable<value_compare>::value && std::is_nothrow_move_assignable<__node_allocator>::value);
 
-    MSTD_HIDE_FROM_ABI void __move_assign_alloc(__tree& __t)
+    void __move_assign_alloc(__tree& __t)
     noexcept(!__node_traits::propagate_on_container_move_assignment::value ||
     std::is_nothrow_move_assignable<__node_allocator>::value) {
         __move_assign_alloc(__t, std::integral_constant<bool, __node_traits::propagate_on_container_move_assignment::value>());
     }
 
-    MSTD_HIDE_FROM_ABI void __move_assign_alloc(__tree& __t, std::true_type)
+    void __move_assign_alloc(__tree& __t, std::true_type)
     noexcept(std::is_nothrow_move_assignable<__node_allocator>::value) {
         __node_alloc() = std::move(__t.__node_alloc());
     }
-    MSTD_HIDE_FROM_ABI void __move_assign_alloc(__tree&, std::false_type) noexcept {}
+    void __move_assign_alloc(__tree&, std::false_type) noexcept {}
 
     template <class _From, class _ValueT = _Tp, std::enable_if_t<__is_tree_value_type_v<_ValueT>, int> = 0>
-    MSTD_HIDE_FROM_ABI static void __assign_value(__get_node_value_type_t<value_type>& __lhs, _From&& __rhs) {
+    static void __assign_value(__get_node_value_type_t<value_type>& __lhs, _From&& __rhs) {
         using __key_type = std::remove_const_t<typename value_type::first_type>;
 
         // This is technically UB, since the object was constructed as `const`.
@@ -1350,7 +1346,7 @@ private:
     }
 
     template <class _To, class _From, class _ValueT = _Tp, std::enable_if_t<!__is_tree_value_type_v<_ValueT>, int> = 0>
-    MSTD_HIDE_FROM_ABI static void __assign_value(_To& __lhs, _From&& __rhs) {
+    static void __assign_value(_To& __lhs, _From&& __rhs) {
         __lhs = std::forward<_From>(__rhs);
     }
 
@@ -1360,11 +1356,8 @@ private:
     public:
         using pointer = __node_pointer;
 
-        MSTD_HIDE_FROM_ABI __tree_deleter(__node_allocator& __alloc) : __alloc_(__alloc) {}
+        __tree_deleter(__node_allocator& __alloc) : __alloc_(__alloc) {}
 
-        #ifdef MSTD_COMPILER_CLANG_BASED // FIXME: GCC complains about not being able to always_inline a recursive function
-        MSTD_HIDE_FROM_ABI
-        #endif
         void
         operator()(__node_pointer __ptr) {
             if (!__ptr)
@@ -1386,9 +1379,6 @@ private:
     // didn't get a correct tree, the invariants of __tree are broken and we have a much bigger problem than an improperly
     // balanced tree.
     template <class _NodeConstructor>
-    #ifdef MSTD_COMPILER_CLANG_BASED // FIXME: GCC complains about not being able to always_inline a recursive function
-    MSTD_HIDE_FROM_ABI
-    #endif
     __node_pointer __construct_from_tree(__node_pointer __src, _NodeConstructor __construct) {
         if (!__src)
             return nullptr;
@@ -1411,19 +1401,19 @@ private:
         return __new_node_ptr;
     }
 
-    MSTD_HIDE_FROM_ABI __node_pointer __copy_construct_tree(__node_pointer __src) {
+    __node_pointer __copy_construct_tree(__node_pointer __src) {
         return __construct_from_tree(__src, [this](const value_type& __val) { return __construct_node(__val); });
     }
 
     template <class _ValueT = _Tp, std::enable_if_t<__is_tree_value_type_v<_ValueT>, int> = 0>
-    MSTD_HIDE_FROM_ABI __node_pointer __move_construct_tree(__node_pointer __src) {
+    __node_pointer __move_construct_tree(__node_pointer __src) {
         return __construct_from_tree(__src, [this](value_type& __val) {
             return __construct_node(const_cast<key_type&&>(__val.first), std::move(__val.second));
         });
     }
 
     template <class _ValueT = _Tp, std::enable_if_t<!__is_tree_value_type_v<_ValueT>, int> = 0>
-    MSTD_HIDE_FROM_ABI __node_pointer __move_construct_tree(__node_pointer __src) {
+    __node_pointer __move_construct_tree(__node_pointer __src) {
         return __construct_from_tree(__src, [this](value_type& __val) { return __construct_node(std::move(__val)); });
     }
 
@@ -1431,9 +1421,6 @@ private:
     // This copy assignment will always produce a correct red-black-tree assuming the incoming tree is correct, since our
     // own tree is a red-black-tree and the incoming tree is a red-black-tree. The invariants of a red-black-tree are
     // temporarily not met until all of the incoming red-black tree is copied.
-    #ifdef MSTD_COMPILER_CLANG_BASED // FIXME: GCC complains about not being able to always_inline a recursive function
-    MSTD_HIDE_FROM_ABI
-    #endif
     __node_pointer __assign_from_tree(
         __node_pointer __dest, __node_pointer __src, _Assignment __assign, _ConstructionAlg __construct_subtree) {
         if (!__src) {
@@ -1475,7 +1462,7 @@ private:
         return __dest;
         }
 
-        MSTD_HIDE_FROM_ABI __node_pointer __copy_assign_tree(__node_pointer __dest, __node_pointer __src) {
+        __node_pointer __copy_assign_tree(__node_pointer __dest, __node_pointer __src) {
             return __assign_from_tree(
                 __dest,
                 __src,
@@ -1483,7 +1470,7 @@ private:
                                       [this](__node_pointer __nd) { return __copy_construct_tree(__nd); });
         }
 
-        MSTD_HIDE_FROM_ABI __node_pointer __move_assign_tree(__node_pointer __dest, __node_pointer __src) {
+        __node_pointer __move_assign_tree(__node_pointer __dest, __node_pointer __src) {
             return __assign_from_tree(
                 __dest,
                 __src,
@@ -1501,7 +1488,7 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<__tree<_Tp
     using __node_pointer MSTD_NODEBUG = typename __tree<_Tp, _Compare, _Allocator>::__node_pointer;
 
     template <class _Tree, class _Func, class _Proj>
-    MSTD_HIDE_FROM_ABI static auto operator()(_Tree&& __range, _Func __func, _Proj __proj) {
+    static auto operator()(_Tree&& __range, _Func __func, _Proj __proj) {
         if (__range.size() != 0)
             mstd::__tree_iterate_from_root<__copy_cvref_t<_Tree, typename std::remove_cvref_t<_Tree>::value_type>>(
                 [](__node_pointer) { return false; }, __range.__root(), __func, __proj);
@@ -1751,7 +1738,7 @@ typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer& __tree<_Tp, _Co
     // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class _Tp, class _Compare, class _Allocator>
     template <class _Key>
-    MSTD_HIDE_FROM_ABI std::pair<typename __tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
+    std::pair<typename __tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
 typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&>
 __tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
     using _Pair = std::pair<__end_node_pointer, __node_base_pointer&>;
@@ -1796,7 +1783,7 @@ __tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
 // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
 template <class _Tp, class _Compare, class _Allocator>
 template <class _Key>
-MSTD_HIDE_FROM_ABI std::pair<typename __tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
+std::pair<typename __tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
 typename __tree<_Tp, _Compare, _Allocator>::__node_base_pointer&>
 __tree<_Tp, _Compare, _Allocator>::__find_equal(const_iterator __hint, __node_base_pointer& __dummy, const _Key& __v) {
     using _Pair = std::pair<__end_node_pointer, __node_base_pointer&>;
@@ -1893,7 +1880,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle, class _InsertReturnType>
-    MSTD_HIDE_FROM_ABI _InsertReturnType
+    _InsertReturnType
     __tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(_NodeHandle&& __nh) {
         if (__nh.empty())
             return _InsertReturnType{end(), false, _NodeHandle()};
@@ -1910,7 +1897,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI typename __tree<_Tp, _Compare, _Allocator>::iterator
+    typename __tree<_Tp, _Compare, _Allocator>::iterator
     __tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(const_iterator __hint, _NodeHandle&& __nh) {
         if (__nh.empty())
             return end();
@@ -1929,7 +1916,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI _NodeHandle __tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& __key) {
+    _NodeHandle __tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& __key) {
         iterator __it = find(__key);
         if (__it == end())
             return _NodeHandle();
@@ -1938,7 +1925,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI _NodeHandle __tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator __p) {
+    _NodeHandle __tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator __p) {
         __node_pointer __np = __p.__get_np();
         __remove_node_pointer(__np);
         return _NodeHandle(__np, __alloc());
@@ -1946,7 +1933,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _Comp2>
-    MSTD_HIDE_FROM_ABI void
+    void
     __tree<_Tp, _Compare, _Allocator>::__node_handle_merge_unique(__tree<_Tp, _Comp2, _Allocator>& __source) {
         for (iterator __i = __source.begin(); __i != __source.end();) {
             __node_pointer __src_ptr = __i.__get_np();
@@ -1961,7 +1948,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI typename __tree<_Tp, _Compare, _Allocator>::iterator
+    typename __tree<_Tp, _Compare, _Allocator>::iterator
     __tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(_NodeHandle&& __nh) {
         if (__nh.empty())
             return end();
@@ -1975,7 +1962,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle>
-    MSTD_HIDE_FROM_ABI typename __tree<_Tp, _Compare, _Allocator>::iterator
+    typename __tree<_Tp, _Compare, _Allocator>::iterator
     __tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(const_iterator __hint, _NodeHandle&& __nh) {
         if (__nh.empty())
             return end();
@@ -1990,7 +1977,7 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _Comp2>
-    MSTD_HIDE_FROM_ABI void
+    void
     __tree<_Tp, _Compare, _Allocator>::__node_handle_merge_multi(__tree<_Tp, _Comp2, _Allocator>& __source) {
         for (iterator __i = __source.begin(); __i != __source.end();) {
             __node_pointer __src_ptr = __i.__get_np();
@@ -2249,7 +2236,7 @@ __tree<_Tp, _Compare, _Allocator>::remove(const_iterator __p) noexcept {
 }
 
 template <class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI void swap(__tree<_Tp, _Compare, _Allocator>& __x, __tree<_Tp, _Compare, _Allocator>& __y)
+inline void swap(__tree<_Tp, _Compare, _Allocator>& __x, __tree<_Tp, _Compare, _Allocator>& __y)
 noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }

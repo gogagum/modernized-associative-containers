@@ -37,7 +37,6 @@
 #      define MSTD_OVERRIDABLE_FUNC_VIS
 #    endif
 
-#    define MSTD_HIDDEN
 #    define MSTD_NAMESPACE_VISIBILITY
 
 #  else
@@ -47,8 +46,6 @@
 #    else
 #      define MSTD_VISIBILITY(vis)
 #    endif
-
-#    define MSTD_HIDDEN MSTD_VISIBILITY("hidden")
 
 // TODO: Make this a proper customization point or remove the option to override it.
 #    ifndef MSTD_OVERRIDABLE_FUNC_VIS
@@ -103,56 +100,6 @@
 #  define MSTD_ODR_SIGNATURE                                                                                        \
     MSTD_CONCAT(                                                                                                    \
         MSTD_CONCAT(MSTD_HARDENING_SIG, MSTD_ASSERTION_SEMANTIC_SIG), MSTD_EXCEPTIONS_SIG)
-
-// This macro marks a symbol as being hidden from libc++'s ABI. This is achieved
-// on two levels:
-// 1. The symbol is given hidden visibility, which ensures that users won't start exporting
-//    symbols from their dynamic library by means of using the libc++ headers. This ensures
-//    that those symbols stay private to the dynamic library in which it is defined.
-//
-// 2. The symbol is given an ABI tag that encodes the ODR-relevant properties of the library.
-//    This ensures that no ODR violation can arise from mixing two TUs compiled with different
-//    versions or configurations of libc++ (such as exceptions vs no-exceptions). Indeed, if the
-//    program contains two definitions of a function, the ODR requires them to be token-by-token
-//    equivalent, and the linker is allowed to pick either definition and discard the other one.
-//
-//    For example, if a program contains a copy of `vector::at()` compiled with exceptions enabled
-//    *and* a copy of `vector::at()` compiled with exceptions disabled (by means of having two TUs
-//    compiled with different settings), the two definitions are both visible by the linker and they
-//    have the same name, but they have a meaningfully different implementation (one throws an exception
-//    and the other aborts the program). This violates the ODR and makes the program ill-formed, and in
-//    practice what will happen is that the linker will pick one of the definitions at random and will
-//    discard the other one. This can quite clearly lead to incorrect program behavior.
-//
-//    A similar reasoning holds for many other properties that are ODR-affecting. Essentially any
-//    property that causes the code of a function to differ from the code in another configuration
-//    can be considered ODR-affecting. In practice, we don't encode all such properties in the ABI
-//    tag, but we encode the ones that we think are most important: library version, exceptions, and
-//    hardening mode.
-//
-//    Note that historically, solving this problem has been achieved in various ways, including
-//    force-inlining all functions or giving internal linkage to all functions. Both these previous
-//    solutions suffer from drawbacks that lead notably to code bloat.
-//
-// Note that we use MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION to ensure that we don't depend
-// on MSTD_HIDE_FROM_ABI methods of classes explicitly instantiated in the dynamic library.
-//
-// The macro can be applied to record and enum types. When the tagged type is nested in
-// a record this "parent" record needs to have the macro too. Another use case for applying
-// this macro to records and unions is to apply an ABI tag to inline constexpr variables.
-// This can be useful for inline variables that are implementation details which are expected
-// to change in the future.
-//
-// TODO: We provide a escape hatch with MSTD_NO_ABI_TAG for folks who want to avoid increasing
-//       the length of symbols with an ABI tag. In practice, we should remove the escape hatch and
-//       use compression mangling instead, see https://github.com/itanium-cxx-abi/cxx-abi/issues/70.
-#  ifndef MSTD_NO_ABI_TAG
-#    define MSTD_HIDE_FROM_ABI                                                                                      \
-      MSTD_HIDDEN MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION                                                       \
-      __attribute__((__abi_tag__(MSTD_TOSTRING(MSTD_ODR_SIGNATURE))))
-#  else
-#    define MSTD_HIDE_FROM_ABI MSTD_HIDDEN MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION
-#  endif
 
 #  ifndef MSTD_NO_AUTO_LINK
 #    if defined(MSTD_ABI_MICROSOFT) && !defined(MSTD_BUILDING_LIBRARY)
