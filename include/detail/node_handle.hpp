@@ -186,10 +186,10 @@ struct __map_node_handle_specifics {
 };
 
 template <class _NodeType, class _Alloc>
-using __set_node_handle MSTD_NODEBUG = __basic_node_handle< _NodeType, _Alloc, __set_node_handle_specifics>;
+using __set_node_handle = __basic_node_handle< _NodeType, _Alloc, __set_node_handle_specifics>;
 
 template <class _NodeType, class _Alloc>
-using __map_node_handle MSTD_NODEBUG = __basic_node_handle< _NodeType, _Alloc, __map_node_handle_specifics>;
+using __map_node_handle = __basic_node_handle< _NodeType, _Alloc, __map_node_handle_specifics>;
 
 template <class _Iterator, class _NodeType>
 struct __insert_return_type {

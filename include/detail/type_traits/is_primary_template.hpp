@@ -20,11 +20,11 @@
 namespace mstd {
 
 template <class _Tp>
-using __test_for_primary_template MSTD_NODEBUG =
+using __test_for_primary_template =
     std::enable_if_t<std::is_same_v<_Tp, typename _Tp::__primary_template>>;
 
 template <class _Tp>
-using __is_primary_template MSTD_NODEBUG = _IsValidExpansion<__test_for_primary_template, _Tp>;
+using __is_primary_template = _IsValidExpansion<__test_for_primary_template, _Tp>;
 
 } // namespace mstd
 

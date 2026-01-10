@@ -124,14 +124,14 @@ concept __cpp17_input_iterator_missing_members =
 // Otherwise, `pointer` names `void`.
 template <class>
 struct __iterator_traits_member_pointer_or_arrow_or_void {
-  using type MSTD_NODEBUG = void;
+  using type = void;
 };
 
 // [iterator.traits]/3.2.1
 // If the qualified-id `I::pointer` is valid and denotes a type, `pointer` names that type.
 template <__has_member_pointer _Ip>
 struct __iterator_traits_member_pointer_or_arrow_or_void<_Ip> {
-  using type MSTD_NODEBUG = typename _Ip::pointer;
+  using type = typename _Ip::pointer;
 };
 
 // Otherwise, if `decltype(declval<I&>().operator->())` is well-formed, then `pointer` names that
@@ -139,48 +139,48 @@ struct __iterator_traits_member_pointer_or_arrow_or_void<_Ip> {
 template <class _Ip>
   requires requires(_Ip& __i) { __i.operator->(); } && (!__has_member_pointer<_Ip>)
 struct __iterator_traits_member_pointer_or_arrow_or_void<_Ip> {
-  using type MSTD_NODEBUG = decltype(std::declval<_Ip&>().operator->());
+  using type = decltype(std::declval<_Ip&>().operator->());
 };
 
 // Otherwise, `reference` names `iter-reference-t<I>`.
 template <class _Ip>
 struct __iterator_traits_member_reference {
-  using type MSTD_NODEBUG = iter_reference_t<_Ip>;
+  using type = iter_reference_t<_Ip>;
 };
 
 // [iterator.traits]/3.2.2
 // If the qualified-id `I::reference` is valid and denotes a type, `reference` names that type.
 template <__has_member_reference _Ip>
 struct __iterator_traits_member_reference<_Ip> {
-  using type MSTD_NODEBUG = typename _Ip::reference;
+  using type = typename _Ip::reference;
 };
 
 // [iterator.traits]/3.2.3.4
 // input_iterator_tag
 template <class _Ip>
 struct __deduce_iterator_category {
-  using type MSTD_NODEBUG = input_iterator_tag;
+  using type = input_iterator_tag;
 };
 
 // [iterator.traits]/3.2.3.1
 // `random_access_iterator_tag` if `I` satisfies `cpp17-random-access-iterator`, or otherwise
 template <__iterator_traits_detail::__cpp17_random_access_iterator _Ip>
 struct __deduce_iterator_category<_Ip> {
-  using type MSTD_NODEBUG = random_access_iterator_tag;
+  using type = random_access_iterator_tag;
 };
 
 // [iterator.traits]/3.2.3.2
 // `bidirectional_iterator_tag` if `I` satisfies `cpp17-bidirectional-iterator`, or otherwise
 template <__iterator_traits_detail::__cpp17_bidirectional_iterator _Ip>
 struct __deduce_iterator_category<_Ip> {
-  using type MSTD_NODEBUG = bidirectional_iterator_tag;
+  using type = bidirectional_iterator_tag;
 };
 
 // [iterator.traits]/3.2.3.3
 // `forward_iterator_tag` if `I` satisfies `cpp17-forward-iterator`, or otherwise
 template <__iterator_traits_detail::__cpp17_forward_iterator _Ip>
 struct __deduce_iterator_category<_Ip> {
-  using type MSTD_NODEBUG = forward_iterator_tag;
+  using type = forward_iterator_tag;
 };
 
 template <class _Ip>
@@ -191,13 +191,13 @@ struct __iterator_traits_iterator_category : __deduce_iterator_category<_Ip> {};
 // that type.
 template <__has_member_iterator_category _Ip>
 struct __iterator_traits_iterator_category<_Ip> {
-  using type MSTD_NODEBUG = typename _Ip::iterator_category;
+  using type = typename _Ip::iterator_category;
 };
 
 // otherwise, it names void.
 template <class>
 struct __iterator_traits_difference_type {
-  using type MSTD_NODEBUG = void;
+  using type = void;
 };
 
 // If the qualified-id `incrementable_traits<I>::difference_type` is valid and denotes a type, then
@@ -205,7 +205,7 @@ struct __iterator_traits_difference_type {
 template <class _Ip>
   requires requires { typename std::incrementable_traits<_Ip>::difference_type; }
 struct __iterator_traits_difference_type<_Ip> {
-  using type MSTD_NODEBUG = typename std::incrementable_traits<_Ip>::difference_type;
+  using type = typename std::incrementable_traits<_Ip>::difference_type;
 };
 
 // [iterator.traits]/3.4
@@ -214,7 +214,7 @@ template <class>
 struct __iterator_traits {};
 
 template <class _Tp>
-using __pointer_member MSTD_NODEBUG = typename _Tp::pointer;
+using __pointer_member = typename _Tp::pointer;
 
 // [iterator.traits]/3.1
 // If `I` has valid ([temp.deduct]) member types `difference-type`, `value-type`, `reference`, and
@@ -253,7 +253,7 @@ struct __iterator_traits<_Ip> {
 
 template <class _Ip>
 struct iterator_traits : __iterator_traits<_Ip> {
-  using __primary_template MSTD_NODEBUG = iterator_traits;
+  using __primary_template = iterator_traits;
 };
 
 template <class _Tp>
@@ -268,32 +268,32 @@ struct iterator_traits<_Tp*> {
 };
 
 template <class _Tp>
-using __iterator_category MSTD_NODEBUG = typename _Tp::iterator_category;
+using __iterator_category = typename _Tp::iterator_category;
 
 template <class _Tp>
-using __iterator_concept MSTD_NODEBUG = typename _Tp::iterator_concept;
+using __iterator_concept = typename _Tp::iterator_concept;
 
 template <class _Tp, class _Up>
-using __has_iterator_category_convertible_to MSTD_NODEBUG =
+using __has_iterator_category_convertible_to =
     std::is_convertible<__detected_or_t<__nat, __iterator_category, std::iterator_traits<_Tp> >, _Up>;
 
 template <class _Tp, class _Up>
-using __has_iterator_concept_convertible_to MSTD_NODEBUG =
+using __has_iterator_concept_convertible_to =
     std::is_convertible<__detected_or_t<__nat, __iterator_concept, _Tp>, _Up>;
 
 template <class _Tp>
-using __has_input_iterator_category MSTD_NODEBUG = __has_iterator_category_convertible_to<_Tp, input_iterator_tag>;
+using __has_input_iterator_category = __has_iterator_category_convertible_to<_Tp, input_iterator_tag>;
 
 template <class _Tp>
-using __has_forward_iterator_category MSTD_NODEBUG =
+using __has_forward_iterator_category =
     __has_iterator_category_convertible_to<_Tp, forward_iterator_tag>;
 
 template <class _Tp>
-using __has_bidirectional_iterator_category MSTD_NODEBUG =
+using __has_bidirectional_iterator_category =
     __has_iterator_category_convertible_to<_Tp, bidirectional_iterator_tag>;
 
 template <class _Tp>
-using __has_random_access_iterator_category MSTD_NODEBUG =
+using __has_random_access_iterator_category =
     __has_iterator_category_convertible_to<_Tp, random_access_iterator_tag>;
 
 // _MSTD_is_contiguous_iterator determines if an iterator is known by
@@ -316,48 +316,48 @@ template <class _Iter>
 class __wrap_iter;
 
 template <class _Tp>
-using __has_exactly_input_iterator_category MSTD_NODEBUG =
+using __has_exactly_input_iterator_category =
     std::integral_constant<bool,
                       __has_iterator_category_convertible_to<_Tp, input_iterator_tag>::value &&
                           !__has_iterator_category_convertible_to<_Tp, forward_iterator_tag>::value>;
 
 template <class _Tp>
-using __has_exactly_forward_iterator_category MSTD_NODEBUG =
+using __has_exactly_forward_iterator_category =
     std::integral_constant<bool,
                       __has_iterator_category_convertible_to<_Tp, forward_iterator_tag>::value &&
                           !__has_iterator_category_convertible_to<_Tp, bidirectional_iterator_tag>::value>;
 
 template <class _Tp>
-using __has_exactly_bidirectional_iterator_category MSTD_NODEBUG =
+using __has_exactly_bidirectional_iterator_category =
     std::integral_constant<bool,
                       __has_iterator_category_convertible_to<_Tp, bidirectional_iterator_tag>::value &&
                           !__has_iterator_category_convertible_to<_Tp, random_access_iterator_tag>::value>;
 
 template <class _InputIterator>
-using __iterator_value_type MSTD_NODEBUG = typename iterator_traits<_InputIterator>::value_type;
+using __iterator_value_type = typename iterator_traits<_InputIterator>::value_type;
 
 template <class _InputIterator>
-using __iter_key_type MSTD_NODEBUG = std::remove_const_t<std::tuple_element_t<0, __iterator_value_type<_InputIterator>>>;
+using __iter_key_type = std::remove_const_t<std::tuple_element_t<0, __iterator_value_type<_InputIterator>>>;
 
 template <class _InputIterator>
-using __iter_mapped_type MSTD_NODEBUG = std::tuple_element_t<1, __iterator_value_type<_InputIterator>>;
+using __iter_mapped_type = std::tuple_element_t<1, __iterator_value_type<_InputIterator>>;
 
 template <class _InputIterator>
-using __iter_to_alloc_type MSTD_NODEBUG =
+using __iter_to_alloc_type =
     std::pair<const std::tuple_element_t<0, __iterator_value_type<_InputIterator>>,
          std::tuple_element_t<1, __iterator_value_type<_InputIterator>>>;
 
 template <class _Iter>
-using __iterator_iterator_category MSTD_NODEBUG = typename iterator_traits<_Iter>::iterator_category;
+using __iterator_iterator_category = typename iterator_traits<_Iter>::iterator_category;
 
 template <class _Iter>
-using __iterator_pointer MSTD_NODEBUG = typename iterator_traits<_Iter>::pointer;
+using __iterator_pointer = typename iterator_traits<_Iter>::pointer;
 
 template <class _Iter>
-using __iterator_difference_type MSTD_NODEBUG = typename iterator_traits<_Iter>::difference_type;
+using __iterator_difference_type = typename iterator_traits<_Iter>::difference_type;
 
 template <class _Iter>
-using __iterator_reference MSTD_NODEBUG = typename iterator_traits<_Iter>::reference;
+using __iterator_reference = typename iterator_traits<_Iter>::reference;
 
 // [readable.traits]
 

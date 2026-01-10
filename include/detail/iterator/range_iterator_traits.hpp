@@ -23,13 +23,13 @@
 namespace mstd {
 
 template <std::ranges::input_range _Range>
-using __range_key_type MSTD_NODEBUG = std::remove_const_t<typename std::ranges::range_value_t<_Range>::first_type>;
+using __range_key_type = std::remove_const_t<typename std::ranges::range_value_t<_Range>::first_type>;
 
 template <std::ranges::input_range _Range>
-using __range_mapped_type MSTD_NODEBUG = typename std::ranges::range_value_t<_Range>::second_type;
+using __range_mapped_type = typename std::ranges::range_value_t<_Range>::second_type;
 
 template <std::ranges::input_range _Range>
-using __range_to_alloc_type MSTD_NODEBUG =
+using __range_to_alloc_type =
     std::pair<const typename std::ranges::range_value_t<_Range>::first_type, typename std::ranges::range_value_t<_Range>::second_type>;
 
 } // namespace mstd

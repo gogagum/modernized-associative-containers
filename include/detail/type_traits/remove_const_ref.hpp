@@ -20,7 +20,7 @@
 namespace mstd {
 
 template <class _Tp>
-using __remove_const_ref_t MSTD_NODEBUG = std::remove_const_t<std::remove_reference_t<_Tp> >;
+using __remove_const_ref_t = std::remove_const_t<std::remove_reference_t<_Tp> >;
 
 } // namespace mstd
 

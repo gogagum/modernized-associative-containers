@@ -23,11 +23,11 @@ namespace mstd {
 
 template <class _Comparator>
 struct __make_transparent {
-  using type MSTD_NODEBUG = _Comparator;
+  using type = _Comparator;
 };
 
 template <class _Comparator>
-using __make_transparent_t MSTD_NODEBUG = typename __make_transparent<_Comparator>::type;
+using __make_transparent_t = typename __make_transparent<_Comparator>::type;
 
 template <class _Comparator, std::enable_if_t<std::is_same<_Comparator, __make_transparent_t<_Comparator> >::value, int> = 0>
 _Comparator& __as_transparent(_Comparator& __comp) {

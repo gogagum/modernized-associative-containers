@@ -30,7 +30,7 @@ std::false_type __and_helper(...);
 // be instantiated) since it is an alias, unlike `conjunction<_Pred...>`, which is a struct.
 // If you want to defer the evaluation of `_And<_Pred...>` itself, use `_Lazy<_And, _Pred...>`.
 template <class... _Pred>
-using _And MSTD_NODEBUG = decltype(mstd::__and_helper<_Pred...>(0));
+using _And = decltype(mstd::__and_helper<_Pred...>(0));
 
 } // namespace mstd
 

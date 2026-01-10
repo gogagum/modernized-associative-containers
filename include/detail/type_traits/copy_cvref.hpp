@@ -21,23 +21,23 @@ namespace mstd {
 template <class _From>
 struct __copy_cvref {
   template <class _To>
-  using __apply MSTD_NODEBUG = __copy_cv_t<_From, _To>;
+  using __apply = __copy_cv_t<_From, _To>;
 };
 
 template <class _From>
 struct __copy_cvref<_From&> {
   template <class _To>
-  using __apply MSTD_NODEBUG = std::add_lvalue_reference_t<__copy_cv_t<_From, _To> >;
+  using __apply = std::add_lvalue_reference_t<__copy_cv_t<_From, _To> >;
 };
 
 template <class _From>
 struct __copy_cvref<_From&&> {
   template <class _To>
-  using __apply MSTD_NODEBUG = std::add_rvalue_reference_t<__copy_cv_t<_From, _To> >;
+  using __apply = std::add_rvalue_reference_t<__copy_cv_t<_From, _To> >;
 };
 
 template <class _From, class _To>
-using __copy_cvref_t MSTD_NODEBUG = typename __copy_cvref<_From>::template __apply<_To>;
+using __copy_cvref_t = typename __copy_cvref<_From>::template __apply<_To>;
 
 } // namespace mstd
 
