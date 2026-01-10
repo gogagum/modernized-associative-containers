@@ -265,10 +265,8 @@ TEST(SetEmplace, Test1)
 
 TEST(SetInsert, Test1)
 {
-    using namespace std;
-
-    set<int> s0, s1;
-    set<int>::iterator iter1;
+    mstd::set<int> s0, s1;
+    mstd::set<int>::iterator iter1;
 
     s0.insert(1);
     s1.insert(s1.end(), 1);

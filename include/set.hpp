@@ -593,12 +593,12 @@ public:
     template <class _Key2, class _Compare2, class _Alloc2>
     friend class multiset;
 
-    MSTD_HIDE_FROM_ABI set() _NOEXCEPT_(
+    MSTD_HIDE_FROM_ABI set() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(value_compare()) {}
 
-    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp) _NOEXCEPT_(
+    MSTD_HIDE_FROM_ABI explicit set(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(__comp) {}
 
@@ -669,28 +669,28 @@ public:
 
     MSTD_HIDE_FROM_ABI ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() _NOEXCEPT { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const _NOEXCEPT { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() _NOEXCEPT { return __tree_.end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const _NOEXCEPT { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() noexcept { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() _NOEXCEPT { return reverse_iterator(end()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const _NOEXCEPT {
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() _NOEXCEPT { return reverse_iterator(begin()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const _NOEXCEPT {
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const _NOEXCEPT { return begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const _NOEXCEPT { return end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const _NOEXCEPT { return rbegin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const _NOEXCEPT { return rend(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const noexcept { return begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const noexcept { return end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const _NOEXCEPT { return __tree_.size() == 0; }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const _NOEXCEPT { return __tree_.size(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT { return __tree_.max_size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const noexcept { return __tree_.size() == 0; }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const noexcept { return __tree_.size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
@@ -730,7 +730,7 @@ public:
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
     MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
+    MSTD_HIDE_FROM_ABI void clear() noexcept { __tree_.clear(); }
 
     MSTD_HIDE_FROM_ABI insert_return_type insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
@@ -773,9 +773,9 @@ public:
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
     
-    MSTD_HIDE_FROM_ABI void swap(set& __s) _NOEXCEPT_(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
+    MSTD_HIDE_FROM_ABI void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const _NOEXCEPT { return __tree_.__alloc(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
 
@@ -929,7 +929,7 @@ operator<=>(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare
 // specialized algorithms:
 template <class _Key, class _Compare, class _Allocator>
 inline MSTD_HIDE_FROM_ABI void swap(set<_Key, _Compare, _Allocator>& __x, set<_Key, _Compare, _Allocator>& __y)
-_NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
+noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
@@ -944,9 +944,9 @@ struct __container_traits<set<_Key, _Compare, _Allocator> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
-    static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+    static constexpr bool __emplacement_has_strong_exception_safety_guarantee = true;
 
-    static MSTD_CONSTEXPR const bool __reservable = false;
+    static constexpr bool __reservable = false;
 };
 
 template <class _Key, class _Compare, class _Allocator>
@@ -989,12 +989,12 @@ public:
     friend class multiset;
 
     // construct/copy/destroy:
-    MSTD_HIDE_FROM_ABI multiset() _NOEXCEPT_(
+    MSTD_HIDE_FROM_ABI multiset() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(value_compare()) {}
 
-    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp) _NOEXCEPT_(
+    MSTD_HIDE_FROM_ABI explicit multiset(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
     : __tree_(__comp) {}
 
@@ -1067,28 +1067,28 @@ public:
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() _NOEXCEPT { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const _NOEXCEPT { return __tree_.begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() _NOEXCEPT { return __tree_.end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const _NOEXCEPT { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator begin() noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator begin() const noexcept { return __tree_.begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator end() noexcept { return __tree_.end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator end() const noexcept { return __tree_.end(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() _NOEXCEPT { return reverse_iterator(end()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const _NOEXCEPT {
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() _NOEXCEPT { return reverse_iterator(begin()); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const _NOEXCEPT {
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const _NOEXCEPT { return begin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const _NOEXCEPT { return end(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const _NOEXCEPT { return rbegin(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const _NOEXCEPT { return rend(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cbegin() const noexcept { return begin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator cend() const noexcept { return end(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const _NOEXCEPT { return __tree_.size() == 0; }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const _NOEXCEPT { return __tree_.size(); }
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT { return __tree_.max_size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool empty() const noexcept { return __tree_.size() == 0; }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type size() const noexcept { return __tree_.size(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const noexcept { return __tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
@@ -1126,7 +1126,7 @@ public:
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p); }
     MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_multi(__k); }
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
+    MSTD_HIDE_FROM_ABI void clear() noexcept { __tree_.clear(); }
 
     MSTD_HIDE_FROM_ABI iterator insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
@@ -1169,11 +1169,11 @@ public:
         __tree_.__node_handle_merge_multi(__source.__tree_);
     }
     
-    MSTD_HIDE_FROM_ABI void swap(multiset& __s) _NOEXCEPT_(std::is_nothrow_swappable_v<__base>) {
+    MSTD_HIDE_FROM_ABI void swap(multiset& __s) noexcept(std::is_nothrow_swappable_v<__base>) {
         __tree_.swap(__s.__tree_);
     }
 
-    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const _NOEXCEPT { return __tree_.__alloc(); }
+    [[__nodiscard__]] MSTD_HIDE_FROM_ABI allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI key_compare key_comp() const { return __tree_.value_comp(); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI value_compare value_comp() const { return __tree_.value_comp(); }
 
@@ -1326,7 +1326,7 @@ operator<=>(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key
 template <class _Key, class _Compare, class _Allocator>
 inline MSTD_HIDE_FROM_ABI void
 swap(multiset<_Key, _Compare, _Allocator>& __x, multiset<_Key, _Compare, _Allocator>& __y)
-_NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
+noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
@@ -1341,9 +1341,9 @@ struct __container_traits<multiset<_Key, _Compare, _Allocator> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
-    static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+    static constexpr const bool __emplacement_has_strong_exception_safety_guarantee = true;
 
-    static MSTD_CONSTEXPR const bool __reservable = false;
+    static constexpr const bool __reservable = false;
 };
 
 MSTD_END_NAMESPACE

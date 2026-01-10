@@ -1,3 +1,4 @@
+#include "gtest/gtest.h"
 #include <gtest/gtest.h>
 #include <rval_struct.hpp>
 
@@ -221,9 +222,7 @@ TEST(MultisetCompareTest, Test2)
 
 TEST(MultisetCountTest, Test1)
 {
-    using namespace std;
-
-    multiset<int> ms0;
+    mstd::multiset<int> ms0;
     EXPECT_EQ(ms0.count(0), 0);
     EXPECT_EQ(ms0.count(1), 0);
 
@@ -249,7 +248,7 @@ TEST(MultisetCountTest, Test1)
     ms0.erase(0);
     EXPECT_EQ(ms0.count(0), 0);
 
-    multiset<int> ms1(ms0);
+    mstd::multiset<int> ms1(ms0);
     EXPECT_EQ(ms1.count(0), 0);
     EXPECT_EQ(ms1.count(1), 2);
     EXPECT_EQ(ms1.count(2), 0);
@@ -513,7 +512,7 @@ TEST(MultisetInsertTest, TestRvalStruct2)
 
     Set::iterator i2 = s.begin();
     ++i2;
-    EXPECT_EQ(i, s.begin());
     EXPECT_EQ(i, i2);
-    EXPECT_EQ((*(s.begin())).val == 2 && (*i2).val, 2);
+    EXPECT_EQ(s.begin()->val, 2);
+    EXPECT_EQ(i->val, 2);
 }

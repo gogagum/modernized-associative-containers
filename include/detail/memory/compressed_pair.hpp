@@ -59,10 +59,10 @@ MSTD_BEGIN_NAMESPACE_STD
 #ifndef MSTD_ABI_NO_COMPRESSED_PAIR_PADDING
 
 template <class _Tp>
-inline const size_t __compressed_pair_alignment = MSTD_ALIGNOF(_Tp);
+inline const size_t __compressed_pair_alignment = alignof(_Tp);
 
 template <class _Tp>
-inline const size_t __compressed_pair_alignment<_Tp&> = MSTD_ALIGNOF(void*);
+inline const size_t __compressed_pair_alignment<_Tp&> = alignof(void*);
 
 template <class _ToPad>
 inline const bool __is_reference_or_unpadded_object =
