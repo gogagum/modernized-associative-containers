@@ -26,7 +26,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp>
 concept __dereferenceable = requires(_Tp& __t) {
@@ -371,6 +371,6 @@ using iter_value_t =
                            std::indirectly_readable_traits<std::remove_cvref_t<_Ip> >,
                            std::iterator_traits<std::remove_cvref_t<_Ip> > >::value_type;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_ITERATOR_ITERATOR_TRAITS_HPP

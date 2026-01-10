@@ -20,7 +20,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <std::ranges::input_range _Range>
 using __range_key_type MSTD_NODEBUG = std::remove_const_t<typename std::ranges::range_value_t<_Range>::first_type>;
@@ -32,6 +32,6 @@ template <std::ranges::input_range _Range>
 using __range_to_alloc_type MSTD_NODEBUG =
     std::pair<const typename std::ranges::range_value_t<_Range>::first_type, typename std::ranges::range_value_t<_Range>::second_type>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_ITERATOR_RANGES_ITERATOR_TRAITS_HPP

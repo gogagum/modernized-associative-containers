@@ -17,7 +17,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp, class = void>
 inline const bool __is_referenceable_v = false;
@@ -28,6 +28,6 @@ inline const bool __is_referenceable_v<_Tp, std::void_t<_Tp&> > = true;
 template <class _Tp>
 concept __referenceable = __is_referenceable_v<_Tp>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_IS_REFERENCEABLE_HPP

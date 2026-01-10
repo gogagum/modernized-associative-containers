@@ -17,11 +17,11 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp>
 using __remove_const_ref_t MSTD_NODEBUG = std::remove_const_t<std::remove_reference_t<_Tp> >;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_REMOVE_CONST_REF_HPP

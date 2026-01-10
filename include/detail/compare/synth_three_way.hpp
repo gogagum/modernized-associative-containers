@@ -20,7 +20,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // [expos.only.func]
 
@@ -45,6 +45,6 @@ template <class _Tp, class _Up = _Tp>
 using __synth_three_way_result MSTD_NODEBUG =
     decltype(mstd::__synth_three_way(std::declval<_Tp&>(), std::declval<_Up&>()));
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_COMPARE_SYNTH_THREE_WAY_HPP

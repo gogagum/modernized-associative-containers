@@ -28,7 +28,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp, template <class...> class _Template>
 inline const bool __is_specialization_v = false; // true if and only if _Tp is a specialization of _Template
@@ -36,6 +36,6 @@ inline const bool __is_specialization_v = false; // true if and only if _Tp is a
 template <template <class...> class _Template, class... _Args>
 inline const bool __is_specialization_v<_Template<_Args...>, _Template> = true;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD___TYPE_TRAITS_IS_SPECIALIZATION

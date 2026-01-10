@@ -19,7 +19,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class...>
 std::false_type __and_helper(...);
@@ -32,6 +32,6 @@ std::false_type __and_helper(...);
 template <class... _Pred>
 using _And MSTD_NODEBUG = decltype(mstd::__and_helper<_Pred...>(0));
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_CONJUNCTION_HPP

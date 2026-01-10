@@ -18,7 +18,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Alloc, class = void, class = void>
 inline const bool __is_allocator_v = false;
@@ -28,6 +28,6 @@ inline const bool __is_allocator_v<_Alloc,
                                    std::void_t<typename _Alloc::value_type>,
                                    std::void_t<decltype(std::declval<_Alloc&>().allocate(size_t()))> > = true;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_IS_ALLOCATOR_HPP

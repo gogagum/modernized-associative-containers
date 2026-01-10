@@ -16,7 +16,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // This struct can be specialized to provide a three way comparator between _LHS and _RHS.
 // The return value should be
@@ -64,6 +64,6 @@ template <class _LHS, class _RHS>
 struct __has_default_three_way_comparator<_LHS, _RHS, sizeof(__default_three_way_comparator<_LHS, _RHS>) >= 0>
     : std::true_type {};
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_UTILITY_DEFAULT_THREE_WAY_COMPARATOR_HPP

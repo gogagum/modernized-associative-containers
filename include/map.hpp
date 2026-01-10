@@ -610,7 +610,7 @@ erase_if(multimap<Key, T, Compare, Allocator>& c, Predicate pred);  // C++20
 MSTD_PUSH_MACROS
 #  include <detail/undef_macros.hpp>
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Key, class _CP, class _Compare>
 class __map_value_compare {
@@ -1917,9 +1917,9 @@ struct __container_traits<multimap<_Key, _Tp, _Compare, _Allocator> > {
     static constexpr const bool __reservable = false;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 namespace pmr {
     template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
     using map MSTD_AVAILABILITY_PMR =
@@ -1928,7 +1928,7 @@ namespace pmr {
     using multimap MSTD_AVAILABILITY_PMR =
     mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
 } // namespace pmr
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

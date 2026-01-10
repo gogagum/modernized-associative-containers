@@ -17,7 +17,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // // __container_traits is a general purpose utility containing traits describing various containers operations.
 // It currently only has one trait: `__emplacement_has_strong_exception_safety_guarantee`, but it's
@@ -42,6 +42,6 @@ struct __container_traits {
   static constexpr const bool __reservable = false;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_CONTAINER_TRAITS_HPP

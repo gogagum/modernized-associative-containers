@@ -73,7 +73,7 @@ public:
 MSTD_PUSH_MACROS
 #include <detail/undef_macros.hpp>
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // Specialized in __tree & __hash_table for their _NodeType.
 template <class _NodeType, class _Alloc>
@@ -200,7 +200,7 @@ struct __insert_return_type {
   _NodeType node;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

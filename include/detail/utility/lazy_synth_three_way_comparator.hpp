@@ -26,7 +26,7 @@
 //    can be specialized to implement a three way comparator for the specific types.
 // 2) Fall back to doing a lazy less than/greater than comparison
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Comparator, class _LHS, class _RHS>
 struct __lazy_compare_result {
@@ -103,6 +103,6 @@ struct __lazy_synth_three_way_comparator<_Comparator,
   }
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_UTILITY_LAZY_SYNTH_THREE_WAY_COMPARATOR_HPP

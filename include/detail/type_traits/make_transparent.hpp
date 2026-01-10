@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // __make_transparent tries to create a transparent comparator from its non-transparent counterpart, e.g. obtain
 // `less<>` from `less<T>`. This is useful in cases where conversions can be avoided (e.g. a string literal to a
@@ -40,6 +40,6 @@ MSTD_HIDE_FROM_ABI __make_transparent_t<_Comparator> __as_transparent(_Comparato
   return __make_transparent_t<_Comparator>();
 }
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_MAKE_TRANSPARENT_HPP

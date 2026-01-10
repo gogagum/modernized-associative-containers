@@ -18,7 +18,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp, class _Key = void, class = void>
 inline const bool __is_transparent_v = false;
@@ -34,6 +34,6 @@ inline const bool __is_transparent_v<_Tp, _Key, std::void_t<typename _Tp::is_tra
 template <class _Comparator, class _KeyT, class _Arg, class = void>
 inline const bool __is_transparently_comparable_v = false;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_FUNCTIONAL_IS_TRANSPARENT_HPP

@@ -547,7 +547,7 @@ erase_if(multiset<Key, Compare, Allocator>& c, Predicate pred);  // C++20
 MSTD_PUSH_MACROS
 #  include <detail/undef_macros.hpp>
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >
 class multiset;
@@ -1346,9 +1346,9 @@ struct __container_traits<multiset<_Key, _Compare, _Allocator> > {
     static constexpr const bool __reservable = false;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 namespace pmr {
     template <class _KeyT, class _CompareT = std::less<_KeyT>>
     using set MSTD_AVAILABILITY_PMR = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
@@ -1356,7 +1356,7 @@ namespace pmr {
     template <class _KeyT, class _CompareT = std::less<_KeyT>>
     using multiset MSTD_AVAILABILITY_PMR = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 } // namespace pmr
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 
