@@ -19,7 +19,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // ================================================================================================================== //
 // The utilities here are for staying ABI compatible with the legacy `__compressed_pair`. They should not be used      //
@@ -136,6 +136,6 @@ class __compressed_pair_padding<_ToPad, true> {};
     MSTD_NO_UNIQUE_ADDRESS T3 Name3
 #endif // MSTD_ABI_NO_COMPRESSED_PAIR_PADDING
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_MEMORY_COMPRESSED_PAIR_HPP

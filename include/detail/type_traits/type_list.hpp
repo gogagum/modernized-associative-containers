@@ -16,7 +16,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class... _Types>
 struct __type_list {};
@@ -42,6 +42,6 @@ struct __find_first<__type_list<_Head, _Tail...>, _Size, false> {
   using type MSTD_NODEBUG = typename __find_first<__type_list<_Tail...>, _Size>::type;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_TYPE_LIST_HPP

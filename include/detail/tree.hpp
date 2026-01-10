@@ -68,7 +68,7 @@ MSTD_DIAGNOSTIC_PUSH
 // __tree_next_iter and __tree_prev_iter for more details.
 MSTD_DIAGNOSTIC_POP
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Pointer>
 class __tree_end_node;
@@ -2258,7 +2258,7 @@ noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

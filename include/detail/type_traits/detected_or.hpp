@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Default, class _Void, template <class...> class _Op, class... _Args>
 struct __detector {
@@ -30,6 +30,6 @@ struct __detector<_Default, std::void_t<_Op<_Args...> >, _Op, _Args...> {
 template <class _Default, template <class...> class _Op, class... _Args>
 using __detected_or_t MSTD_NODEBUG = typename __detector<_Default, void, _Op, _Args...>::type;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_DETECTED_OR_HPP

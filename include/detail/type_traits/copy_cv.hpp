@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // Let COPYCV(FROM, TO) be an alias for type TO with the addition of FROM's
 // top-level cv-qualifiers.
@@ -46,6 +46,6 @@ struct __copy_cv<const volatile _From> {
 template <class _From, class _To>
 using __copy_cv_t MSTD_NODEBUG = typename __copy_cv<_From>::template __apply<_To>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_COPY_CV_HPP

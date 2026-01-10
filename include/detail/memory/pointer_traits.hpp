@@ -28,12 +28,12 @@
 MSTD_PUSH_MACROS
 #include "detail/undef_macros.hpp"
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _From, class _To>
 using __rebind_pointer_t MSTD_NODEBUG = typename std::pointer_traits<_From>::template rebind<_To>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

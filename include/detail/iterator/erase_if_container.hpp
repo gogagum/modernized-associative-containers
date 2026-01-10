@@ -19,7 +19,7 @@
 MSTD_PUSH_MACROS
 #include <detail/undef_macros.hpp>
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Container, class _Predicate>
 MSTD_HIDE_FROM_ABI typename _Container::size_type _MSTD_erase_if_container(_Container& __c, _Predicate& __pred) {
@@ -36,7 +36,7 @@ MSTD_HIDE_FROM_ABI typename _Container::size_type _MSTD_erase_if_container(_Cont
   return __old_size - __c.size();
 }
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

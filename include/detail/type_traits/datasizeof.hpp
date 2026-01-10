@@ -22,7 +22,7 @@
 // have unintended side effects, such as overwriting a derived class' member when writing the tail padding of a class
 // through a pointer-to-base.
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp>
 struct _FirstPaddingByte {
@@ -38,6 +38,6 @@ template <class _Tp>
 inline const size_t __datasizeof_v = __builtin_offsetof(_FirstPaddingByte<_Tp>, __first_padding_byte_);
 MSTD_DIAGNOSTIC_POP
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_DATASIZEOF_HPP

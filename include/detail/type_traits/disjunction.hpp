@@ -16,7 +16,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <bool>
 struct _OrImpl;
@@ -43,6 +43,6 @@ struct _OrImpl<false> {
 template <class... _Args>
 using _Or MSTD_NODEBUG = typename _OrImpl<sizeof...(_Args) != 0>::template _Result<std::false_type, _Args...>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD___TYPE_TRAITS_DISJUNCTION_H

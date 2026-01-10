@@ -18,13 +18,13 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Range, class _Tp>
 concept _ContainerCompatibleRange =
     std::ranges::input_range<_Range> && std::convertible_to<std::ranges::range_reference_t<_Range>, _Tp>;
 
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_RANGES_CONTAINER_COMPATIBLE_RANGE_HPP

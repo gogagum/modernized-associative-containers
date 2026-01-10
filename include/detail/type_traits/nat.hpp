@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 struct __nat {
   __nat()                        = delete;
@@ -24,6 +24,6 @@ struct __nat {
   ~__nat()                       = delete;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_NAT_HPP

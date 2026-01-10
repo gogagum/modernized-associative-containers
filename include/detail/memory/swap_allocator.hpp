@@ -17,7 +17,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <typename _Alloc>
 MSTD_HIDE_FROM_ABI constexpr void __swap_allocator(_Alloc& __a1, _Alloc& __a2, std::true_type) noexcept
@@ -36,6 +36,6 @@ inline MSTD_HIDE_FROM_ABI constexpr void __swap_allocator(_Alloc& __a1, _Alloc& 
       __a1, __a2, std::integral_constant<bool, std::allocator_traits<_Alloc>::propagate_on_container_swap::value>());
 }
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_MEMORY_SWAP_ALLOCATOR_HPP

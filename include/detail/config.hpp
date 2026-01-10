@@ -194,20 +194,6 @@
 #    define MSTD_HIDE_FROM_ABI MSTD_HIDDEN MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION
 #  endif
 
-// The unversioned namespace is used when we want to be ABI compatible with other standard libraries in some way. There
-// are two main categories where that's the case:
-// - Historically, we have made exception types ABI compatible with libstdc++ to allow throwing them between libstdc++
-//   and libc++. This is not used anymore for new exception types, since there is no use-case for it anymore.
-// - Types and functions which are used by the compiler are in the unversioned namespace, since the compiler has to know
-//   their mangling without the appropriate declaration in some cases.
-// If it's not clear whether using the unversioned namespace is the correct thing to do, it's not. The versioned
-// namespace (MSTD_BEGIN_NAMESPACE_STD) should almost always be used.
-#  define MSTD_BEGIN_UNVERSIONED_NAMESPACE_STD namespace MSTD_NAMESPACE_VISIBILITY mstd {
-#  define MSTD_END_UNVERSIONED_NAMESPACE_STD }
-
-#  define MSTD_BEGIN_NAMESPACE_STD MSTD_BEGIN_UNVERSIONED_NAMESPACE_STD inline namespace {
-#  define MSTD_END_NAMESPACE } MSTD_END_UNVERSIONED_NAMESPACE_STD
-
 // clang-format off
 #  define MSTD_PUSH_MACROS _Pragma("push_macro(\"min\")") _Pragma("push_macro(\"max\")") _Pragma("push_macro(\"refresh\")") _Pragma("push_macro(\"move\")") _Pragma("push_macro(\"erase\")")
 #  define MSTD_POP_MACROS _Pragma("pop_macro(\"min\")") _Pragma("pop_macro(\"max\")") _Pragma("pop_macro(\"refresh\")") _Pragma("pop_macro(\"move\")") _Pragma("pop_macro(\"erase\")")

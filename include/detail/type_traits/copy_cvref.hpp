@@ -16,7 +16,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _From>
 struct __copy_cvref {
@@ -39,6 +39,6 @@ struct __copy_cvref<_From&&> {
 template <class _From, class _To>
 using __copy_cvref_t MSTD_NODEBUG = typename __copy_cvref<_From>::template __apply<_To>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_COPY_CVREF_HPP

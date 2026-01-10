@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // Tags to represent the canonical operations.
 
@@ -67,6 +67,6 @@ inline const bool __desugars_to_v<_CanonicalTag, _Operation&&, _Args...> =
 template <class _CanonicalTag, class _Operation, class... _Args>
 struct __desugars_to : std::integral_constant<bool, __desugars_to_v<_CanonicalTag, _Operation, _Args...> > {};
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_DESUGARS_TO_HPP

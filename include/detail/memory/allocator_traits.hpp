@@ -24,7 +24,7 @@
 MSTD_PUSH_MACROS
 #include <detail/undef_macros.hpp>
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 // __pointer
 template <class _Tp>
@@ -324,7 +324,7 @@ inline const bool __is_cpp17_copy_insertable_v =
      (!__is_std_allocator_v<_Alloc> &&
       __has_construct_v<_Alloc, typename _Alloc::value_type*, const typename _Alloc::value_type&>));
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 MSTD_POP_MACROS
 

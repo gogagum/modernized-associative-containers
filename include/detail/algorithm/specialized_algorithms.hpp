@@ -15,7 +15,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 namespace _Algorithm {
 struct __copy {};
@@ -49,6 +49,6 @@ struct __specialized_algorithm {
   static const bool __has_algorithm = false;
 };
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_ALGORITHM_SPECIALIZED_ALGORITHMS_HPP

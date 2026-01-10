@@ -19,7 +19,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Type>
 inline const bool __is_pair_v = false;
@@ -113,6 +113,6 @@ __try_key_extraction(_WithKey __with_key, _WithoutKey __without_key, _Args&&... 
       __priority_tag<1>(), __with_key, __without_key, std::forward<_Args>(__args)...);
 }
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_UTILITY_TRY_EXTRACT_KEY_HPP

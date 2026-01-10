@@ -17,7 +17,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <class _Tp>
 using __test_for_primary_template MSTD_NODEBUG =
@@ -26,6 +26,6 @@ using __test_for_primary_template MSTD_NODEBUG =
 template <class _Tp>
 using __is_primary_template MSTD_NODEBUG = _IsValidExpansion<__test_for_primary_template, _Tp>;
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_IS_PRIMARY_TEMPLATE_HPP

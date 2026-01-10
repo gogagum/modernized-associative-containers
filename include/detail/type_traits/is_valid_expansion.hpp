@@ -16,7 +16,7 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <template <class...> class _Templ, class... _Args, class = _Templ<_Args...> >
 std::true_type __sfinae_test_impl(int);
@@ -26,6 +26,6 @@ std::false_type __sfinae_test_impl(...);
 template <template <class...> class _Templ, class... _Args>
 using _IsValidExpansion MSTD_NODEBUG = decltype(mstd::__sfinae_test_impl<_Templ, _Args...>(0));
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_TYPE_TRAITS_IS_VALID_EXPANSION_HPP

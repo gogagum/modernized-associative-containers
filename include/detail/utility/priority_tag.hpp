@@ -16,13 +16,13 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_BEGIN_NAMESPACE_STD
+namespace mstd {
 
 template <size_t _Ip>
 struct __priority_tag : __priority_tag<_Ip - 1> {};
 template <>
 struct __priority_tag<0> {};
 
-MSTD_END_NAMESPACE
+} // namespace mstd
 
 #endif // MSTD_UTILITY_PRIORITY_TAG_HPP
