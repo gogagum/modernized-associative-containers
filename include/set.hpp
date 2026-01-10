@@ -544,8 +544,6 @@ erase_if(multiset<Key, Compare, Allocator>& c, Predicate pred);  // C++20
 #    pragma GCC system_header
 #  endif
 
-MSTD_PUSH_MACROS
-#  include <detail/undef_macros.hpp>
 
 namespace mstd {
 
@@ -1358,6 +1356,5 @@ namespace pmr {
 } // namespace pmr
 } // namespace mstd
 
-MSTD_POP_MACROS
 
 #endif // MSTD_SET

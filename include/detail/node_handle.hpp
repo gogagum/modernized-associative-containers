@@ -70,8 +70,6 @@ public:
 #  pragma GCC system_header
 #endif
 
-MSTD_PUSH_MACROS
-#include <detail/undef_macros.hpp>
 
 namespace mstd {
 
@@ -202,6 +200,5 @@ struct __insert_return_type {
 
 } // namespace mstd
 
-MSTD_POP_MACROS
 
 #endif // MSTD___NODE_HANDLE

@@ -26,17 +26,14 @@ namespace mstd {
 
 template <class _Tp>
 struct _FirstPaddingByte {
-  MSTD_NO_UNIQUE_ADDRESS _Tp __v_;
+  [[no_unique_address]] _Tp __v_;
   char __first_padding_byte_;
 };
 
 // _FirstPaddingByte<> is sometimes non-standard layout.
 // It is conditionally-supported to use __builtin_offsetof in that case, but GCC and Clang allow it.
-MSTD_DIAGNOSTIC_PUSH
-MSTD_CLANG_DIAGNOSTIC_IGNORED("-Winvalid-offsetof")
 template <class _Tp>
 inline const size_t __datasizeof_v = __builtin_offsetof(_FirstPaddingByte<_Tp>, __first_padding_byte_);
-MSTD_DIAGNOSTIC_POP
 
 } // namespace mstd
 
