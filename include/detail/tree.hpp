@@ -37,12 +37,9 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_PUSH_MACROS
-#include "detail/undef_macros.hpp"
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
 
-MSTD_DIAGNOSTIC_PUSH
 // GCC complains about the backslashes at the end, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121528
 // __tree is a red-black-tree implementation used for the associative containers (i.e. (multi)map/set). It stores
 // - (1) a pointer to the node with the smallest (i.e. leftmost) element, namely __begin_node_
@@ -66,7 +63,6 @@ MSTD_DIAGNOSTIC_PUSH
 // __end_node_ only contains a __left_ pointer, which points to the root of the tree.
 // This layout allows for iteration through the tree without a need for special handling of the end node. See
 // __tree_next_iter and __tree_prev_iter for more details.
-MSTD_DIAGNOSTIC_POP
 
 namespace mstd {
 
@@ -2260,6 +2256,5 @@ noexcept(noexcept(__x.swap(__y))) {
 
 } // namespace mstd
 
-MSTD_POP_MACROS
 
 #endif // MSTD___TREE

@@ -24,31 +24,11 @@
 
 // The attributes supported by clang are documented at https://clang.llvm.org/docs/AttributeReference.html
 
-// MSTD_VERSION represents the version of libc++, which matches the version of LLVM.
-// Given a LLVM release LLVM XX.YY.ZZ (e.g. LLVM 17.0.1 == 17.00.01), MSTD_VERSION is
-// defined to XXYYZZ.
-#  define MSTD_VERSION 220000
-
 #  define MSTD_CONCAT_IMPL(_X, _Y) _X##_Y
 #  define MSTD_CONCAT(_X, _Y) MSTD_CONCAT_IMPL(_X, _Y)
 #  define MSTD_CONCAT3(X, Y, Z) MSTD_CONCAT(X, MSTD_CONCAT(Y, Z))
-
-#  if __STDC_HOSTED__ == 0
-#    define MSTD_FREESTANDING
-#  endif
-
 #  define MSTD_TOSTRING2(x) #x
 #  define MSTD_TOSTRING(x) MSTD_TOSTRING2(x)
-
-// '__is_identifier' returns '0' if '__x' is a reserved identifier provided by
-// the compiler and '1' otherwise.
-#  ifndef __is_identifier
-#    define __is_identifier(__x) 1
-#  endif
-
-#  if defined(__MVS__)
-#    include <features.h> // for __NATIVE_ASCII_F
-#  endif
 
 #  if defined(MSTD_OBJECT_FORMAT_COFF)
 #    if defined(MSTD_BUILDING_LIBRARY)
@@ -94,25 +74,6 @@
 #    define MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION __attribute__((__always_inline__))
 #  endif
 
-#  ifdef MSTD_COMPILER_CLANG_BASED
-#    define MSTD_DIAGNOSTIC_PUSH _Pragma("clang diagnostic push")
-#    define MSTD_DIAGNOSTIC_POP _Pragma("clang diagnostic pop")
-#    define MSTD_CLANG_DIAGNOSTIC_IGNORED(str) _Pragma(MSTD_TOSTRING(clang diagnostic ignored str))
-#  elif defined(MSTD_COMPILER_GCC)
-#    define MSTD_DIAGNOSTIC_PUSH _Pragma("GCC diagnostic push")
-#    define MSTD_DIAGNOSTIC_POP _Pragma("GCC diagnostic pop")
-#    define MSTD_CLANG_DIAGNOSTIC_IGNORED(str)
-#  else
-#    define MSTD_DIAGNOSTIC_PUSH
-#    define MSTD_DIAGNOSTIC_POP
-#    define MSTD_CLANG_DIAGNOSTIC_IGNORED(str)
-#  endif
-
-// Macros to enter and leave a state where deprecation warnings are suppressed.
-#  define MSTD_SUPPRESS_DEPRECATED_PUSH                                                                             \
-    MSTD_DIAGNOSTIC_PUSH MSTD_CLANG_DIAGNOSTIC_IGNORED("-Wdeprecated")                                           \
-#  define MSTD_SUPPRESS_DEPRECATED_POP MSTD_DIAGNOSTIC_POP
-
 #  if MSTD_HARDENING_MODE == MSTD_HARDENING_MODE_FAST
 #    define MSTD_HARDENING_SIG f
 #  elif MSTD_HARDENING_MODE == MSTD_HARDENING_MODE_EXTENSIVE
@@ -141,8 +102,7 @@
 
 #  define MSTD_ODR_SIGNATURE                                                                                        \
     MSTD_CONCAT(                                                                                                    \
-        MSTD_CONCAT(MSTD_CONCAT(MSTD_HARDENING_SIG, MSTD_ASSERTION_SEMANTIC_SIG), MSTD_EXCEPTIONS_SIG), \
-        MSTD_VERSION)
+        MSTD_CONCAT(MSTD_HARDENING_SIG, MSTD_ASSERTION_SEMANTIC_SIG), MSTD_EXCEPTIONS_SIG)
 
 // This macro marks a symbol as being hidden from libc++'s ABI. This is achieved
 // on two levels:
@@ -194,11 +154,6 @@
 #    define MSTD_HIDE_FROM_ABI MSTD_HIDDEN MSTD_EXCLUDE_FROM_EXPLICIT_INSTANTIATION
 #  endif
 
-// clang-format off
-#  define MSTD_PUSH_MACROS _Pragma("push_macro(\"min\")") _Pragma("push_macro(\"max\")") _Pragma("push_macro(\"refresh\")") _Pragma("push_macro(\"move\")") _Pragma("push_macro(\"erase\")")
-#  define MSTD_POP_MACROS _Pragma("pop_macro(\"min\")") _Pragma("pop_macro(\"max\")") _Pragma("pop_macro(\"refresh\")") _Pragma("pop_macro(\"move\")") _Pragma("pop_macro(\"erase\")")
-// clang-format on
-
 #  ifndef MSTD_NO_AUTO_LINK
 #    if defined(MSTD_ABI_MICROSOFT) && !defined(MSTD_BUILDING_LIBRARY)
 #      if !defined(MSTD_DISABLE_VISIBILITY_ANNOTATIONS)
@@ -208,17 +163,6 @@
 #      endif
 #    endif // defined(MSTD_ABI_MICROSOFT) && !defined(MSTD_BUILDING_LIBRARY)
 #  endif   // MSTD_NO_AUTO_LINK
-
-
-#  if __has_cpp_attribute(msvc::no_unique_address)
-// MSVC implements [[no_unique_address]] as a silent no-op currently.
-// (If/when MSVC breaks its C++ ABI, it will be changed to work as intended.)
-// However, MSVC implements [[msvc::no_unique_address]] which does what
-// [[no_unique_address]] is supposed to do, in general.
-#    define MSTD_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
-#  else
-#    define MSTD_NO_UNIQUE_ADDRESS [[__no_unique_address__]]
-#  endif
 
 // There are a handful of public standard library types that are intended to
 // support CTAD but don't need any explicit deduction guides to do so. This

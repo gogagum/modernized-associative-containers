@@ -16,8 +16,6 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_PUSH_MACROS
-#include <detail/undef_macros.hpp>
 
 namespace mstd {
 
@@ -38,6 +36,5 @@ MSTD_HIDE_FROM_ABI typename _Container::size_type _MSTD_erase_if_container(_Cont
 
 } // namespace mstd
 
-MSTD_POP_MACROS
 
 #endif // MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP

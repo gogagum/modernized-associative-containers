@@ -25,16 +25,11 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_PUSH_MACROS
-#include "detail/undef_macros.hpp"
-
 namespace mstd {
 
 template <class _From, class _To>
 using __rebind_pointer_t MSTD_NODEBUG = typename std::pointer_traits<_From>::template rebind<_To>;
 
 } // namespace mstd
-
-MSTD_POP_MACROS
 
 #endif // MSTD_MEMORY_POINTER_TRAITS_HPP

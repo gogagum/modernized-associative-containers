@@ -23,7 +23,7 @@ namespace mstd {
 
 // ================================================================================================================== //
 // The utilities here are for staying ABI compatible with the legacy `__compressed_pair`. They should not be used      //
-// for new data structures. Use `MSTD_NO_UNIQUE_ADDRESS` for new data structures instead (but make sure you        //
+// for new data structures. Use `[[no_unique_address]]` for new data structures instead (but make sure you        //
 // understand how it works).                                                                                          //
 // ================================================================================================================== //
 
@@ -83,57 +83,57 @@ template <class _ToPad>
 class __compressed_pair_padding<_ToPad, true> {};
 
 #  define MSTD_COMPRESSED_ELEMENT(T1, Initializer1)                                                                 \
-    MSTD_NO_UNIQUE_ADDRESS T1 Initializer1;                                                                         \
-    MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding_, __LINE__, _)
+    [[no_unique_address]] T1 Initializer1;                                                                         \
+    [[no_unique_address]] ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding_, __LINE__, _)
 
 // TODO: Fix the ABI for GCC as well once https://gcc.gnu.org/bugzilla/show_bug.cgi?id=121637 is fixed
 #  ifdef MSTD_COMPILER_GCC
 #    define MSTD_COMPRESSED_PAIR(T1, Initializer1, T2, Initializer2)                                                \
-      MSTD_NO_UNIQUE_ADDRESS __attribute__((__aligned__(::mstd::__compressed_pair_alignment<T2>))) T1 Initializer1;  \
-      MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);        \
-      MSTD_NO_UNIQUE_ADDRESS T2 Initializer2;                                                                       \
-      MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _)
+      [[no_unique_address]] __attribute__((__aligned__(::mstd::__compressed_pair_alignment<T2>))) T1 Initializer1;  \
+      [[no_unique_address]] ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);        \
+      [[no_unique_address]] T2 Initializer2;                                                                       \
+      [[no_unique_address]] ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _)
 
 #    define MSTD_COMPRESSED_TRIPLE(T1, Initializer1, T2, Initializer2, T3, Initializer3)                            \
-      MSTD_NO_UNIQUE_ADDRESS                                                                                        \
+      [[no_unique_address]]                                                                                        \
       __attribute__((__aligned__(::mstd::__compressed_pair_alignment<T2>),                                              \
                      __aligned__(::mstd::__compressed_pair_alignment<T3>))) T1 Initializer1;                            \
-      MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);        \
-      MSTD_NO_UNIQUE_ADDRESS T2 Initializer2;                                                                       \
-      MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);        \
-      MSTD_NO_UNIQUE_ADDRESS T3 Initializer3;                                                                       \
-      MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T3> MSTD_CONCAT3(__padding3_, __LINE__, _)
+      [[no_unique_address]] ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);        \
+      [[no_unique_address]] T2 Initializer2;                                                                       \
+      [[no_unique_address]] ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);        \
+      [[no_unique_address]] T3 Initializer3;                                                                       \
+      [[no_unique_address]] ::mstd::__compressed_pair_padding<T3> MSTD_CONCAT3(__padding3_, __LINE__, _)
 #  else
 #    define MSTD_COMPRESSED_PAIR(T1, Initializer1, T2, Initializer2)                                                \
       struct {                                                                                                         \
-        MSTD_NO_UNIQUE_ADDRESS T1 Initializer1;                                                                     \
-        MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);      \
-        MSTD_NO_UNIQUE_ADDRESS T2 Initializer2;                                                                     \
-        MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);      \
+        [[no_unique_address]] T1 Initializer1;                                                                     \
+        [[no_unique_address]] ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);      \
+        [[no_unique_address]] T2 Initializer2;                                                                     \
+        [[no_unique_address]] ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);      \
       }
 
 #    define MSTD_COMPRESSED_TRIPLE(T1, Initializer1, T2, Initializer2, T3, Initializer3)                            \
       struct {                                                                                                         \
-        MSTD_NO_UNIQUE_ADDRESS T1 Initializer1;                                                                     \
-        MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);      \
-        MSTD_NO_UNIQUE_ADDRESS T2 Initializer2;                                                                     \
-        MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);      \
-        MSTD_NO_UNIQUE_ADDRESS T3 Initializer3;                                                                     \
-        MSTD_NO_UNIQUE_ADDRESS ::mstd::__compressed_pair_padding<T3> MSTD_CONCAT3(__padding3_, __LINE__, _);      \
+        [[no_unique_address]] T1 Initializer1;                                                                     \
+        [[no_unique_address]] ::mstd::__compressed_pair_padding<T1> MSTD_CONCAT3(__padding1_, __LINE__, _);      \
+        [[no_unique_address]] T2 Initializer2;                                                                     \
+        [[no_unique_address]] ::mstd::__compressed_pair_padding<T2> MSTD_CONCAT3(__padding2_, __LINE__, _);      \
+        [[no_unique_address]] T3 Initializer3;                                                                     \
+        [[no_unique_address]] ::mstd::__compressed_pair_padding<T3> MSTD_CONCAT3(__padding3_, __LINE__, _);      \
       }
 #  endif
 
 #else
-#  define MSTD_COMPRESSED_ELEMENT(T1, Initializer1) MSTD_NO_UNIQUE_ADDRESS T1 Initializer1
+#  define MSTD_COMPRESSED_ELEMENT(T1, Initializer1) [[no_unique_address]] T1 Initializer1
 
 #  define MSTD_COMPRESSED_PAIR(T1, Name1, T2, Name2)                                                                \
-    MSTD_NO_UNIQUE_ADDRESS T1 Name1;                                                                                \
-    MSTD_NO_UNIQUE_ADDRESS T2 Name2
+    [[no_unique_address]] T1 Name1;                                                                                \
+    [[no_unique_address]] T2 Name2
 
 #  define MSTD_COMPRESSED_TRIPLE(T1, Name1, T2, Name2, T3, Name3)                                                   \
-    MSTD_NO_UNIQUE_ADDRESS T1 Name1;                                                                                \
-    MSTD_NO_UNIQUE_ADDRESS T2 Name2;                                                                                \
-    MSTD_NO_UNIQUE_ADDRESS T3 Name3
+    [[no_unique_address]] T1 Name1;                                                                                \
+    [[no_unique_address]] T2 Name2;                                                                                \
+    [[no_unique_address]] T3 Name3
 #endif // MSTD_ABI_NO_COMPRESSED_PAIR_PADDING
 
 } // namespace mstd

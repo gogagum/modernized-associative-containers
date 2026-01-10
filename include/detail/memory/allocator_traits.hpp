@@ -21,8 +21,6 @@
 #  pragma GCC system_header
 #endif
 
-MSTD_PUSH_MACROS
-#include <detail/undef_macros.hpp>
 
 namespace mstd {
 
@@ -326,6 +324,5 @@ inline const bool __is_cpp17_copy_insertable_v =
 
 } // namespace mstd
 
-MSTD_POP_MACROS
 
 #endif // MSTD_MEMORY_ALLOCATOR_TRAITS_HPP
