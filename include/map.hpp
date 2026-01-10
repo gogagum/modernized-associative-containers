@@ -603,11 +603,6 @@ erase_if(multimap<Key, T, Compare, Allocator>& c, Predicate pred);  // C++20
 #  include <compare>
 #  include <initializer_list>
 
-#  if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#    pragma GCC system_header
-#  endif
-
-
 namespace mstd {
 
 template <class _Key, class _CP, class _Compare>

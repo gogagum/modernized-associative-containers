@@ -10,10 +10,6 @@
 #ifndef MSTD_CONFIGURATION_PLATFORM_HPP
 #define MSTD_CONFIGURATION_PLATFORM_HPP
 
-#ifndef MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER
-#  pragma GCC system_header
-#endif
-
 #if defined(__ELF__)
 #  define MSTD_OBJECT_FORMAT_ELF 1
 #elif defined(__MACH__)

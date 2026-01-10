@@ -13,10 +13,6 @@
 #include "compiler.hpp"
 #include "language.hpp"
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 // This file defines a framework that can be used by vendors to encode the version of an operating system that various
 // features of libc++ has been shipped in. This is primarily intended to allow safely deploying an executable built with
 // a new version of the library on a platform containing an older version of the built library.

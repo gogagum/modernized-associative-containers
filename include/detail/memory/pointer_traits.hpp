@@ -21,10 +21,6 @@
 #include "detail/type_traits/detected_or.hpp"
 #include "detail/type_traits/conjunction.hpp"
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _From, class _To>

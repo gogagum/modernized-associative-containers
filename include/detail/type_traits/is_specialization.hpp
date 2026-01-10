@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MSTD___TYPE_TRAITS_IS_SPECIALIZATION
-#define MSTD___TYPE_TRAITS_IS_SPECIALIZATION
+#ifndef MSTD_TYPE_TRAITS_IS_SPECIALIZATION
+#define MSTD_TYPE_TRAITS_IS_SPECIALIZATION
 
 // This contains parts of P2098R1 but is based on MSVC STL's implementation.
 //
@@ -24,10 +24,6 @@
 
 #include "detail/config.hpp"
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _Tp, template <class...> class _Template>
@@ -38,4 +34,4 @@ inline const bool __is_specialization_v<_Template<_Args...>, _Template> = true;
 
 } // namespace mstd
 
-#endif // MSTD___TYPE_TRAITS_IS_SPECIALIZATION
+#endif // MSTD_TYPE_TRAITS_IS_SPECIALIZATION

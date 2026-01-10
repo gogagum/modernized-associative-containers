@@ -10,10 +10,6 @@
 #ifndef MSTD_CONFIGURATION_LANGUAGE_HPP
 #define MSTD_CONFIGURATION_LANGUAGE_HPP
 
-#ifndef MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER
-#  pragma GCC system_header
-#endif
-
 // NOLINTBEGIN(libcpp-cpp-version-check)
 #ifdef __cplusplus
 #  if __cplusplus < 201103L

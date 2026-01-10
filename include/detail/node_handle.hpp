@@ -66,11 +66,6 @@ public:
 #include <detail/memory/allocator_traits.hpp>
 #include <optional>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
-
 namespace mstd {
 
 // Specialized in __tree & __hash_table for their _NodeType.

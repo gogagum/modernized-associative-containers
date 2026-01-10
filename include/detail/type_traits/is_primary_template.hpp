@@ -13,10 +13,6 @@
 #include <type_traits>
 #include "is_valid_expansion.hpp"
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 namespace mstd {
 
 template <class _Tp>

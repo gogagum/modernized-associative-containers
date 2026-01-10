@@ -16,10 +16,6 @@
 #include "configuration/language.hpp"
 #include "configuration/platform.hpp"
 
-#ifndef MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER
-#  pragma GCC system_header
-#endif
-
 #ifdef __cplusplus
 
 // The attributes supported by clang are documented at https://clang.llvm.org/docs/AttributeReference.html

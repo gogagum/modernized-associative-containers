@@ -33,10 +33,6 @@
 #include <detail/memory/swap_allocator.hpp>
 #include <detail/utility/lazy_synth_three_way_comparator.hpp>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
 

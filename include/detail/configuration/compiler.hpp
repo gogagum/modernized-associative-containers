@@ -10,10 +10,6 @@
 #ifndef MSTD_CONFIGURATION_COMPILER_HPP
 #define MSTD_CONFIGURATION_COMPILER_HPP
 
-#ifndef MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER
-#  pragma GCC system_header
-#endif
-
 #if defined(__apple_build_version__)
 // Given AppleClang XX.Y.Z, MSTD_APPLE_CLANG_VER is XXYZ (e.g. AppleClang 14.0.3 => 1403)
 #  define MSTD_COMPILER_CLANG_BASED

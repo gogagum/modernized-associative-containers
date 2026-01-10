@@ -17,11 +17,6 @@
 #include <utility>
 #include <limits>
 
-#if !defined(MSTD_HAS_NO_PRAGMA_SYSTEM_HEADER)
-#  pragma GCC system_header
-#endif
-
-
 namespace mstd {
 
 // __pointer
