@@ -561,12 +561,12 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    typedef __tree<value_type, value_compare, allocator_type> __base;
+    typedef Tree<value_type, value_compare, allocator_type> __base;
     typedef std::allocator_traits<allocator_type> __alloc_traits;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
 
-    __base __tree_;
+    __base tree_;
 
 public:
     typedef typename __base::pointer pointer;
@@ -589,22 +589,22 @@ public:
     set() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
-    : __tree_(value_compare()) {}
+    : tree_(value_compare()) {}
 
     explicit set(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
-    : __tree_(__comp) {}
+    : tree_(__comp) {}
 
-    explicit set(const value_compare& __comp, const allocator_type& __a) : __tree_(__comp, __a) {}
+    explicit set(const value_compare& __comp, const allocator_type& __a) : tree_(__comp, __a) {}
     template <class _InputIterator>
     set(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
-    : __tree_(__comp) {
+    : tree_(__comp) {
         insert(__f, __l);
     }
 
     template <class _InputIterator>
     set(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert(__f, __l);
     }
 
@@ -613,7 +613,7 @@ public:
         _Range&& __range,
         const key_compare& __comp = key_compare(),
         const allocator_type& __a = allocator_type())
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert_range(std::forward<_Range>(__range));
     }
     
@@ -631,19 +631,19 @@ public:
 
     set(set&& __s) = default;
 
-    explicit set(const allocator_type& __a) : __tree_(__a) {}
+    explicit set(const allocator_type& __a) : tree_(__a) {}
 
-    set(const set& __s, const allocator_type& __alloc) : __tree_(__s.__tree_, __alloc) {}
+    set(const set& __s, const allocator_type& __alloc) : tree_(__s.tree_, __alloc) {}
 
-    set(set&& __s, const allocator_type& __alloc) : __tree_(std::move(__s.__tree_), __alloc) {}
+    set(set&& __s, const allocator_type& __alloc) : tree_(std::move(__s.tree_), __alloc) {}
 
     set(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
-    : __tree_(__comp) {
+    : tree_(__comp) {
         insert(__il.begin(), __il.end());
     }
 
     set(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert(__il.begin(), __il.end());
     }
 
@@ -660,10 +660,10 @@ public:
 
     ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
 
-    [[nodiscard]] iterator begin() noexcept { return __tree_.begin(); }
-    [[nodiscard]] const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[nodiscard]] iterator end() noexcept { return __tree_.end(); }
-    [[nodiscard]] const_iterator end() const noexcept { return __tree_.end(); }
+    [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
+    [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
+    [[nodiscard]] iterator end() noexcept { return tree_.end(); }
+    [[nodiscard]] const_iterator end() const noexcept { return tree_.end(); }
 
     [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
     [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
@@ -679,115 +679,115 @@ public:
     [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[nodiscard]] bool empty() const noexcept { return __tree_.size() == 0; }
-    [[nodiscard]] size_type size() const noexcept { return __tree_.size(); }
-    [[nodiscard]] size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[nodiscard]] bool empty() const noexcept { return tree_.size() == 0; }
+    [[nodiscard]] size_type size() const noexcept { return tree_.size(); }
+    [[nodiscard]] size_type max_size() const noexcept { return tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
     std::pair<iterator, bool> emplace(_Args&&... __args) {
-        return __tree_.__emplace_unique(std::forward<_Args>(__args)...);
+        return tree_.__emplace_unique(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
     iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return __tree_.__emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
+        return tree_.__emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& __v) { return __tree_.__emplace_unique(__v); }
+    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.__emplace_unique(__v); }
     iterator insert(const_iterator __p, const value_type& __v) {
-        return __tree_.__emplace_hint_unique(__p, __v).first;
+        return tree_.__emplace_hint_unique(__p, __v).first;
     }
 
     template <class _InputIterator>
     void insert(_InputIterator __first, _InputIterator __last) {
-        __tree_.__insert_range_unique(__first, __last);
+        tree_.__insert_range_unique(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
     void insert_range(_Range&& __range) {
-        __tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
+        tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
     std::pair<iterator, bool> insert(value_type&& __v) {
-        return __tree_.__emplace_unique(std::move(__v));
+        return tree_.__emplace_unique(std::move(__v));
     }
 
     iterator insert(const_iterator __p, value_type&& __v) {
-        return __tree_.__emplace_hint_unique(__p, std::move(__v)).first;
+        return tree_.__emplace_hint_unique(__p, std::move(__v)).first;
     }
 
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
     
-    iterator erase(const_iterator __p) { return __tree_.erase(__p); }
-    size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
-    iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    void clear() noexcept { __tree_.clear(); }
+    iterator erase(const_iterator __p) { return tree_.erase(__p); }
+    size_type erase(const key_type& __k) { return tree_.__erase_unique(__k); }
+    iterator erase(const_iterator __f, const_iterator __l) { return tree_.erase(__f, __l); }
+    void clear() noexcept { tree_.clear(); }
 
     insert_return_type insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
-        return __tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(__nh));
+        return tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(__nh));
     }
     iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
-        return __tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
+        return tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return __tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template __node_handle_extract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return __tree_.template __node_handle_extract<node_type>(__it);
+        return tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_unique(__source.__tree_);
+        tree_.__node_handle_merge_unique(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_unique(__source.__tree_);
+        tree_.__node_handle_merge_unique(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_unique(__source.__tree_);
+        tree_.__node_handle_merge_unique(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_unique(__source.__tree_);
+        tree_.__node_handle_merge_unique(__source.tree_);
     }
     
-    void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__s.__tree_); }
+    void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { tree_.swap(__s.tree_); }
 
-    [[nodiscard]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[nodiscard]] key_compare key_comp() const { return __tree_.value_comp(); }
-    [[nodiscard]] value_compare value_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.__alloc(); }
+    [[nodiscard]] key_compare key_comp() const { return tree_.value_comp(); }
+    [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 
     // set operations:
-    [[nodiscard]] iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[nodiscard]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[nodiscard]] iterator find(const key_type& __k) { return tree_.find(__k); }
+    [[nodiscard]] const_iterator find(const key_type& __k) const { return tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator find(const _K2& __k) {
-        return __tree_.find(__k);
+        return tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator find(const _K2& __k) const {
-        return __tree_.find(__k);
+        return tree_.find(__k);
     }
     
     [[nodiscard]] size_type count(const key_type& __k) const {
-        return __tree_.__count_unique(__k);
+        return tree_.__count_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
-        return __tree_.__count_multi(__k);
+        return tree_.__count_multi(__k);
     }
 
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
@@ -797,55 +797,55 @@ public:
     }
 
     [[nodiscard]] iterator lower_bound(const key_type& __k) {
-        return __tree_.__lower_bound_unique(__k);
+        return tree_.__lower_bound_unique(__k);
     }
 
     [[nodiscard]] const_iterator lower_bound(const key_type& __k) const {
-        return __tree_.__lower_bound_unique(__k);
+        return tree_.__lower_bound_unique(__k);
     }
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
     // match multiple elements.
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator lower_bound(const _K2& __k) {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator lower_bound(const _K2& __k) const {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
     
     [[nodiscard]] iterator upper_bound(const key_type& __k) {
-        return __tree_.__upper_bound_unique(__k);
+        return tree_.__upper_bound_unique(__k);
     }
 
     [[nodiscard]] const_iterator upper_bound(const key_type& __k) const {
-        return __tree_.__upper_bound_unique(__k);
+        return tree_.__upper_bound_unique(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator upper_bound(const _K2& __k) {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator upper_bound(const _K2& __k) const {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
     
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
-        return __tree_.__equal_range_unique(__k);
+        return tree_.__equal_range_unique(__k);
     }
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
-        return __tree_.__equal_range_unique(__k);
+        return tree_.__equal_range_unique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     
     template <class, class...>
@@ -901,7 +901,7 @@ struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocat
     template <class... _Args>
     static auto operator()(const __set& __set, _Args&&... __args) {
         return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
-            __set.__tree_, std::forward<_Args>(__args)...);
+            __set.tree_, std::forward<_Args>(__args)...);
     }
 };
 
@@ -956,12 +956,12 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    typedef __tree<value_type, value_compare, allocator_type> __base;
+    typedef Tree<value_type, value_compare, allocator_type> __base;
     typedef allocator_traits<allocator_type> __alloc_traits;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
 
-    __base __tree_;
+    __base tree_;
 
 public:
     typedef typename __base::pointer pointer;
@@ -983,17 +983,17 @@ public:
     multiset() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
-    : __tree_(value_compare()) {}
+    : tree_(value_compare()) {}
 
     explicit multiset(const value_compare& __comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
-    : __tree_(__comp) {}
+    : tree_(__comp) {}
 
     explicit multiset(const value_compare& __comp, const allocator_type& __a)
-    : __tree_(__comp, __a) {}
+    : tree_(__comp, __a) {}
     template <class _InputIterator>
     multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
-    : __tree_(__comp) {
+    : tree_(__comp) {
         insert(__f, __l);
     }
 
@@ -1003,7 +1003,7 @@ public:
 
     template <class _InputIterator>
     multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert(__f, __l);
     }
 
@@ -1012,7 +1012,7 @@ public:
              _Range&& __range,
              const key_compare& __comp = key_compare(),
              const allocator_type& __a = allocator_type())
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert_range(std::forward<_Range>(__range));
     }
 
@@ -1026,17 +1026,17 @@ public:
 
     multiset(multiset&& __s) = default;
 
-    multiset(multiset&& __s, const allocator_type& __a) : __tree_(std::move(__s.__tree_), __a) {}
-    explicit multiset(const allocator_type& __a) : __tree_(__a) {}
-    multiset(const multiset& __s, const allocator_type& __a) : __tree_(__s.__tree_, __a) {}
+    multiset(multiset&& __s, const allocator_type& __a) : tree_(std::move(__s.tree_), __a) {}
+    explicit multiset(const allocator_type& __a) : tree_(__a) {}
+    multiset(const multiset& __s, const allocator_type& __a) : tree_(__s.tree_, __a) {}
 
     multiset(std::initializer_list<value_type> __il, const value_compare& __comp = value_compare())
-    : __tree_(__comp) {
+    : tree_(__comp) {
         insert(__il.begin(), __il.end());
     }
 
     multiset(std::initializer_list<value_type> __il, const value_compare& __comp, const allocator_type& __a)
-    : __tree_(__comp, __a) {
+    : tree_(__comp, __a) {
         insert(__il.begin(), __il.end());
     }
 
@@ -1055,10 +1055,10 @@ public:
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
     }
 
-    [[nodiscard]] iterator begin() noexcept { return __tree_.begin(); }
-    [[nodiscard]] const_iterator begin() const noexcept { return __tree_.begin(); }
-    [[nodiscard]] iterator end() noexcept { return __tree_.end(); }
-    [[nodiscard]] const_iterator end() const noexcept { return __tree_.end(); }
+    [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
+    [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
+    [[nodiscard]] iterator end() noexcept { return tree_.end(); }
+    [[nodiscard]] const_iterator end() const noexcept { return tree_.end(); }
 
     [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
     [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
@@ -1074,115 +1074,115 @@ public:
     [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
 
-    [[nodiscard]] bool empty() const noexcept { return __tree_.size() == 0; }
-    [[nodiscard]] size_type size() const noexcept { return __tree_.size(); }
-    [[nodiscard]] size_type max_size() const noexcept { return __tree_.max_size(); }
+    [[nodiscard]] bool empty() const noexcept { return tree_.size() == 0; }
+    [[nodiscard]] size_type size() const noexcept { return tree_.size(); }
+    [[nodiscard]] size_type max_size() const noexcept { return tree_.max_size(); }
 
     // modifiers:
     template <class... _Args>
     iterator emplace(_Args&&... __args) {
-        return __tree_.__emplace_multi(std::forward<_Args>(__args)...);
+        return tree_.__emplace_multi(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
     iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return __tree_.__emplace_hint_multi(__p, std::forward<_Args>(__args)...);
+        return tree_.__emplace_hint_multi(__p, std::forward<_Args>(__args)...);
     }
 
-    iterator insert(const value_type& __v) { return __tree_.__emplace_multi(__v); }
+    iterator insert(const value_type& __v) { return tree_.__emplace_multi(__v); }
     iterator insert(const_iterator __p, const value_type& __v) {
-        return __tree_.__emplace_hint_multi(__p, __v);
+        return tree_.__emplace_hint_multi(__p, __v);
     }
 
     template <class _InputIterator>
     void insert(_InputIterator __first, _InputIterator __last) {
-        __tree_.__insert_range_multi(__first, __last);
+        tree_.__insert_range_multi(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> _Range>
     void insert_range(_Range&& __range) {
-        __tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
+        tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
-    iterator insert(value_type&& __v) { return __tree_.__emplace_multi(std::move(__v)); }
+    iterator insert(value_type&& __v) { return tree_.__emplace_multi(std::move(__v)); }
 
     iterator insert(const_iterator __p, value_type&& __v) {
-        return __tree_.__emplace_hint_multi(__p, std::move(__v));
+        return tree_.__emplace_hint_multi(__p, std::move(__v));
     }
 
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
 
-    iterator erase(const_iterator __p) { return __tree_.erase(__p); }
-    size_type erase(const key_type& __k) { return __tree_.__erase_multi(__k); }
-    iterator erase(const_iterator __f, const_iterator __l) { return __tree_.erase(__f, __l); }
-    void clear() noexcept { __tree_.clear(); }
+    iterator erase(const_iterator __p) { return tree_.erase(__p); }
+    size_type erase(const key_type& __k) { return tree_.__erase_multi(__k); }
+    iterator erase(const_iterator __f, const_iterator __l) { return tree_.erase(__f, __l); }
+    void clear() noexcept { tree_.clear(); }
 
     iterator insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
-        return __tree_.template __node_handle_insert_multi<node_type>(std::move(__nh));
+        return tree_.template __node_handle_insert_multi<node_type>(std::move(__nh));
     }
     iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
-        return __tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
+        return tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return __tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template __node_handle_extract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return __tree_.template __node_handle_extract<node_type>(__it);
+        return tree_.template __node_handle_extract<node_type>(__it);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_multi(__source.__tree_);
+        tree_.__node_handle_merge_multi(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_multi(__source.__tree_);
+        tree_.__node_handle_merge_multi(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_multi(__source.__tree_);
+        tree_.__node_handle_merge_multi(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        __tree_.__node_handle_merge_multi(__source.__tree_);
+        tree_.__node_handle_merge_multi(__source.tree_);
     }
     
     void swap(multiset& __s) noexcept(std::is_nothrow_swappable_v<__base>) {
-        __tree_.swap(__s.__tree_);
+        tree_.swap(__s.tree_);
     }
 
-    [[nodiscard]] allocator_type get_allocator() const noexcept { return __tree_.__alloc(); }
-    [[nodiscard]] key_compare key_comp() const { return __tree_.value_comp(); }
-    [[nodiscard]] value_compare value_comp() const { return __tree_.value_comp(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.__alloc(); }
+    [[nodiscard]] key_compare key_comp() const { return tree_.value_comp(); }
+    [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 
     // set operations:
-    [[nodiscard]] iterator find(const key_type& __k) { return __tree_.find(__k); }
-    [[nodiscard]] const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
+    [[nodiscard]] iterator find(const key_type& __k) { return tree_.find(__k); }
+    [[nodiscard]] const_iterator find(const key_type& __k) const { return tree_.find(__k); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator find(const _K2& __k) {
-        return __tree_.find(__k);
+        return tree_.find(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator find(const _K2& __k) const {
-        return __tree_.find(__k);
+        return tree_.find(__k);
     }
     
     [[nodiscard]] size_type count(const key_type& __k) const {
-        return __tree_.__count_multi(__k);
+        return tree_.__count_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
-        return __tree_.__count_multi(__k);
+        return tree_.__count_multi(__k);
     }
     
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
@@ -1192,53 +1192,53 @@ public:
     }
 
     [[nodiscard]] iterator lower_bound(const key_type& __k) {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
 
     [[nodiscard]] const_iterator lower_bound(const key_type& __k) const {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator lower_bound(const _K2& __k) {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator lower_bound(const _K2& __k) const {
-        return __tree_.__lower_bound_multi(__k);
+        return tree_.__lower_bound_multi(__k);
     }
     
     [[nodiscard]] iterator upper_bound(const key_type& __k) {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
 
     [[nodiscard]] const_iterator upper_bound(const key_type& __k) const {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] iterator upper_bound(const _K2& __k) {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] const_iterator upper_bound(const _K2& __k) const {
-        return __tree_.__upper_bound_multi(__k);
+        return tree_.__upper_bound_multi(__k);
     }
     
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& __k) {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
-        return __tree_.__equal_range_multi(__k);
+        return tree_.__equal_range_multi(__k);
     }
     
     template <class, class...>
@@ -1295,7 +1295,7 @@ struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Al
     template <class... _Args>
     static auto operator()(const __set& __set, _Args&&... __args) {
         return __specialized_algorithm<_Alg, __single_range<typename __set::__base>>()(
-            __set.__tree_, std::forward<_Args>(__args)...);
+            __set.tree_, std::forward<_Args>(__args)...);
     }
 };
 
