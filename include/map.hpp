@@ -642,7 +642,7 @@ public:
 
 template <class _Key, class _MapValueT, class _Compare>
 struct __make_transparent<__map_value_compare<_Key, _MapValueT, _Compare> > {
-    using type MSTD_NODEBUG = __map_value_compare<_Key, _MapValueT, __make_transparent_t<_Compare> >;
+    using type = __map_value_compare<_Key, _MapValueT, __make_transparent_t<_Compare> >;
 };
 
 template <class _MapValueT, class _Key, class _Compare>
@@ -650,11 +650,11 @@ struct __lazy_synth_three_way_comparator<__map_value_compare<_Key, _MapValueT, _
     __lazy_synth_three_way_comparator<_Compare, _Key, _Key> __comp_;
 
     __lazy_synth_three_way_comparator(
-        MSTD_CTOR_LIFETIMEBOUND const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
+        const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
     : __comp_(__comp.key_comp()) {}
 
     auto
-    operator()(MSTD_LIFETIMEBOUND const _MapValueT& __lhs, MSTD_LIFETIMEBOUND const _MapValueT& __rhs) const {
+    operator()(const _MapValueT& __lhs, const _MapValueT& __rhs) const {
         return __comp_(__lhs.first, __rhs.first);
     }
 };
@@ -664,11 +664,11 @@ struct __lazy_synth_three_way_comparator<__map_value_compare<_Key, _MapValueT, _
     __lazy_synth_three_way_comparator<_Compare, _TransparentKey, _Key> __comp_;
 
     __lazy_synth_three_way_comparator(
-        MSTD_CTOR_LIFETIMEBOUND const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
+        const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
     : __comp_(__comp.key_comp()) {}
 
     auto
-    operator()(MSTD_LIFETIMEBOUND const _TransparentKey& __lhs, MSTD_LIFETIMEBOUND const _MapValueT& __rhs) const {
+    operator()(const _TransparentKey& __lhs, const _MapValueT& __rhs) const {
         return __comp_(__lhs, __rhs.first);
     }
 };
@@ -678,11 +678,11 @@ struct __lazy_synth_three_way_comparator<__map_value_compare<_Key, _MapValueT, _
     __lazy_synth_three_way_comparator<_Compare, _Key, _TransparentKey> __comp_;
 
     __lazy_synth_three_way_comparator(
-        MSTD_CTOR_LIFETIMEBOUND const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
+        const __map_value_compare<_Key, _MapValueT, _Compare>& __comp)
     : __comp_(__comp.key_comp()) {}
 
     auto
-    operator()(MSTD_LIFETIMEBOUND const _MapValueT& __lhs, MSTD_LIFETIMEBOUND const _TransparentKey& __rhs) const {
+    operator()(const _MapValueT& __lhs, const _TransparentKey& __rhs) const {
         return __comp_(__lhs.first, __rhs);
     }
 };
@@ -794,11 +794,11 @@ public:
 
 template <class _Alg, class _TreeIterator>
 struct __specialized_algorithm<_Alg, __iterator_pair<__map_iterator<_TreeIterator>, __map_iterator<_TreeIterator>>> {
-    using __base MSTD_NODEBUG = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
+    using __base = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
 
     static const bool __has_algorithm = __base::__has_algorithm;
 
-    using __iterator MSTD_NODEBUG = __map_iterator<_TreeIterator>;
+    using __iterator = __map_iterator<_TreeIterator>;
 
     template <class... _Args>
     static void operator()(__iterator __first, __iterator __last, _Args&&... __args) {
@@ -867,11 +867,11 @@ template <class _Alg, class _TreeIterator>
 struct __specialized_algorithm<
 _Alg,
 __iterator_pair<__map_const_iterator<_TreeIterator>, __map_const_iterator<_TreeIterator>>> {
-    using __base MSTD_NODEBUG = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
+    using __base = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
 
     static const bool __has_algorithm = __base::__has_algorithm;
 
-    using __iterator MSTD_NODEBUG = __map_const_iterator<_TreeIterator>;
+    using __iterator = __map_const_iterator<_TreeIterator>;
 
     template <class... _Args>
     static void operator()(__iterator __first, __iterator __last, _Args&&... __args) {
@@ -1391,7 +1391,7 @@ map(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<_Key, _Tp, _Compare, _Allocator>>> {
-    using __map MSTD_NODEBUG = map<_Key, _Tp, _Compare, _Allocator>;
+    using __map = map<_Key, _Tp, _Compare, _Allocator>;
 
     static const bool __has_algorithm = true;
 
@@ -1862,7 +1862,7 @@ multimap(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<_Key, _Tp, _Compare, _Allocator>>> {
-    using __map MSTD_NODEBUG = multimap<_Key, _Tp, _Compare, _Allocator>;
+    using __map = multimap<_Key, _Tp, _Compare, _Allocator>;
 
     static const bool __has_algorithm = true;
 

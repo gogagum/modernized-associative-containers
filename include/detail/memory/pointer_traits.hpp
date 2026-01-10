@@ -28,7 +28,7 @@
 namespace mstd {
 
 template <class _From, class _To>
-using __rebind_pointer_t MSTD_NODEBUG = typename std::pointer_traits<_From>::template rebind<_To>;
+using __rebind_pointer_t = typename std::pointer_traits<_From>::template rebind<_To>;
 
 } // namespace mstd
 

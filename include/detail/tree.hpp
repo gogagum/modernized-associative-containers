@@ -502,37 +502,37 @@ inline const bool __is_tree_value_type_v = __is_specialization_v<_Tp, __value_ty
 
 template <class _Tp>
 struct __get_tree_key_type {
-    using type MSTD_NODEBUG = _Tp;
+    using type = _Tp;
 };
 
 template <class _Key, class _ValueT>
 struct __get_tree_key_type<__value_type<_Key, _ValueT> > {
-    using type MSTD_NODEBUG = _Key;
+    using type = _Key;
 };
 
 template <class _Tp>
-using __get_tree_key_type_t MSTD_NODEBUG = typename __get_tree_key_type<_Tp>::type;
+using __get_tree_key_type_t = typename __get_tree_key_type<_Tp>::type;
 
 template <class _Tp>
 struct __get_node_value_type {
-    using type MSTD_NODEBUG = _Tp;
+    using type = _Tp;
 };
 
 template <class _Key, class _ValueT>
 struct __get_node_value_type<__value_type<_Key, _ValueT> > {
-    using type MSTD_NODEBUG = std::pair<const _Key, _ValueT>;
+    using type = std::pair<const _Key, _ValueT>;
 };
 
 template <class _Tp>
-using __get_node_value_type_t MSTD_NODEBUG = typename __get_node_value_type<_Tp>::type;
+using __get_node_value_type_t = typename __get_node_value_type<_Tp>::type;
 
 template <class _NodePtr, class _NodeT = typename std::pointer_traits<_NodePtr>::element_type>
 struct __tree_node_types;
 
 template <class _NodePtr, class _Tp, class _VoidPtr>
 struct __tree_node_types<_NodePtr, __tree_node<_Tp, _VoidPtr> > {
-    using __node_base_pointer MSTD_NODEBUG = __rebind_pointer_t<_VoidPtr, __tree_node_base<_VoidPtr> >;
-    using __end_node_pointer MSTD_NODEBUG  = __rebind_pointer_t<_VoidPtr, __tree_end_node<__node_base_pointer> >;
+    using __node_base_pointer = __rebind_pointer_t<_VoidPtr, __tree_node_base<_VoidPtr> >;
+    using __end_node_pointer  = __rebind_pointer_t<_VoidPtr, __tree_end_node<__node_base_pointer> >;
 
 private:
     static_assert(std::is_same_v<typename std::pointer_traits<_VoidPtr>::element_type, void>,
@@ -554,7 +554,7 @@ template <class _VoidPtr>
 class __tree_node_base : public __tree_end_node<__rebind_pointer_t<_VoidPtr, __tree_node_base<_VoidPtr> > > {
 public:
     using pointer                            = __rebind_pointer_t<_VoidPtr, __tree_node_base>;
-    using __end_node_pointer MSTD_NODEBUG = __rebind_pointer_t<_VoidPtr, __tree_end_node<pointer> >;
+    using __end_node_pointer = __rebind_pointer_t<_VoidPtr, __tree_end_node<pointer> >;
 
     pointer __right_;
     __end_node_pointer __parent_;
@@ -572,7 +572,7 @@ public:
 template <class _Tp, class _VoidPtr>
 class __tree_node : public __tree_node_base<_VoidPtr> {
 public:
-    using __node_value_type MSTD_NODEBUG = __get_node_value_type_t<_Tp>;
+    using __node_value_type = __get_node_value_type_t<_Tp>;
 
     // We use a union to avoid initialization during member initialization, which allows us
     // to use the allocator from the container to construct the `__node_value_type` in the
@@ -598,7 +598,7 @@ public:
 template <class _Allocator>
 class __tree_node_destructor {
     using allocator_type                 = _Allocator;
-    using __alloc_traits MSTD_NODEBUG = std::allocator_traits<allocator_type>;
+    using __alloc_traits = std::allocator_traits<allocator_type>;
 
 public:
     using pointer = typename __alloc_traits::pointer;
@@ -680,11 +680,11 @@ __tree_iterate_subrange(_NodeIter __first_it, _NodeIter __last_it, _Func& __func
 
 template <class _Tp, class _NodePtr, class _DiffType>
 class __tree_iterator {
-    using _NodeTypes MSTD_NODEBUG = __tree_node_types<_NodePtr>;
+    using _NodeTypes = __tree_node_types<_NodePtr>;
     // NOLINTNEXTLINE(libcpp-nodebug-on-aliases) lldb relies on this alias for pretty printing
     using __node_pointer                      = _NodePtr;
-    using __node_base_pointer MSTD_NODEBUG = typename _NodeTypes::__node_base_pointer;
-    using __end_node_pointer MSTD_NODEBUG  = typename _NodeTypes::__end_node_pointer;
+    using __node_base_pointer = typename _NodeTypes::__node_base_pointer;
+    using __end_node_pointer  = typename _NodeTypes::__end_node_pointer;
 
     __end_node_pointer __ptr_;
 
@@ -749,7 +749,7 @@ _Algorithm::__for_each,
 __iterator_pair<__tree_iterator<_Tp, _NodePtr, _DiffType>, __tree_iterator<_Tp, _NodePtr, _DiffType>>> {
     static const bool __has_algorithm = true;
 
-    using __iterator MSTD_NODEBUG = __tree_iterator<_Tp, _NodePtr, _DiffType>;
+    using __iterator = __tree_iterator<_Tp, _NodePtr, _DiffType>;
 
     template <class _Func, class _Proj>
     static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
@@ -759,11 +759,11 @@ __iterator_pair<__tree_iterator<_Tp, _NodePtr, _DiffType>, __tree_iterator<_Tp, 
 
 template <class _Tp, class _NodePtr, class _DiffType>
 class __tree_const_iterator {
-    using _NodeTypes MSTD_NODEBUG = __tree_node_types<_NodePtr>;
+    using _NodeTypes = __tree_node_types<_NodePtr>;
     // NOLINTNEXTLINE(libcpp-nodebug-on-aliases) lldb relies on this alias for pretty printing
     using __node_pointer                      = _NodePtr;
-    using __node_base_pointer MSTD_NODEBUG = typename _NodeTypes::__node_base_pointer;
-    using __end_node_pointer MSTD_NODEBUG  = typename _NodeTypes::__end_node_pointer;
+    using __node_base_pointer = typename _NodeTypes::__node_base_pointer;
+    using __end_node_pointer  = typename _NodeTypes::__end_node_pointer;
 
     __end_node_pointer __ptr_;
 
@@ -773,7 +773,7 @@ public:
     using difference_type                      = _DiffType;
     using reference                            = const value_type&;
     using pointer                              = __rebind_pointer_t<_NodePtr, const value_type>;
-    using __non_const_iterator MSTD_NODEBUG = __tree_iterator<_Tp, __node_pointer, difference_type>;
+    using __non_const_iterator = __tree_iterator<_Tp, __node_pointer, difference_type>;
 
     __tree_const_iterator() noexcept : __ptr_(nullptr) {}
 
@@ -832,7 +832,7 @@ _Algorithm::__for_each,
 __iterator_pair<__tree_const_iterator<_Tp, _NodePtr, _DiffType>, __tree_const_iterator<_Tp, _NodePtr, _DiffType>>> {
     static const bool __has_algorithm = true;
 
-    using __iterator MSTD_NODEBUG = __tree_const_iterator<_Tp, _NodePtr, _DiffType>;
+    using __iterator = __tree_const_iterator<_Tp, _NodePtr, _DiffType>;
 
     template <class _Func, class _Proj>
     static void operator()(__iterator __first, __iterator __last, _Func& __func, _Proj& __proj) {
@@ -841,8 +841,6 @@ __iterator_pair<__tree_const_iterator<_Tp, _NodePtr, _DiffType>, __tree_const_it
 };
 
 template <class _Tp, class _Compare>
-MSTD_DIAGNOSE_WARNING(!__is_invocable_v<_Compare const&, _Tp const&, _Tp const&>,
-                         "the specified comparator type does not provide a viable const call operator")
 int __diagnose_non_const_comparator();
 
 template <class _Tp, class _Compare, class _Allocator>
@@ -853,7 +851,7 @@ public:
     using allocator_type = _Allocator;
 
 private:
-    using __alloc_traits MSTD_NODEBUG = std::allocator_traits<allocator_type>;
+    using __alloc_traits = std::allocator_traits<allocator_type>;
     using key_type                       = __get_tree_key_type_t<_Tp>;
 
 public:
@@ -862,20 +860,20 @@ public:
     using size_type       = typename __alloc_traits::size_type;
     using difference_type = typename __alloc_traits::difference_type;
 
-    using __void_pointer MSTD_NODEBUG = typename __alloc_traits::void_pointer;
+    using __void_pointer = typename __alloc_traits::void_pointer;
 
-    using __node MSTD_NODEBUG = __tree_node<_Tp, __void_pointer>;
+    using __node = __tree_node<_Tp, __void_pointer>;
     // NOLINTNEXTLINE(libcpp-nodebug-on-aliases) lldb relies on this alias for pretty printing
     using __node_pointer = __rebind_pointer_t<__void_pointer, __node>;
 
-    using __node_base MSTD_NODEBUG         = __tree_node_base<__void_pointer>;
-    using __node_base_pointer MSTD_NODEBUG = __rebind_pointer_t<__void_pointer, __node_base>;
+    using __node_base         = __tree_node_base<__void_pointer>;
+    using __node_base_pointer = __rebind_pointer_t<__void_pointer, __node_base>;
 
-    using __end_node_t MSTD_NODEBUG       = __tree_end_node<__node_base_pointer>;
-    using __end_node_pointer MSTD_NODEBUG = __rebind_pointer_t<__void_pointer, __end_node_t>;
+    using __end_node_t       = __tree_end_node<__node_base_pointer>;
+    using __end_node_pointer = __rebind_pointer_t<__void_pointer, __end_node_t>;
 
-    using __node_allocator MSTD_NODEBUG = __rebind_alloc<__alloc_traits, __node>;
-    using __node_traits MSTD_NODEBUG    = std::allocator_traits<__node_allocator>;
+    using __node_allocator = __rebind_alloc<__alloc_traits, __node>;
+    using __node_traits    = std::allocator_traits<__node_allocator>;
 
 private:
     // check for sane allocator pointer rebinding semantics. Rebinding the
@@ -883,8 +881,8 @@ private:
     // the pointer using 'pointer_traits'.
     static_assert(std::is_same_v<__node_pointer, typename __node_traits::pointer>,
                   "Allocator does not rebind pointers in a sane manner.");
-    using __node_base_allocator MSTD_NODEBUG = __rebind_alloc<__node_traits, __node_base>;
-    using __node_base_traits MSTD_NODEBUG    = std::allocator_traits<__node_base_allocator>;
+    using __node_base_allocator = __rebind_alloc<__node_traits, __node_base>;
+    using __node_base_traits    = std::allocator_traits<__node_base_allocator>;
     static_assert(std::is_same_v<__node_base_pointer, typename __node_base_traits::pointer>,
                   "Allocator does not rebind pointers in a sane manner.");
 
@@ -1276,8 +1274,8 @@ public:
     template <class _Key>
     std::pair<const_iterator, const_iterator> __equal_range_multi(const _Key& __k) const;
 
-    using _Dp MSTD_NODEBUG           = __tree_node_destructor<__node_allocator>;
-    using __node_holder MSTD_NODEBUG = std::unique_ptr<__node, _Dp>;
+    using _Dp           = __tree_node_destructor<__node_allocator>;
+    using __node_holder = std::unique_ptr<__node, _Dp>;
 
     __node_holder remove(const_iterator __p) noexcept;
 
@@ -1485,7 +1483,7 @@ template <class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<__tree<_Tp, _Compare, _Allocator> > > {
     static const bool __has_algorithm = true;
 
-    using __node_pointer MSTD_NODEBUG = typename __tree<_Tp, _Compare, _Allocator>::__node_pointer;
+    using __node_pointer = typename __tree<_Tp, _Compare, _Allocator>::__node_pointer;
 
     template <class _Tree, class _Func, class _Proj>
     static auto operator()(_Tree&& __range, _Func __func, _Proj __proj) {

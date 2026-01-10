@@ -24,14 +24,14 @@ struct _OrImpl;
 template <>
 struct _OrImpl<true> {
   template <class _Res, class _First, class... _Rest>
-  using _Result MSTD_NODEBUG =
+  using _Result =
       typename _OrImpl<!bool(_First::value) && sizeof...(_Rest) != 0>::template _Result<_First, _Rest...>;
 };
 
 template <>
 struct _OrImpl<false> {
   template <class _Res, class...>
-  using _Result MSTD_NODEBUG = _Res;
+  using _Result = _Res;
 };
 
 // _Or always performs lazy evaluation of its arguments.
@@ -41,7 +41,7 @@ struct _OrImpl<false> {
 // If you want to defer the evaluation of `_Or<_Pred...>` itself, use `_Lazy<_Or, _Pred...>`
 // or `disjunction<_Pred...>` directly.
 template <class... _Args>
-using _Or MSTD_NODEBUG = typename _OrImpl<sizeof...(_Args) != 0>::template _Result<std::false_type, _Args...>;
+using _Or = typename _OrImpl<sizeof...(_Args) != 0>::template _Result<std::false_type, _Args...>;
 
 } // namespace mstd
 

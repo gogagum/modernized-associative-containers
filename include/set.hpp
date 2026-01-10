@@ -897,7 +897,7 @@ set(std::initializer_list<_Key>, _Allocator) -> set<_Key, std::less<_Key>, _Allo
 
 template <class _Alg, class _Key, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocator>>> {
-    using __set MSTD_NODEBUG = set<_Key, _Compare, _Allocator>;
+    using __set = set<_Key, _Compare, _Allocator>;
 
     static const bool __has_algorithm =
     __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;
@@ -1291,7 +1291,7 @@ multiset(std::initializer_list<_Key>, _Allocator) -> multiset<_Key, std::less<_K
 
 template <class _Alg, class _Key, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Allocator>>> {
-    using __set MSTD_NODEBUG = multiset<_Key, _Compare, _Allocator>;
+    using __set = multiset<_Key, _Compare, _Allocator>;
 
     static const bool __has_algorithm =
     __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;

@@ -42,7 +42,7 @@ inline constexpr auto __synth_three_way = []<class _Tp, class _Up>(const _Tp& __
 };
 
 template <class _Tp, class _Up = _Tp>
-using __synth_three_way_result MSTD_NODEBUG =
+using __synth_three_way_result =
     decltype(mstd::__synth_three_way(std::declval<_Tp&>(), std::declval<_Up&>()));
 
 } // namespace mstd

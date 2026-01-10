@@ -19,16 +19,16 @@ namespace mstd {
 
 template <class _Default, class _Void, template <class...> class _Op, class... _Args>
 struct __detector {
-  using type MSTD_NODEBUG = _Default;
+  using type = _Default;
 };
 
 template <class _Default, template <class...> class _Op, class... _Args>
 struct __detector<_Default, std::void_t<_Op<_Args...> >, _Op, _Args...> {
-  using type MSTD_NODEBUG = _Op<_Args...>;
+  using type = _Op<_Args...>;
 };
 
 template <class _Default, template <class...> class _Op, class... _Args>
-using __detected_or_t MSTD_NODEBUG = typename __detector<_Default, void, _Op, _Args...>::type;
+using __detected_or_t = typename __detector<_Default, void, _Op, _Args...>::type;
 
 } // namespace mstd
 

@@ -24,7 +24,7 @@ template <template <class...> class, class...>
 std::false_type __sfinae_test_impl(...);
 
 template <template <class...> class _Templ, class... _Args>
-using _IsValidExpansion MSTD_NODEBUG = decltype(mstd::__sfinae_test_impl<_Templ, _Args...>(0));
+using _IsValidExpansion = decltype(mstd::__sfinae_test_impl<_Templ, _Args...>(0));
 
 } // namespace mstd
 
