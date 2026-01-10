@@ -22,7 +22,7 @@
 
 #include "test_macros.hpp"
 
-struct TEST_ALIGNAS(16) Cmp {
+struct alignas(16) Cmp {
   bool operator()(int, int) const;
 };
 
@@ -56,4 +56,3 @@ static_assert(sizeof(Multiset<Cmp&>) == sizeof(Multiset<bool (*)(int, int)>), ""
 static_assert(sizeof(Map<Cmp&>) == sizeof(Map<bool (*)(int, int)>), "");
 static_assert(sizeof(Multimap<Cmp&>) == sizeof(Multimap<bool (*)(int, int)>), "");
 
-int main() {}

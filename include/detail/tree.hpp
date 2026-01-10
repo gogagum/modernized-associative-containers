@@ -1034,7 +1034,7 @@ public:
                     __r        = __h.release();
                     __inserted = true;
                 }
-                return pair<iterator, bool>(iterator(__r), __inserted);
+                return std::pair<iterator, bool>(iterator(__r), __inserted);
             },
             [this](_Args&&... __args2) {
                 __node_holder __h        = __construct_node(std::forward<_Args>(__args2)...);
@@ -1046,7 +1046,7 @@ public:
                     __r        = __h.release();
                     __inserted = true;
                 }
-                return pair<iterator, bool>(iterator(__r), __inserted);
+                return std::pair<iterator, bool>(iterator(__r), __inserted);
             },
             std::forward<_Args>(__args)...);
     }
@@ -1065,7 +1065,7 @@ public:
                     __r        = __h.release();
                     __inserted = true;
                 }
-                return pair<iterator, bool>(iterator(__r), __inserted);
+                return std::pair<iterator, bool>(iterator(__r), __inserted);
             },
             [this, __p](_Args&&... __args2) {
                 __node_holder __h = __construct_node(std::forward<_Args>(__args2)...);
@@ -1076,7 +1076,7 @@ public:
                     __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
                     __r = __h.release();
                 }
-                return pair<iterator, bool>(iterator(__r), __child == nullptr);
+                return std::pair<iterator, bool>(iterator(__r), __child == nullptr);
             },
             std::forward<_Args>(__args)...);
     }
