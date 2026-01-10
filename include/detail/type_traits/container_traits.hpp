@@ -36,10 +36,10 @@ struct __container_traits {
   // A trait that tells whether a single element insertion/emplacement via member function
   // `insert(...)` or `emplace(...)` has strong exception guarantee, that is, if the function
   // exits via an exception, the original container is unaffected
-  static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = false;
+  static constexpr const bool __emplacement_has_strong_exception_safety_guarantee = false;
 
   // A trait that tells whether a container supports `reserve(n)` member function.
-  static MSTD_CONSTEXPR const bool __reservable = false;
+  static constexpr const bool __reservable = false;
 };
 
 MSTD_END_NAMESPACE

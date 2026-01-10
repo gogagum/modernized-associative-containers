@@ -24,11 +24,6 @@
 
 MSTD_BEGIN_NAMESPACE_STD
 
-// TODO: Enable this again once #94816 is fixed.
-#if (__has_keyword(__datasizeof) || __has_extension(datasizeof)) && 0
-template <class _Tp>
-inline const size_t __datasizeof_v = __datasizeof(_Tp);
-#else
 template <class _Tp>
 struct _FirstPaddingByte {
   MSTD_NO_UNIQUE_ADDRESS _Tp __v_;
@@ -39,11 +34,9 @@ struct _FirstPaddingByte {
 // It is conditionally-supported to use __builtin_offsetof in that case, but GCC and Clang allow it.
 MSTD_DIAGNOSTIC_PUSH
 MSTD_CLANG_DIAGNOSTIC_IGNORED("-Winvalid-offsetof")
-MSTD_GCC_DIAGNOSTIC_IGNORED("-Winvalid-offsetof")
 template <class _Tp>
 inline const size_t __datasizeof_v = __builtin_offsetof(_FirstPaddingByte<_Tp>, __first_padding_byte_);
 MSTD_DIAGNOSTIC_POP
-#endif // __has_extension(datasizeof)
 
 MSTD_END_NAMESPACE
 

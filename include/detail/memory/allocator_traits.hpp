@@ -26,7 +26,6 @@ MSTD_PUSH_MACROS
 
 MSTD_BEGIN_NAMESPACE_STD
 
-MSTD_SUPPRESS_DEPRECATED_PUSH
 // __pointer
 template <class _Tp>
 using __pointer_member MSTD_NODEBUG = typename _Tp::pointer;
@@ -52,7 +51,6 @@ using __const_pointer_member MSTD_NODEBUG = typename _Alloc::const_pointer;
 template <class _Tp, class _Ptr, class _Alloc>
 using __const_pointer_t MSTD_NODEBUG =
     typename __rebind_or_alias_pointer<_Alloc, __const_pointer_member, _Ptr, const _Tp>::type;
-MSTD_SUPPRESS_DEPRECATED_POP
 
 // __void_pointer
 template <class _Alloc>
@@ -114,7 +112,6 @@ template <class _Alloc>
 using __propagate_on_container_swap MSTD_NODEBUG =
     __detected_or_t<std::false_type, __propagate_on_container_swap_member, _Alloc>;
 
-MSTD_SUPPRESS_DEPRECATED_PUSH
 // __is_always_equal
 template <class _Tp>
 using __is_always_equal_member MSTD_NODEBUG = typename _Tp::is_always_equal;
@@ -142,12 +139,9 @@ template <template <class, class...> class _Alloc, class _Tp, class... _Args, cl
 struct __allocator_traits_rebind<_Alloc<_Tp, _Args...>, _Up, false> {
   using type MSTD_NODEBUG = _Alloc<_Up, _Args...>;
 };
-MSTD_SUPPRESS_DEPRECATED_POP
 
 template <class _Alloc, class _Tp>
 using __allocator_traits_rebind_t MSTD_NODEBUG = typename __allocator_traits_rebind<_Alloc, _Tp>::type;
-
-MSTD_SUPPRESS_DEPRECATED_PUSH
 
 // __has_allocate_hint_v
 template <class _Alloc, class _SizeType, class _ConstVoidPtr, class = void>
@@ -196,8 +190,6 @@ inline const bool __has_select_on_container_copy_construction_v<
     _Alloc,
     decltype((void)std::declval<_Alloc>().select_on_container_copy_construction())> = true;
 
-MSTD_SUPPRESS_DEPRECATED_POP
-
 template <class _Pointer, class _SizeType = size_t>
 struct allocation_result {
   _Pointer ptr;
@@ -225,20 +217,18 @@ struct allocator_traits {
   template <class _Tp>
   using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
 
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static pointer
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
   allocate(allocator_type& __a, size_type __n) {
     return __a.allocate(__n);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static pointer
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer __hint) {
-    MSTD_SUPPRESS_DEPRECATED_PUSH
     return __a.allocate(__n, __hint);
-    MSTD_SUPPRESS_DEPRECATED_POP
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_allocate_hint_v<_Ap, size_type, const_void_pointer>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static pointer
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static pointer
   allocate(allocator_type& __a, size_type __n, const_void_pointer) {
     return __a.allocate(__n);
   }
@@ -253,55 +243,49 @@ struct allocator_traits {
     }
   }
 
-  MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void
-  deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT {
+  MSTD_HIDE_FROM_ABI constexpr static void
+  deallocate(allocator_type& __a, pointer __p, size_type __n) noexcept {
     __a.deallocate(__p, __n);
   }
 
   template <class _Tp, class... _Args, std::enable_if_t<__has_construct_v<allocator_type, _Tp*, _Args...>, int> = 0>
-  MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void
+  MSTD_HIDE_FROM_ABI constexpr static void
   construct(allocator_type& __a, _Tp* __p, _Args&&... __args) {
-    MSTD_SUPPRESS_DEPRECATED_PUSH
     __a.construct(__p, std::forward<_Args>(__args)...);
-    MSTD_SUPPRESS_DEPRECATED_POP
   }
   template <class _Tp, class... _Args, std::enable_if_t<!__has_construct_v<allocator_type, _Tp*, _Args...>, int> = 0>
-  MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void
+  MSTD_HIDE_FROM_ABI constexpr static void
   construct(allocator_type&, _Tp* __p, _Args&&... __args) {
     std::construct_at(__p, std::forward<_Args>(__args)...);
   }
 
   template <class _Tp, std::enable_if_t<__has_destroy_v<allocator_type, _Tp*>, int> = 0>
-  MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type& __a, _Tp* __p) {
-    MSTD_SUPPRESS_DEPRECATED_PUSH
+  MSTD_HIDE_FROM_ABI constexpr static void destroy(allocator_type& __a, _Tp* __p) {
     __a.destroy(__p);
-    MSTD_SUPPRESS_DEPRECATED_POP
   }
   template <class _Tp, std::enable_if_t<!__has_destroy_v<allocator_type, _Tp*>, int> = 0>
-  MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type&, _Tp* __p) {
+  MSTD_HIDE_FROM_ABI constexpr static void destroy(allocator_type&, _Tp* __p) {
     std::destroy_at(__p);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static size_type
-  max_size(const allocator_type& __a) _NOEXCEPT {
-    MSTD_SUPPRESS_DEPRECATED_PUSH
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static size_type
+  max_size(const allocator_type& __a) noexcept {
     return __a.max_size();
-    MSTD_SUPPRESS_DEPRECATED_POP
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_max_size_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static size_type
-  max_size(const allocator_type&) _NOEXCEPT {
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static size_type
+  max_size(const allocator_type&) noexcept {
     return std::numeric_limits<size_type>::max() / sizeof(value_type);
   }
 
   template <class _Ap = _Alloc, std::enable_if_t<__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static allocator_type
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a.select_on_container_copy_construction();
   }
   template <class _Ap = _Alloc, std::enable_if_t<!__has_select_on_container_copy_construction_v<const _Ap>, int> = 0>
-  [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static allocator_type
+  [[__nodiscard__]] MSTD_HIDE_FROM_ABI constexpr static allocator_type
   select_on_container_copy_construction(const allocator_type& __a) {
     return __a;
   }
