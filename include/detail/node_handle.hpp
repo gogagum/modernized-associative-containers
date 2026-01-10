@@ -68,7 +68,7 @@ public:
 
 namespace mstd {
 
-// Specialized in __tree & __hash_table for their _NodeType.
+// Specialized in Tree & __hash_table for their _NodeType.
 template <class _NodeType, class _Alloc>
 struct __generic_container_node_destructor;
 
@@ -76,7 +76,7 @@ template <class _NodeType, class _Alloc, template <class, class> class _MapOrSet
 class __basic_node_handle
     : public _MapOrSetSpecifics< _NodeType, __basic_node_handle<_NodeType, _Alloc, _MapOrSetSpecifics>> {
   template <class _Tp, class _Compare, class _Allocator>
-  friend class __tree;
+  friend class Tree;
   template <class _Tp, class _Hash, class _Equal, class _Allocator>
   friend class __hash_table;
   friend struct _MapOrSetSpecifics< _NodeType, __basic_node_handle<_NodeType, _Alloc, _MapOrSetSpecifics>>;
@@ -184,7 +184,7 @@ template <class _NodeType, class _Alloc>
 using __set_node_handle = __basic_node_handle< _NodeType, _Alloc, __set_node_handle_specifics>;
 
 template <class _NodeType, class _Alloc>
-using __map_node_handle = __basic_node_handle< _NodeType, _Alloc, __map_node_handle_specifics>;
+using MapNodeHandle = __basic_node_handle< _NodeType, _Alloc, __map_node_handle_specifics>;
 
 template <class _Iterator, class _NodeType>
 struct __insert_return_type {
