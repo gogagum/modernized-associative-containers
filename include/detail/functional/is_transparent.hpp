@@ -20,15 +20,11 @@
 
 MSTD_BEGIN_NAMESPACE_STD
 
-#if MSTD_STD_VER >= 14
-
 template <class _Tp, class _Key = void, class = void>
 inline const bool __is_transparent_v = false;
 
 template <class _Tp, class _Key>
 inline const bool __is_transparent_v<_Tp, _Key, std::void_t<typename _Tp::is_transparent> > = true;
-
-#endif
 
 // Two types are considered transparently comparable if `comparator(key, arg)` is equivalent to `comparator(key,
 // <implicit cast to KeyT>(arg))`.

@@ -75,7 +75,6 @@ __try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _
   return __with_key(__arg1, std::forward<_Arg1>(__arg1), std::forward<_Arg2>(__arg2));
 }
 
-#ifndef MSTD_CXX03_LANG
 template <class _KeyT,
           class _Ret,
           class _WithKey,
@@ -100,7 +99,6 @@ MSTD_HIDE_FROM_ABI _Ret __try_key_extraction_impl(
       std::forward<_Tuple1>(__tuple1),
       std::forward<_Tuple2>(__tuple2));
 }
-#endif // MSTD_CXX03_LANG
 
 // This function tries extracting the given _KeyT from _Args...
 // If it succeeds to extract the key, it calls the `__with_key` function with the extracted key and all of the

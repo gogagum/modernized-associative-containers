@@ -39,7 +39,7 @@ struct __default_three_way_comparator<_LHS,
   }
 };
 
-#if MSTD_STD_VER >= 20 && __has_builtin(__builtin_lt_synthesizes_from_spaceship)
+#if __has_builtin(__builtin_lt_synthesizes_from_spaceship)
 template <class _LHS, class _RHS>
 struct __default_three_way_comparator<
     _LHS,

@@ -25,10 +25,8 @@ inline const bool __is_referenceable_v = false;
 template <class _Tp>
 inline const bool __is_referenceable_v<_Tp, std::void_t<_Tp&> > = true;
 
-#if MSTD_STD_VER >= 20
 template <class _Tp>
 concept __referenceable = __is_referenceable_v<_Tp>;
-#endif
 
 MSTD_END_NAMESPACE
 

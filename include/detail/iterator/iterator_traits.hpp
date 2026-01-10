@@ -28,8 +28,6 @@
 
 MSTD_BEGIN_NAMESPACE_STD
 
-#if MSTD_STD_VER >= 20
-
 template <class _Tp>
 concept __dereferenceable = requires(_Tp& __t) {
   { *__t } -> __referenceable; // not required to be equality-preserving
@@ -39,8 +37,6 @@ concept __dereferenceable = requires(_Tp& __t) {
 template <__dereferenceable _Tp>
 using iter_reference_t = decltype(*std::declval<_Tp&>());
 
-#endif // MSTD_STD_VER >= 20
-
 template <class _Iter>
 struct iterator_traits;
 
@@ -49,11 +45,7 @@ struct output_iterator_tag {};
 struct forward_iterator_tag : public input_iterator_tag {};
 struct bidirectional_iterator_tag : public forward_iterator_tag {};
 struct random_access_iterator_tag : public bidirectional_iterator_tag {};
-#if MSTD_STD_VER >= 20
 struct contiguous_iterator_tag : public random_access_iterator_tag {};
-#endif
-
-#if MSTD_STD_VER >= 20
 
 // The `cpp17-*-iterator` exposition-only concepts have very similar names to the `Cpp17*Iterator` named requirements
 // from `[iterator.cpp17]`. To avoid confusion between the two, the exposition-only concepts have been banished to
@@ -264,70 +256,15 @@ struct iterator_traits : __iterator_traits<_Ip> {
   using __primary_template MSTD_NODEBUG = iterator_traits;
 };
 
-#else  // MSTD_STD_VER >= 20
-
-template <class _Iter, bool>
-struct __iterator_traits {};
-
-template <class _Iter, bool>
-struct __iterator_traits_impl {};
-
-template <class _Iter>
-struct __iterator_traits_impl<_Iter, true> {
-  typedef typename _Iter::difference_type difference_type;
-  typedef typename _Iter::value_type value_type;
-  typedef typename _Iter::pointer pointer;
-  typedef typename _Iter::reference reference;
-  typedef typename _Iter::iterator_category iterator_category;
-};
-
-template <class _Iter>
-struct __iterator_traits<_Iter, true>
-    : __iterator_traits_impl< _Iter,
-                              is_convertible<typename _Iter::iterator_category, input_iterator_tag>::value ||
-                                  is_convertible<typename _Iter::iterator_category, output_iterator_tag>::value > {};
-
 template <class _Tp>
-struct __has_iterator_typedefs {
-private:
-  template <class _Up>
-  static false_type __test(...);
-  template <class _Up>
-  static true_type
-  __test(__void_t<typename _Up::iterator_category>* = nullptr,
-         __void_t<typename _Up::difference_type>*   = nullptr,
-         __void_t<typename _Up::value_type>*        = nullptr,
-         __void_t<typename _Up::reference>*         = nullptr,
-         __void_t<typename _Up::pointer>*           = nullptr);
-
-public:
-  static const bool value = decltype(__test<_Tp>(nullptr, nullptr, nullptr, nullptr, nullptr))::value;
-};
-
-// iterator_traits<Iterator> will only have the nested types if Iterator::iterator_category
-//    exists.  Else iterator_traits<Iterator> will be an empty class.  This is a
-//    conforming extension which allows some programs to compile and behave as
-//    the client expects instead of failing at compile time.
-
-template <class _Iter>
-struct iterator_traits : __iterator_traits<_Iter, __has_iterator_typedefs<_Iter>::value> {
-  using __primary_template MSTD_NODEBUG = iterator_traits;
-};
-#endif // MSTD_STD_VER >= 20
-
-template <class _Tp>
-#if MSTD_STD_VER >= 20
   requires std::is_object_v<_Tp>
-#endif
 struct iterator_traits<_Tp*> {
   typedef ptrdiff_t difference_type;
   typedef std::remove_cv_t<_Tp> value_type;
   typedef _Tp* pointer;
   typedef _Tp& reference;
   typedef random_access_iterator_tag iterator_category;
-#if MSTD_STD_VER >= 20
   typedef contiguous_iterator_tag iterator_concept;
-#endif
 };
 
 template <class _Tp>
@@ -366,15 +303,10 @@ using __has_random_access_iterator_category MSTD_NODEBUG =
 // Such iterators receive special "contiguous" optimizations in
 // std::copy and std::sort.
 //
-#if MSTD_STD_VER >= 20
 template <class _Tp>
 struct _MSTD_is_contiguous_iterator
     : _Or< __has_iterator_category_convertible_to<_Tp, contiguous_iterator_tag>,
            __has_iterator_concept_convertible_to<_Tp, contiguous_iterator_tag> > {};
-#else
-template <class _Tp>
-struct _MSTD_is_contiguous_iterator : false_type {};
-#endif
 
 // Any native pointer which is an iterator is also a contiguous iterator.
 template <class _Up>
@@ -404,7 +336,6 @@ using __has_exactly_bidirectional_iterator_category MSTD_NODEBUG =
 template <class _InputIterator>
 using __iterator_value_type MSTD_NODEBUG = typename iterator_traits<_InputIterator>::value_type;
 
-#if MSTD_STD_VER >= 23
 template <class _InputIterator>
 using __iter_key_type MSTD_NODEBUG = std::remove_const_t<std::tuple_element_t<0, __iterator_value_type<_InputIterator>>>;
 
@@ -415,18 +346,6 @@ template <class _InputIterator>
 using __iter_to_alloc_type MSTD_NODEBUG =
     std::pair<const std::tuple_element_t<0, __iterator_value_type<_InputIterator>>,
          std::tuple_element_t<1, __iterator_value_type<_InputIterator>>>;
-#else
-template <class _InputIterator>
-using __iter_key_type MSTD_NODEBUG = __remove_const_t<typename __iterator_value_type<_InputIterator>::first_type>;
-
-template <class _InputIterator>
-using __iter_mapped_type MSTD_NODEBUG = typename __iterator_value_type<_InputIterator>::second_type;
-
-template <class _InputIterator>
-using __iter_to_alloc_type MSTD_NODEBUG =
-    pair<const typename __iterator_value_type<_InputIterator>::first_type,
-         typename __iterator_value_type<_InputIterator>::second_type>;
-#endif // MSTD_STD_VER >= 23
 
 template <class _Iter>
 using __iterator_iterator_category MSTD_NODEBUG = typename iterator_traits<_Iter>::iterator_category;
@@ -440,8 +359,6 @@ using __iterator_difference_type MSTD_NODEBUG = typename iterator_traits<_Iter>:
 template <class _Iter>
 using __iterator_reference MSTD_NODEBUG = typename iterator_traits<_Iter>::reference;
 
-#if MSTD_STD_VER >= 20
-
 // [readable.traits]
 
 // Let `RI` be `remove_cvref_t<I>`. The type `iter_value_t<I>` denotes
@@ -453,8 +370,6 @@ using iter_value_t =
     typename std::conditional_t<__is_primary_template<std::iterator_traits<std::remove_cvref_t<_Ip> > >::value,
                            std::indirectly_readable_traits<std::remove_cvref_t<_Ip> >,
                            std::iterator_traits<std::remove_cvref_t<_Ip> > >::value_type;
-
-#endif // MSTD_STD_VER >= 20
 
 MSTD_END_NAMESPACE
 

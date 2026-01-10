@@ -21,11 +21,7 @@ MSTD_BEGIN_NAMESPACE_STD
 
 template <typename _Alloc>
 MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX14 void __swap_allocator(_Alloc& __a1, _Alloc& __a2, std::true_type)
-#if MSTD_STD_VER >= 14
     _NOEXCEPT
-#else
-    _NOEXCEPT_(__is_nothrow_swappable_v<_Alloc>)
-#endif
 {
   std::swap(__a1, __a2);
 }
@@ -36,11 +32,7 @@ __swap_allocator(_Alloc&, _Alloc&, std::false_type) _NOEXCEPT {}
 
 template <typename _Alloc>
 inline MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX14 void __swap_allocator(_Alloc& __a1, _Alloc& __a2)
-#if MSTD_STD_VER >= 14
     _NOEXCEPT
-#else
-    _NOEXCEPT_(__is_nothrow_swappable_v<_Alloc>)
-#endif
 {
   mstd::__swap_allocator(
       __a1, __a2, std::integral_constant<bool, std::allocator_traits<_Alloc>::propagate_on_container_swap::value>());

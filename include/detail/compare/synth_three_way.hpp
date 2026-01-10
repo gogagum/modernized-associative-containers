@@ -22,8 +22,6 @@
 
 MSTD_BEGIN_NAMESPACE_STD
 
-#if MSTD_STD_VER >= 20
-
 // [expos.only.func]
 
 MSTD_HIDE_FROM_ABI inline constexpr auto __synth_three_way = []<class _Tp, class _Up>(const _Tp& __t, const _Up& __u)
@@ -46,8 +44,6 @@ MSTD_HIDE_FROM_ABI inline constexpr auto __synth_three_way = []<class _Tp, class
 template <class _Tp, class _Up = _Tp>
 using __synth_three_way_result MSTD_NODEBUG =
     decltype(mstd::__synth_three_way(std::declval<_Tp&>(), std::declval<_Up&>()));
-
-#endif // MSTD_STD_VER >= 20
 
 MSTD_END_NAMESPACE
 
