@@ -75,8 +75,6 @@ MSTD_PUSH_MACROS
 
 MSTD_BEGIN_NAMESPACE_STD
 
-#if MSTD_STD_VER >= 17
-
 // Specialized in __tree & __hash_table for their _NodeType.
 template <class _NodeType, class _Alloc>
 struct __generic_container_node_destructor;
@@ -201,8 +199,6 @@ struct __insert_return_type {
   bool inserted;
   _NodeType node;
 };
-
-#endif // MSTD_STD_VER >= 17
 
 MSTD_END_NAMESPACE
 

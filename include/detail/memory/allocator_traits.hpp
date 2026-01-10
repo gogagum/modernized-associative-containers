@@ -37,11 +37,7 @@ using __pointer MSTD_NODEBUG = __detected_or_t<_Tp*, __pointer_member, std::remo
 // This trait returns _Alias<_Alloc> if that's well-formed, and _Ptr rebound to _Tp otherwise
 template <class _Alloc, template <class> class _Alias, class _Ptr, class _Tp, class = void>
 struct __rebind_or_alias_pointer {
-#ifdef MSTD_CXX03_LANG
-  using type MSTD_NODEBUG = typename std::pointer_traits<_Ptr>::template rebind<_Tp>::other;
-#else
   using type MSTD_NODEBUG = typename std::pointer_traits<_Ptr>::template rebind<_Tp>;
-#endif
 };
 
 template <class _Ptr, class _Alloc, class _Tp, template <class> class _Alias>
@@ -202,16 +198,12 @@ inline const bool __has_select_on_container_copy_construction_v<
 
 MSTD_SUPPRESS_DEPRECATED_POP
 
-#if MSTD_STD_VER >= 23
-
 template <class _Pointer, class _SizeType = size_t>
 struct allocation_result {
   _Pointer ptr;
   _SizeType count;
 };
 MSTD_CTAD_SUPPORTED_FOR_TYPE(allocation_result);
-
-#endif // MSTD_STD_VER
 
 template <class _Alloc>
 struct allocator_traits {
@@ -228,21 +220,10 @@ struct allocator_traits {
   using propagate_on_container_swap            = __propagate_on_container_swap<allocator_type>;
   using is_always_equal                        = __is_always_equal<allocator_type>;
 
-#ifndef MSTD_CXX03_LANG
   template <class _Tp>
   using rebind_alloc = __allocator_traits_rebind_t<allocator_type, _Tp>;
   template <class _Tp>
   using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
-#else  // MSTD_CXX03_LANG
-  template <class _Tp>
-  struct rebind_alloc {
-    using other = __allocator_traits_rebind_t<allocator_type, _Tp>;
-  };
-  template <class _Tp>
-  struct rebind_traits {
-    using other = allocator_traits<typename rebind_alloc<_Tp>::other>;
-  };
-#endif // MSTD_CXX03_LANG
 
   [[__nodiscard__]] MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static pointer
   allocate(allocator_type& __a, size_type __n) {
@@ -262,7 +243,6 @@ struct allocator_traits {
     return __a.allocate(__n);
   }
 
-#if MSTD_STD_VER >= 23
   template <class _Ap = _Alloc>
   [[nodiscard]] MSTD_HIDE_FROM_ABI static constexpr allocation_result<pointer, size_type>
   allocate_at_least(_Ap& __alloc, size_type __n) {
@@ -272,7 +252,6 @@ struct allocator_traits {
       return {__alloc.allocate(__n), __n};
     }
   }
-#endif
 
   MSTD_HIDE_FROM_ABI MSTD_CONSTEXPR_SINCE_CXX20 static void
   deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT {
@@ -328,13 +307,8 @@ struct allocator_traits {
   }
 };
 
-#ifndef MSTD_CXX03_LANG
 template <class _Traits, class _Tp>
 using __rebind_alloc MSTD_NODEBUG = typename _Traits::template rebind_alloc<_Tp>;
-#else
-template <class _Traits, class _Tp>
-using __rebind_alloc MSTD_NODEBUG = typename _Traits::template rebind_alloc<_Tp>::other;
-#endif
 
 template <class _Alloc>
 struct __check_valid_allocator : std::true_type {

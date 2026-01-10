@@ -579,7 +579,6 @@ public:
     // We use a union to avoid initialization during member initialization, which allows us
     // to use the allocator from the container to construct the `__node_value_type` in the
     // memory provided by the union member
-    #ifndef MSTD_CXX03_LANG
 
 private:
     union {
@@ -588,14 +587,6 @@ private:
 
 public:
     MSTD_HIDE_FROM_ABI __node_value_type& __get_value() { return __value_; }
-    #else
-
-private:
-    _ALIGNAS_TYPE(__node_value_type) unsigned char __buffer_[sizeof(__node_value_type)];
-
-public:
-    MSTD_HIDE_FROM_ABI __node_value_type& __get_value() { return *reinterpret_cast<__node_value_type*>(__buffer_); }
-    #endif
 
     template <class _Alloc, class... _Args>
     MSTD_HIDE_FROM_ABI explicit __tree_node(_Alloc& __na, _Args&&... __args) {
@@ -638,14 +629,12 @@ public:
     friend class __map_node_destructor;
 };
 
-#if MSTD_STD_VER >= 17
 template <class _NodeType, class _Alloc>
 struct __generic_container_node_destructor;
 template <class _Tp, class _VoidPtr, class _Alloc>
 struct __generic_container_node_destructor<__tree_node<_Tp, _VoidPtr>, _Alloc> : __tree_node_destructor<_Alloc> {
     using __tree_node_destructor<_Alloc>::__tree_node_destructor;
 };
-#endif
 
 // Do an in-order traversal of the tree until `__break` returns true. Takes the root node of the tree.
 template <class _Reference, class _Break, class _NodePtr, class _Func, class _Proj>
@@ -758,7 +747,6 @@ private:
     friend void __tree_iterate_subrange(_NodeIter, _NodeIter, _Func&, _Proj&);
 };
 
-#ifndef MSTD_CXX03_LANG
 // This also handles {multi,}set::iterator, since they're just aliases to __tree::iterator
 template <class _Tp, class _NodePtr, class _DiffType>
 struct __specialized_algorithm<
@@ -773,7 +761,6 @@ __iterator_pair<__tree_iterator<_Tp, _NodePtr, _DiffType>, __tree_iterator<_Tp, 
         mstd::__tree_iterate_subrange(__first, __last, __func, __proj);
     }
 };
-#endif
 
 template <class _Tp, class _NodePtr, class _DiffType>
 class __tree_const_iterator {
@@ -843,7 +830,6 @@ private:
     friend void __tree_iterate_subrange(_NodeIter, _NodeIter, _Func&, _Proj&);
 };
 
-#ifndef MSTD_CXX03_LANG
 // This also handles {multi,}set::const_iterator, since they're just aliases to __tree::iterator
 template <class _Tp, class _NodePtr, class _DiffType>
 struct __specialized_algorithm<
@@ -858,13 +844,10 @@ __iterator_pair<__tree_const_iterator<_Tp, _NodePtr, _DiffType>, __tree_const_it
         mstd::__tree_iterate_subrange(__first, __last, __func, __proj);
     }
 };
-#endif
 
 template <class _Tp, class _Compare>
-#ifndef MSTD_CXX03_LANG
 MSTD_DIAGNOSE_WARNING(!__is_invocable_v<_Compare const&, _Tp const&, _Tp const&>,
                          "the specified comparator type does not provide a viable const call operator")
-#endif
 int __diagnose_non_const_comparator();
 
 template <class _Tp, class _Compare, class _Allocator>
@@ -1008,12 +991,7 @@ public:
     MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT;
 
     MSTD_HIDE_FROM_ABI void swap(__tree& __t)
-    #if MSTD_STD_VER <= 11
-    _NOEXCEPT_(__is_nothrow_swappable_v<value_compare> &&
-    (!__node_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<__node_allocator>));
-    #else
     _NOEXCEPT_(std::is_nothrow_swappable_v<value_compare>);
-    #endif
 
     template <class... _Args>
     MSTD_HIDE_FROM_ABI iterator __emplace_multi(_Args&&... __args);
@@ -1162,7 +1140,6 @@ public:
 
     MSTD_HIDE_FROM_ABI iterator __remove_node_pointer(__node_pointer) _NOEXCEPT;
 
-    #if MSTD_STD_VER >= 17
     template <class _NodeHandle, class _InsertReturnType>
     MSTD_HIDE_FROM_ABI _InsertReturnType __node_handle_insert_unique(_NodeHandle&&);
     template <class _NodeHandle>
@@ -1181,7 +1158,6 @@ public:
     MSTD_HIDE_FROM_ABI _NodeHandle __node_handle_extract(key_type const&);
     template <class _NodeHandle>
     MSTD_HIDE_FROM_ABI _NodeHandle __node_handle_extract(const_iterator);
-    #endif
 
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p);
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __f, const_iterator __l);
@@ -1520,7 +1496,6 @@ private:
         friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<__tree> >;
 };
 
-#if MSTD_STD_VER >= 14
 template <class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<__tree<_Tp, _Compare, _Allocator> > > {
     static const bool __has_algorithm = true;
@@ -1535,7 +1510,6 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<__tree<_Tp
             return std::make_pair(__range.end(), std::move(__func));
     }
 };
-#endif
 
 template <class _Tp, class _Compare, class _Allocator>
 __tree<_Tp, _Compare, _Allocator>& __tree<_Tp, _Compare, _Allocator>::operator=(const __tree& __t) {
@@ -1658,12 +1632,7 @@ void __tree<_Tp, _Compare, _Allocator>::__move_assign(__tree& __t, std::false_ty
 
 template <class _Tp, class _Compare, class _Allocator>
 void __tree<_Tp, _Compare, _Allocator>::swap(__tree& __t)
-#if MSTD_STD_VER <= 11
-_NOEXCEPT_(__is_nothrow_swappable_v<value_compare> &&
-(!__node_traits::propagate_on_container_swap::value || __is_nothrow_swappable_v<__node_allocator>))
-#else
 _NOEXCEPT_(std::is_nothrow_swappable_v<value_compare>)
-#endif
 {
     using std::swap;
     swap(__begin_node_, __t.__begin_node_);
@@ -1924,7 +1893,6 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
         return __r;
     }
 
-    #if MSTD_STD_VER >= 17
     template <class _Tp, class _Compare, class _Allocator>
     template <class _NodeHandle, class _InsertReturnType>
     MSTD_HIDE_FROM_ABI _InsertReturnType
@@ -2035,8 +2003,6 @@ void __tree<_Tp, _Compare, _Allocator>::__insert_node_at(
             __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__src_ptr));
         }
     }
-
-    #endif // MSTD_STD_VER >= 17
 
     template <class _Tp, class _Compare, class _Allocator>
     typename __tree<_Tp, _Compare, _Allocator>::iterator __tree<_Tp, _Compare, _Allocator>::erase(const_iterator __p) {

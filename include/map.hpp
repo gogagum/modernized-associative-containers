@@ -571,37 +571,31 @@ erase_if(multimap<Key, T, Compare, Allocator>& c, Predicate pred);  // C++20
 
 */
 
-#if __cplusplus < 201103L && defined(MSTD_USE_FROZEN_CXX03_HEADERS)
-#  include <__cxx03/map>
-#else
-#  include <algorithm>
-#  include <cassert>
-#  include <detail/config.hpp>
-#  include <functional>
-#  include <detail/functional/is_transparent.hpp>
-#  include <detail/iterator/erase_if_container.hpp>
-#  include <iterator>
-//#  include <__iterator/ranges_iterator_traits.h>
-# // include <__iterator/reverse_iterator.h>
-#  include <memory>
-#  include <detail/memory/compressed_pair.hpp>
+#include <algorithm>
+#include <cassert>
+#include <detail/config.hpp>
+#include <functional>
+#include <detail/functional/is_transparent.hpp>
+#include <detail/iterator/erase_if_container.hpp>
+#include <iterator>
+#include <memory>
+#include <detail/memory/compressed_pair.hpp>
 #include <detail/iterator/iterator_traits.hpp>
 #include <detail/iterator/range_iterator_traits.hpp>
 #include <detail/iterator/erase_if_container.hpp>
 #include <detail/compare/synth_three_way.hpp>
-#  include <memory_resource>
-#  include <detail/node_handle.hpp>
+#include <memory_resource>
+#include <detail/node_handle.hpp>
 #include <ranges>
-#  include <detail/tree.hpp>
-#  include <detail/type_traits/container_traits.hpp>
-#  include <detail/type_traits/is_allocator.hpp>
-//#  include <__type_traits/make_transparent.h>
-#  include <utility>
-#  include <detail/utility/lazy_synth_three_way_comparator.hpp>
+#include <detail/tree.hpp>
+#include <detail/type_traits/container_traits.hpp>
+#include <detail/type_traits/is_allocator.hpp>
+#include <utility>
+#include <detail/utility/lazy_synth_three_way_comparator.hpp>
 #include <detail/ranges/container_compatible_range.hpp>
-#  include <stdexcept>
-#  include <tuple>
-#  include <version>
+#include <stdexcept>
+#include <tuple>
+#include <version>
 
 // standard-mandated includes
 
@@ -637,7 +631,6 @@ public:
         swap(__comp_, __y.__comp_);
     }
 
-    #  if MSTD_STD_VER >= 14
     template <typename _K2>
     MSTD_HIDE_FROM_ABI bool operator()(const _K2& __x, const _CP& __y) const {
         return __comp_(__x, __y.first);
@@ -647,7 +640,6 @@ public:
     MSTD_HIDE_FROM_ABI bool operator()(const _CP& __x, const _K2& __y) const {
         return __comp_(__x.first, __y);
     }
-    #  endif
 };
 
 template <class _Key, class _MapValueT, class _Compare>
@@ -655,7 +647,6 @@ struct __make_transparent<__map_value_compare<_Key, _MapValueT, _Compare> > {
     using type MSTD_NODEBUG = __map_value_compare<_Key, _MapValueT, __make_transparent_t<_Compare> >;
 };
 
-#  if MSTD_STD_VER >= 14
 template <class _MapValueT, class _Key, class _Compare>
 struct __lazy_synth_three_way_comparator<__map_value_compare<_Key, _MapValueT, _Compare>, _MapValueT, _MapValueT> {
     __lazy_synth_three_way_comparator<_Compare, _Key, _Key> __comp_;
@@ -697,7 +688,6 @@ struct __lazy_synth_three_way_comparator<__map_value_compare<_Key, _MapValueT, _
         return __comp_(__lhs.first, __rhs);
     }
 };
-#  endif // MSTD_STD_VER >= 14
 
 template <class _Key, class _CP, class _Compare>
 inline MSTD_HIDE_FROM_ABI void
@@ -726,14 +716,12 @@ public:
     __first_constructed(false),
     __second_constructed(false) {}
 
-    #  ifndef MSTD_CXX03_LANG
     MSTD_HIDE_FROM_ABI __map_node_destructor(__tree_node_destructor<allocator_type>&& __x) _NOEXCEPT
     : __na_(__x.__na_),
     __first_constructed(__x.__value_constructed),
     __second_constructed(__x.__value_constructed) {
         __x.__value_constructed = false;
     }
-    #  endif // MSTD_CXX03_LANG
 
     __map_node_destructor& operator=(const __map_node_destructor&) = delete;
 
@@ -806,7 +794,6 @@ public:
     friend struct __specialized_algorithm;
 };
 
-#  ifndef MSTD_CXX03_LANG
 template <class _Alg, class _TreeIterator>
 struct __specialized_algorithm<_Alg, __iterator_pair<__map_iterator<_TreeIterator>, __map_iterator<_TreeIterator>>> {
     using __base MSTD_NODEBUG = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
@@ -820,7 +807,6 @@ struct __specialized_algorithm<_Alg, __iterator_pair<__map_iterator<_TreeIterato
         __base()(__first.__i_, __last.__i_, std::forward<_Args>(__args)...);
     }
 };
-#  endif
 
 template <class _TreeIterator>
 class __map_const_iterator {
@@ -880,7 +866,6 @@ public:
     friend struct __specialized_algorithm;
 };
 
-#  ifndef MSTD_CXX03_LANG
 template <class _Alg, class _TreeIterator>
 struct __specialized_algorithm<
 _Alg,
@@ -896,7 +881,6 @@ __iterator_pair<__map_const_iterator<_TreeIterator>, __map_const_iterator<_TreeI
         __base()(__first.__i_, __last.__i_, std::forward<_Args>(__args)...);
     }
 };
-#  endif
 
 template <class _Key, class _Tp, class _Compare = std::less<_Key>, class _Allocator = std::allocator<std::pair<const _Key, _Tp> > >
 class multimap;
@@ -951,10 +935,8 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    #  if MSTD_STD_VER >= 17
     typedef __map_node_handle<typename __base::__node, allocator_type> node_type;
     typedef __insert_return_type<iterator, node_type> insert_return_type;
-    #  endif
 
     template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
     friend class map;
@@ -986,7 +968,6 @@ public:
         insert(__f, __l);
     }
 
-    #  if MSTD_STD_VER >= 23
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI
     map(std::from_range_t,
@@ -996,25 +977,18 @@ public:
     : __tree_(__vc(__comp), typename __base::allocator_type(__a)) {
         insert_range(std::forward<_Range>(__range));
     }
-    #  endif
-
-    #  if MSTD_STD_VER >= 14
+    
     template <class _InputIterator>
     MSTD_HIDE_FROM_ABI map(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : map(__f, __l, key_compare(), __a) {}
-    #  endif
 
-    #  if MSTD_STD_VER >= 23
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI map(std::from_range_t, _Range&& __range, const allocator_type& __a)
     : map(std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
-    #  endif
 
     MSTD_HIDE_FROM_ABI map(const map& __m) = default;
 
     MSTD_HIDE_FROM_ABI map& operator=(const map& __m) = default;
-
-    #  ifndef MSTD_CXX03_LANG
 
     MSTD_HIDE_FROM_ABI map(map&& __m) = default;
 
@@ -1032,18 +1006,14 @@ public:
         insert(__il.begin(), __il.end());
     }
 
-    #    if MSTD_STD_VER >= 14
     MSTD_HIDE_FROM_ABI map(std::initializer_list<value_type> __il, const allocator_type& __a)
     : map(__il, key_compare(), __a) {}
-    #    endif
 
     MSTD_HIDE_FROM_ABI map& operator=(std::initializer_list<value_type> __il) {
         clear();
         insert(__il.begin(), __il.end());
         return *this;
     }
-
-    #  endif // MSTD_CXX03_LANG
 
     MSTD_HIDE_FROM_ABI explicit map(const allocator_type& __a) : __tree_(typename __base::allocator_type(__a)) {}
 
@@ -1075,9 +1045,7 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT { return __tree_.max_size(); }
 
     MSTD_HIDE_FROM_ABI mapped_type& operator[](const key_type& __k);
-    #  ifndef MSTD_CXX03_LANG
     MSTD_HIDE_FROM_ABI mapped_type& operator[](key_type&& __k);
-    #  endif
 
     template <class _Arg,
     std::enable_if_t<__is_transparently_comparable_v<_Compare, key_type, std::remove_cvref_t<_Arg> >, int> = 0>
@@ -1108,7 +1076,6 @@ public:
         return value_compare(__tree_.value_comp().key_comp());
     }
 
-    #  ifndef MSTD_CXX03_LANG
     template <class... _Args>
     MSTD_HIDE_FROM_ABI std::pair<iterator, bool> emplace(_Args&&... __args) {
         return __tree_.__emplace_unique(std::forward<_Args>(__args)...);
@@ -1129,15 +1096,12 @@ public:
         return __tree_.__emplace_hint_unique(__pos.__i_, std::forward<_Pp>(__p)).first;
     }
 
-    #  endif // MSTD_CXX03_LANG
-
     MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(const value_type& __v) { return __tree_.__emplace_unique(__v); }
 
     MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
         return __tree_.__emplace_hint_unique(__p.__i_, __v).first;
     }
 
-    #  ifndef MSTD_CXX03_LANG
     MSTD_HIDE_FROM_ABI std::pair<iterator, bool> insert(value_type&& __v) {
         return __tree_.__emplace_unique(std::move(__v));
     }
@@ -1147,21 +1111,16 @@ public:
     }
 
     MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
-    #  endif
 
     template <class _InputIterator>
     MSTD_HIDE_FROM_ABI void insert(_InputIterator __first, _InputIterator __last) {
         __tree_.__insert_range_unique(__first, __last);
     }
 
-    #  if MSTD_STD_VER >= 23
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
         __tree_.__insert_range_unique( std::ranges::begin(__range),  std::ranges::end(__range));
     }
-    #  endif
-
-    #  if MSTD_STD_VER >= 17
 
     template <class... _Args>
     MSTD_HIDE_FROM_ABI std::pair<iterator, bool> try_emplace(const key_type& __k, _Args&&... __args) {
@@ -1237,8 +1196,6 @@ public:
         return __r;
     }
 
-    #  endif // MSTD_STD_VER >= 17
-
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p.__i_); }
     MSTD_HIDE_FROM_ABI iterator erase(iterator __p) { return __tree_.erase(__p.__i_); }
     MSTD_HIDE_FROM_ABI size_type erase(const key_type& __k) { return __tree_.__erase_unique(__k); }
@@ -1247,7 +1204,6 @@ public:
     }
     MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
 
-    #  if MSTD_STD_VER >= 17
     MSTD_HIDE_FROM_ABI insert_return_type insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to map::insert()");
@@ -1288,13 +1244,11 @@ public:
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         __tree_.__node_handle_merge_unique(__source.__tree_);
     }
-    #  endif
 
     MSTD_HIDE_FROM_ABI void swap(map& __m) _NOEXCEPT_(std::is_nothrow_swappable_v<__base>) { __tree_.swap(__m.__tree_); }
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
-    #  if MSTD_STD_VER >= 14
     template <typename _K2,
     std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
     int> = 0>
@@ -1307,19 +1261,16 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
-    #  endif
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
         return __tree_.__count_unique(__k);
     }
-    #  if MSTD_STD_VER >= 14
+
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
-    #  endif
 
-    #  if MSTD_STD_VER >= 20
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2,
     std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
@@ -1327,7 +1278,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
-    #  endif // MSTD_STD_VER >= 20
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_unique(__k);
@@ -1339,7 +1289,6 @@ public:
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
     // match multiple elements.
-    #  if MSTD_STD_VER >= 14
     template <typename _K2,
     std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
     int> = 0>
@@ -1353,7 +1302,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
-    #  endif
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_unique(__k);
@@ -1363,7 +1311,6 @@ public:
         return __tree_.__upper_bound_unique(__k);
     }
 
-    #  if MSTD_STD_VER >= 14
     template <typename _K2,
     std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
     int> = 0>
@@ -1376,15 +1323,12 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
-    #  endif
-
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_unique(__k);
     }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_unique(__k);
     }
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
         return __tree_.__equal_range_multi(__k);
@@ -1393,7 +1337,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
-    #  endif
 
 private:
     typedef typename __base::__node __node;
@@ -1404,14 +1347,9 @@ private:
     typedef __map_node_destructor<__node_allocator> _Dp;
     typedef std::unique_ptr<__node, _Dp> __node_holder;
 
-    #  ifdef MSTD_CXX03_LANG
-    MSTD_HIDE_FROM_ABI __node_holder __construct_node_with_key(const key_type& __k);
-    #  endif
-
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map> >;
 };
 
-#  if MSTD_STD_VER >= 17
 template <class _InputIterator,
 class _Compare   = std::less<__iter_key_type<_InputIterator>>,
 class _Allocator = std::allocator<__iter_to_alloc_type<_InputIterator>>,
@@ -1421,7 +1359,6 @@ class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
 map(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
 -> map<__iter_key_type<_InputIterator>, __iter_mapped_type<_InputIterator>, _Compare, _Allocator>;
 
-#    if MSTD_STD_VER >= 23
 template < std::ranges::input_range _Range,
 class _Compare   = std::less<__range_key_type<_Range>>,
 class _Allocator = std::allocator<__range_to_alloc_type<_Range>>,
@@ -1429,7 +1366,6 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
 map(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
 -> map<__range_key_type<_Range>, __range_mapped_type<_Range>, _Compare, _Allocator>;
-#    endif
 
 template <class _Key,
 class _Tp,
@@ -1450,18 +1386,14 @@ __iter_mapped_type<_InputIterator>,
 std::less<__iter_key_type<_InputIterator>>,
 _Allocator>;
 
-#    if MSTD_STD_VER >= 23
 template < std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 map(std::from_range_t, _Range&&, _Allocator)
 -> map<__range_key_type<_Range>, __range_mapped_type<_Range>, std::less<__range_key_type<_Range>>, _Allocator>;
-#    endif
 
 template <class _Key, class _Tp, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 map(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
 -> map<std::remove_const_t<_Key>, _Tp, std::less<std::remove_const_t<_Key>>, _Allocator>;
-#  endif
 
-#  if MSTD_STD_VER >= 14
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<_Key, _Tp, _Compare, _Allocator>>> {
     using __map MSTD_NODEBUG = map<_Key, _Tp, _Compare, _Allocator>;
@@ -1475,9 +1407,7 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<_Key, 
         return std::make_pair(__map.end(), std::move(__func2));
     }
 };
-#  endif
 
-#  ifndef MSTD_CXX03_LANG
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 _Tp& map<_Key, _Tp, _Compare, _Allocator>::operator[](const key_type& __k) {
     return __tree_.__emplace_unique(std::piecewise_construct, std::forward_as_tuple(__k), std::forward_as_tuple())
@@ -1490,34 +1420,6 @@ _Tp& map<_Key, _Tp, _Compare, _Allocator>::operator[](key_type&& __k) {
     .__emplace_unique(std::piecewise_construct, std::forward_as_tuple(std::move(__k)), std::forward_as_tuple())
     .first->second;
 }
-
-#  else // MSTD_CXX03_LANG
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-typename map<_Key, _Tp, _Compare, _Allocator>::__node_holder
-map<_Key, _Tp, _Compare, _Allocator>::__construct_node_with_key(const key_type& __k) {
-    __node_allocator& __na = __tree_.__node_alloc();
-    __node_holder __h(__node_traits::allocate(__na, 1), _Dp(__na));
-    __node_traits::construct(__na, std::addressof(__h->__get_value().first), __k);
-    __h.get_deleter().__first_constructed = true;
-    __node_traits::construct(__na, std::addressof(__h->__get_value().second));
-    __h.get_deleter().__second_constructed = true;
-    return __h;
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-_Tp& map<_Key, _Tp, _Compare, _Allocator>::operator[](const key_type& __k) {
-    auto [__parent, __child] = __tree_.__find_equal(__k);
-    __node_pointer __r       = static_cast<__node_pointer>(__child);
-    if (__child == nullptr) {
-        __node_holder __h = __construct_node_with_key(__k);
-        __tree_.__insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
-        __r = __h.release();
-    }
-    return __r->__get_value().second;
-}
-
-#  endif // MSTD_CXX03_LANG
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 _Tp& map<_Key, _Tp, _Compare, _Allocator>::at(const key_type& __k) {
@@ -1541,47 +1443,11 @@ operator==(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp,
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
-#  if MSTD_STD_VER <= 17
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator<(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return std::lexicographical_compare(__x.begin(), __x.end(), __y.begin(), __y.end());
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator!=(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__x == __y);
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator>(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return __y < __x;
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator>=(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__x < __y);
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator<=(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__y < __x);
-}
-
-#  else // #if MSTD_STD_VER <= 17
-
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 MSTD_HIDE_FROM_ABI __synth_three_way_result<std::pair<const _Key, _Tp>>
 operator<=>(const map<_Key, _Tp, _Compare, _Allocator>& __x, const map<_Key, _Tp, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), mstd::__synth_three_way);
 }
-
-#  endif // #if MSTD_STD_VER <= 17
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 inline MSTD_HIDE_FROM_ABI void
@@ -1590,13 +1456,11 @@ _NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
     __x.swap(__y);
 }
 
-#  if MSTD_STD_VER >= 20
 template <class _Key, class _Tp, class _Compare, class _Allocator, class _Predicate>
 inline MSTD_HIDE_FROM_ABI typename map<_Key, _Tp, _Compare, _Allocator>::size_type
 erase_if(map<_Key, _Tp, _Compare, _Allocator>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }
-#  endif
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 struct __container_traits<map<_Key, _Tp, _Compare, _Allocator> > {
@@ -1657,9 +1521,7 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    #  if MSTD_STD_VER >= 17
     typedef __map_node_handle<typename __base::__node, allocator_type> node_type;
-    #  endif
 
     template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
     friend class map;
@@ -1691,7 +1553,6 @@ public:
         insert(__f, __l);
     }
 
-    #  if MSTD_STD_VER >= 23
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI
     multimap(std::from_range_t,
@@ -1701,25 +1562,18 @@ public:
     : __tree_(__vc(__comp), typename __base::allocator_type(__a)) {
         insert_range(std::forward<_Range>(__range));
     }
-    #  endif
 
-    #  if MSTD_STD_VER >= 14
     template <class _InputIterator>
     MSTD_HIDE_FROM_ABI multimap(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : multimap(__f, __l, key_compare(), __a) {}
-    #  endif
-
-    #  if MSTD_STD_VER >= 23
+    
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI multimap(std::from_range_t, _Range&& __range, const allocator_type& __a)
     : multimap(std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
-    #  endif
-
+    
     MSTD_HIDE_FROM_ABI multimap(const multimap& __m) = default;
 
     MSTD_HIDE_FROM_ABI multimap& operator=(const multimap& __m) = default;
-
-    #  ifndef MSTD_CXX03_LANG
 
     MSTD_HIDE_FROM_ABI multimap(multimap&& __m) = default;
 
@@ -1738,18 +1592,14 @@ public:
         insert(__il.begin(), __il.end());
     }
 
-    #    if MSTD_STD_VER >= 14
     MSTD_HIDE_FROM_ABI multimap(std::initializer_list<value_type> __il, const allocator_type& __a)
     : multimap(__il, key_compare(), __a) {}
-    #    endif
-
+    
     MSTD_HIDE_FROM_ABI multimap& operator=(std::initializer_list<value_type> __il) {
         clear();
         insert(__il.begin(), __il.end());
         return *this;
     }
-
-    #  endif // MSTD_CXX03_LANG
 
     MSTD_HIDE_FROM_ABI explicit multimap(const allocator_type& __a) : __tree_(typename __base::allocator_type(__a)) {}
 
@@ -1790,8 +1640,6 @@ public:
         return value_compare(__tree_.value_comp().key_comp());
     }
 
-    #  ifndef MSTD_CXX03_LANG
-
     template <class... _Args>
     MSTD_HIDE_FROM_ABI iterator emplace(_Args&&... __args) {
         return __tree_.__emplace_multi(std::forward<_Args>(__args)...);
@@ -1820,8 +1668,6 @@ public:
 
     MSTD_HIDE_FROM_ABI void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
 
-    #  endif // MSTD_CXX03_LANG
-
     MSTD_HIDE_FROM_ABI iterator insert(const value_type& __v) { return __tree_.__emplace_multi(__v); }
 
     MSTD_HIDE_FROM_ABI iterator insert(const_iterator __p, const value_type& __v) {
@@ -1833,12 +1679,10 @@ public:
         __tree_.__insert_range_multi(__f, __l);
     }
 
-    #  if MSTD_STD_VER >= 23
     template <_ContainerCompatibleRange<value_type> _Range>
     MSTD_HIDE_FROM_ABI void insert_range(_Range&& __range) {
         __tree_.__insert_range_multi( std::ranges::begin(__range),  std::ranges::end(__range));
     }
-    #  endif
 
     MSTD_HIDE_FROM_ABI iterator erase(const_iterator __p) { return __tree_.erase(__p.__i_); }
     MSTD_HIDE_FROM_ABI iterator erase(iterator __p) { return __tree_.erase(__p.__i_); }
@@ -1847,7 +1691,6 @@ public:
         return __tree_.erase(__f.__i_, __l.__i_);
     }
 
-    #  if MSTD_STD_VER >= 17
     MSTD_HIDE_FROM_ABI iterator insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multimap::insert()");
@@ -1888,7 +1731,6 @@ public:
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         return __tree_.__node_handle_merge_multi(__source.__tree_);
     }
-    #  endif
 
     MSTD_HIDE_FROM_ABI void clear() _NOEXCEPT { __tree_.clear(); }
 
@@ -1898,7 +1740,6 @@ public:
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const key_type& __k) { return __tree_.find(__k); }
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const key_type& __k) const { return __tree_.find(__k); }
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator find(const _K2& __k) {
         return __tree_.find(__k);
@@ -1907,25 +1748,20 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator find(const _K2& __k) const {
         return __tree_.find(__k);
     }
-    #  endif
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const key_type& __k) const {
         return __tree_.__count_multi(__k);
     }
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI size_type count(const _K2& __k) const {
         return __tree_.__count_multi(__k);
     }
-    #  endif
 
-    #  if MSTD_STD_VER >= 20
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const key_type& __k) const { return find(__k) != end(); }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
-    #  endif // MSTD_STD_VER >= 20
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const key_type& __k) {
         return __tree_.__lower_bound_multi(__k);
@@ -1935,7 +1771,6 @@ public:
         return __tree_.__lower_bound_multi(__k);
     }
 
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator lower_bound(const _K2& __k) {
         return __tree_.__lower_bound_multi(__k);
@@ -1945,7 +1780,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator lower_bound(const _K2& __k) const {
         return __tree_.__lower_bound_multi(__k);
     }
-    #  endif
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const key_type& __k) {
         return __tree_.__upper_bound_multi(__k);
@@ -1955,7 +1789,6 @@ public:
         return __tree_.__upper_bound_multi(__k);
     }
 
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI iterator upper_bound(const _K2& __k) {
         return __tree_.__upper_bound_multi(__k);
@@ -1964,7 +1797,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI const_iterator upper_bound(const _K2& __k) const {
         return __tree_.__upper_bound_multi(__k);
     }
-    #  endif
 
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const key_type& __k) {
         return __tree_.__equal_range_multi(__k);
@@ -1972,7 +1804,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
-    #  if MSTD_STD_VER >= 14
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<iterator, iterator> equal_range(const _K2& __k) {
         return __tree_.__equal_range_multi(__k);
@@ -1981,7 +1812,6 @@ public:
     [[__nodiscard__]] MSTD_HIDE_FROM_ABI std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return __tree_.__equal_range_multi(__k);
     }
-    #  endif
 
 private:
     typedef typename __base::__node __node;
@@ -1994,7 +1824,6 @@ private:
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap> >;
 };
 
-#  if MSTD_STD_VER >= 17
 template <class _InputIterator,
 class _Compare   = std::less<__iter_key_type<_InputIterator>>,
 class _Allocator = std::allocator<__iter_to_alloc_type<_InputIterator>>,
@@ -2004,7 +1833,6 @@ class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multimap(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
 -> multimap<__iter_key_type<_InputIterator>, __iter_mapped_type<_InputIterator>, _Compare, _Allocator>;
 
-#    if MSTD_STD_VER >= 23
 template < std::ranges::input_range _Range,
 class _Compare   = std::less<__range_key_type<_Range>>,
 class _Allocator = std::allocator<__range_to_alloc_type<_Range>>,
@@ -2012,7 +1840,6 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multimap(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
 -> multimap<__range_key_type<_Range>, __range_mapped_type<_Range>, _Compare, _Allocator>;
-#    endif
 
 template <class _Key,
 class _Tp,
@@ -2033,18 +1860,14 @@ __iter_mapped_type<_InputIterator>,
 std::less<__iter_key_type<_InputIterator>>,
 _Allocator>;
 
-#    if MSTD_STD_VER >= 23
 template < std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multimap(std::from_range_t, _Range&&, _Allocator)
 -> multimap<__range_key_type<_Range>, __range_mapped_type<_Range>, std::less<__range_key_type<_Range>>, _Allocator>;
-#    endif
 
 template <class _Key, class _Tp, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multimap(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
 -> multimap<std::remove_const_t<_Key>, _Tp, std::less<std::remove_const_t<_Key>>, _Allocator>;
-#  endif
 
-#  if MSTD_STD_VER >= 14
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<_Key, _Tp, _Compare, _Allocator>>> {
     using __map MSTD_NODEBUG = multimap<_Key, _Tp, _Compare, _Allocator>;
@@ -2058,7 +1881,6 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<_
         return std::make_pair(__map.end(), std::move(__func2));
     }
 };
-#  endif
 
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 inline MSTD_HIDE_FROM_ABI bool
@@ -2066,100 +1888,48 @@ operator==(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
-#  if MSTD_STD_VER <= 17
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator<(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return std::lexicographical_compare(__x.begin(), __x.end(), __y.begin(), __y.end());
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator!=(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__x == __y);
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator>(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return __y < __x;
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator>=(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__x < __y);
-}
-
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-inline MSTD_HIDE_FROM_ABI bool
-operator<=(const multimap<_Key, _Tp, _Compare, _Allocator>& __x, const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
-    return !(__y < __x);
-}
-
-#  else // #if MSTD_STD_VER <= 17
-
 template <class _Key, class _Tp, class _Compare, class _Allocator>
 MSTD_HIDE_FROM_ABI __synth_three_way_result<std::pair<const _Key, _Tp>>
 operator<=>(const multimap<_Key, _Tp, _Compare, _Allocator>& __x,
             const multimap<_Key, _Tp, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), __synth_three_way);
-            }
+}
 
-            #  endif // #if MSTD_STD_VER <= 17
+template <class _Key, class _Tp, class _Compare, class _Allocator>
+inline MSTD_HIDE_FROM_ABI void
+swap(multimap<_Key, _Tp, _Compare, _Allocator>& __x, multimap<_Key, _Tp, _Compare, _Allocator>& __y)
+_NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
+    __x.swap(__y);
+}
 
-            template <class _Key, class _Tp, class _Compare, class _Allocator>
-            inline MSTD_HIDE_FROM_ABI void
-            swap(multimap<_Key, _Tp, _Compare, _Allocator>& __x, multimap<_Key, _Tp, _Compare, _Allocator>& __y)
-            _NOEXCEPT_(_NOEXCEPT_(__x.swap(__y))) {
-                __x.swap(__y);
-            }
+template <class _Key, class _Tp, class _Compare, class _Allocator, class _Predicate>
+inline MSTD_HIDE_FROM_ABI typename multimap<_Key, _Tp, _Compare, _Allocator>::size_type
+erase_if(multimap<_Key, _Tp, _Compare, _Allocator>& __c, _Predicate __pred) {
+    return mstd::_MSTD_erase_if_container(__c, __pred);
+}
 
-            #  if MSTD_STD_VER >= 20
-            template <class _Key, class _Tp, class _Compare, class _Allocator, class _Predicate>
-            inline MSTD_HIDE_FROM_ABI typename multimap<_Key, _Tp, _Compare, _Allocator>::size_type
-            erase_if(multimap<_Key, _Tp, _Compare, _Allocator>& __c, _Predicate __pred) {
-                return mstd::_MSTD_erase_if_container(__c, __pred);
-            }
-            #  endif
+template <class _Key, class _Tp, class _Compare, class _Allocator>
+struct __container_traits<multimap<_Key, _Tp, _Compare, _Allocator> > {
+    // http://eel.is/c++draft/associative.reqmts.except#2
+    // For associative containers, if an exception is thrown by any operation from within
+    // an insert or emplace function inserting a single element, the insertion has no effect.
+    static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+    static MSTD_CONSTEXPR const bool __reservable = false;
+};
 
-            template <class _Key, class _Tp, class _Compare, class _Allocator>
-            struct __container_traits<multimap<_Key, _Tp, _Compare, _Allocator> > {
-                // http://eel.is/c++draft/associative.reqmts.except#2
-                // For associative containers, if an exception is thrown by any operation from within
-                // an insert or emplace function inserting a single element, the insertion has no effect.
-                static MSTD_CONSTEXPR const bool __emplacement_has_strong_exception_safety_guarantee = true;
+MSTD_END_NAMESPACE
 
-                static MSTD_CONSTEXPR const bool __reservable = false;
-            };
+MSTD_BEGIN_NAMESPACE_STD
+namespace pmr {
+    template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
+    using map MSTD_AVAILABILITY_PMR =
+    mstd::map<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
+    template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
+    using multimap MSTD_AVAILABILITY_PMR =
+    mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
+} // namespace pmr
+MSTD_END_NAMESPACE
 
-            MSTD_END_NAMESPACE
+MSTD_POP_MACROS
 
-            #  if MSTD_STD_VER >= 17
-            MSTD_BEGIN_NAMESPACE_STD
-            namespace pmr {
-                template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-                using map MSTD_AVAILABILITY_PMR =
-                mstd::map<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
-
-                template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-                using multimap MSTD_AVAILABILITY_PMR =
-                mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
-            } // namespace pmr
-            MSTD_END_NAMESPACE
-            #  endif
-
-            MSTD_POP_MACROS
-
-            #  if !defined(MSTD_REMOVE_TRANSITIVE_INCLUDES) && MSTD_STD_VER <= 20
-            #    include <concepts>
-            #    include <cstdlib>
-            #    include <functional>
-            #    include <iterator>
-            #    include <type_traits>
-            #    include <utility>
-            #  endif
-            #endif // __cplusplus < 201103L && defined(MSTD_USE_FROZEN_CXX03_HEADERS)
-
-            #endif // MSTD_MAP
+#endif // MSTD_MAP

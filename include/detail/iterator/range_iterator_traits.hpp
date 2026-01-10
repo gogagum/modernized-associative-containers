@@ -22,8 +22,6 @@
 
 MSTD_BEGIN_NAMESPACE_STD
 
-#if MSTD_STD_VER >= 23
-
 template <std::ranges::input_range _Range>
 using __range_key_type MSTD_NODEBUG = std::remove_const_t<typename std::ranges::range_value_t<_Range>::first_type>;
 
@@ -33,8 +31,6 @@ using __range_mapped_type MSTD_NODEBUG = typename std::ranges::range_value_t<_Ra
 template <std::ranges::input_range _Range>
 using __range_to_alloc_type MSTD_NODEBUG =
     std::pair<const typename std::ranges::range_value_t<_Range>::first_type, typename std::ranges::range_value_t<_Range>::second_type>;
-
-#endif
 
 MSTD_END_NAMESPACE
 

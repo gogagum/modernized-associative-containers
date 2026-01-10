@@ -149,31 +149,12 @@
 #    define MSTD_USING_DEV_RANDOM
 #  endif
 
-#  ifndef MSTD_CXX03_LANG
-
 #    define MSTD_ALIGNOF(...) alignof(__VA_ARGS__)
 #    define _ALIGNAS_TYPE(x) alignas(x)
 #    define _ALIGNAS(x) alignas(x)
 #    define _NOEXCEPT noexcept
 #    define _NOEXCEPT_(...) noexcept(__VA_ARGS__)
 #    define MSTD_CONSTEXPR constexpr
-
-#  else
-
-#    define MSTD_ALIGNOF(...) _Alignof(__VA_ARGS__)
-#    define _ALIGNAS_TYPE(x) __attribute__((__aligned__(MSTD_ALIGNOF(x))))
-#    define _ALIGNAS(x) __attribute__((__aligned__(x)))
-#    define nullptr __nullptr
-#    define _NOEXCEPT throw()
-#    define _NOEXCEPT_(...)
-#    define static_assert(...) _Static_assert(__VA_ARGS__)
-#    define decltype(...) __decltype(__VA_ARGS__)
-#    define MSTD_CONSTEXPR
-
-typedef __char16_t char16_t;
-typedef __char32_t char32_t;
-
-#  endif
 
 #  define MSTD_PREFERRED_ALIGNOF(_Tp) __alignof(_Tp)
 
@@ -452,23 +433,8 @@ typedef __char32_t char32_t;
 #    define MSTD_HAS_INT128 1
 #  endif
 
-#  ifdef MSTD_CXX03_LANG
-#    define MSTD_DECLARE_STRONG_ENUM(x)                                                                             \
-      struct MSTD_EXPORTED_FROM_ABI x {                                                                             \
-        enum __lx
-// clang-format off
-#    define MSTD_DECLARE_STRONG_ENUM_EPILOG(x)                                                                      \
-      __lx __v_;                                                                                                       \
-      MSTD_HIDE_FROM_ABI x(__lx __v) : __v_(__v) {}                                                                 \
-      MSTD_HIDE_FROM_ABI explicit x(int __v) : __v_(static_cast<__lx>(__v)) {}                                      \
-      MSTD_HIDE_FROM_ABI operator int() const { return __v_; }                                                      \
-      };
-// clang-format on
-
-#  else // MSTD_CXX03_LANG
 #    define MSTD_DECLARE_STRONG_ENUM(x) enum class x
 #    define MSTD_DECLARE_STRONG_ENUM_EPILOG(x)
-#  endif // MSTD_CXX03_LANG
 
 #  ifdef __FreeBSD__
 #    define _DECLARE_C99_LDBL_MATH 1
@@ -508,21 +474,9 @@ typedef __char32_t char32_t;
 //
 // Deprecations warnings are always enabled, except when users explicitly opt-out
 // by defining MSTD_DISABLE_DEPRECATION_WARNINGS.
-#  if !defined(MSTD_DISABLE_DEPRECATION_WARNINGS)
-#    if __has_attribute(__deprecated__)
-#      define MSTD_DEPRECATED __attribute__((__deprecated__))
-#      define MSTD_DEPRECATED_(m) __attribute__((__deprecated__(m)))
-#    elif MSTD_STD_VER >= 14
-#      define MSTD_DEPRECATED [[deprecated]]
-#      define MSTD_DEPRECATED_(m) [[deprecated(m)]]
-#    else
-#      define MSTD_DEPRECATED
-#      define MSTD_DEPRECATED_(m)
-#    endif
-#  else
-#    define MSTD_DEPRECATED
-#    define MSTD_DEPRECATED_(m)
-#  endif
+
+#define MSTD_DEPRECATED [[deprecated]]
+#define MSTD_DEPRECATED_(m) [[deprecated(m)]]
 
 // FIXME: using `#warning` causes diagnostics from system headers which include deprecated headers. This can only be
 // enabled again once https://github.com/llvm/llvm-project/pull/168041 (or a similar feature) has landed, since that
@@ -533,35 +487,11 @@ typedef __char32_t char32_t;
 #    define MSTD_DIAGNOSE_DEPRECATED_HEADERS 0
 #  endif
 
-#  if !defined(MSTD_CXX03_LANG)
-#    define MSTD_DEPRECATED_IN_CXX11 MSTD_DEPRECATED
-#  else
-#    define MSTD_DEPRECATED_IN_CXX11
-#  endif
-
-#  if MSTD_STD_VER >= 14
-#    define MSTD_DEPRECATED_IN_CXX14 MSTD_DEPRECATED
-#  else
-#    define MSTD_DEPRECATED_IN_CXX14
-#  endif
-
-#  if MSTD_STD_VER >= 17
-#    define MSTD_DEPRECATED_IN_CXX17 MSTD_DEPRECATED
-#  else
-#    define MSTD_DEPRECATED_IN_CXX17
-#  endif
-
-#  if MSTD_STD_VER >= 20
-#    define MSTD_DEPRECATED_IN_CXX20 MSTD_DEPRECATED
-#  else
-#    define MSTD_DEPRECATED_IN_CXX20
-#  endif
-
-#  if MSTD_STD_VER >= 23
-#    define MSTD_DEPRECATED_IN_CXX23 MSTD_DEPRECATED
-#  else
-#    define MSTD_DEPRECATED_IN_CXX23
-#  endif
+#define MSTD_DEPRECATED_IN_CXX11 MSTD_DEPRECATED
+#define MSTD_DEPRECATED_IN_CXX14 MSTD_DEPRECATED
+#define MSTD_DEPRECATED_IN_CXX17 MSTD_DEPRECATED
+#define MSTD_DEPRECATED_IN_CXX20 MSTD_DEPRECATED
+#define MSTD_DEPRECATED_IN_CXX23 MSTD_DEPRECATED
 
 #  if MSTD_STD_VER >= 26
 #    define MSTD_DEPRECATED_IN_CXX26 MSTD_DEPRECATED
@@ -577,41 +507,12 @@ typedef __char32_t char32_t;
 #    define MSTD_DEPRECATED_WITH_CHAR8_T
 #  endif
 
-#  if MSTD_STD_VER <= 11
-#    define MSTD_EXPLICIT_SINCE_CXX14
-#  else
-#    define MSTD_EXPLICIT_SINCE_CXX14 explicit
-#  endif
-
-#  if MSTD_STD_VER >= 23
-#    define MSTD_EXPLICIT_SINCE_CXX23 explicit
-#  else
-#    define MSTD_EXPLICIT_SINCE_CXX23
-#  endif
-
-#  if MSTD_STD_VER >= 14
-#    define MSTD_CONSTEXPR_SINCE_CXX14 constexpr
-#  else
-#    define MSTD_CONSTEXPR_SINCE_CXX14
-#  endif
-
-#  if MSTD_STD_VER >= 17
-#    define MSTD_CONSTEXPR_SINCE_CXX17 constexpr
-#  else
-#    define MSTD_CONSTEXPR_SINCE_CXX17
-#  endif
-
-#  if MSTD_STD_VER >= 20
-#    define MSTD_CONSTEXPR_SINCE_CXX20 constexpr
-#  else
-#    define MSTD_CONSTEXPR_SINCE_CXX20
-#  endif
-
-#  if MSTD_STD_VER >= 23
-#    define MSTD_CONSTEXPR_SINCE_CXX23 constexpr
-#  else
-#    define MSTD_CONSTEXPR_SINCE_CXX23
-#  endif
+#define MSTD_EXPLICIT_SINCE_CXX14 explicit
+#define MSTD_EXPLICIT_SINCE_CXX23 explicit
+#define MSTD_CONSTEXPR_SINCE_CXX14 constexpr
+#define MSTD_CONSTEXPR_SINCE_CXX17 constexpr
+#define MSTD_CONSTEXPR_SINCE_CXX20 constexpr
+#define MSTD_CONSTEXPR_SINCE_CXX23 constexpr
 
 #  if MSTD_STD_VER >= 26
 #    define MSTD_CONSTEXPR_SINCE_CXX26 constexpr
@@ -744,13 +645,8 @@ typedef __char32_t char32_t;
 #    define MSTD_NO_THREAD_SAFETY_ANALYSIS
 #  endif
 
-#  if MSTD_STD_VER >= 20
-#    define MSTD_CONSTINIT constinit
-#  elif __has_attribute(__require_constant_initialization__)
-#    define MSTD_CONSTINIT __attribute__((__require_constant_initialization__))
-#  else
-#    define MSTD_CONSTINIT
-#  endif
+// TODO: remove MSTD_CONSTINIT
+#define MSTD_CONSTINIT constinit
 
 #  if defined(__CUDACC__) || defined(__CUDA_ARCH__) || defined(__CUDA_LIBDEVICE__)
 // The CUDA SDK contains an unfortunate definition for the __noinline__ macro,
@@ -836,18 +732,14 @@ typedef __char32_t char32_t;
 // macro is used to mark them as such, which suppresses the
 // '-Wctad-maybe-unsupported' compiler warning when CTAD is used in user code
 // with these classes.
-#  if MSTD_STD_VER >= 17
-#    ifdef MSTD_COMPILER_CLANG_BASED
-#      define MSTD_CTAD_SUPPORTED_FOR_TYPE(_ClassName)                                                              \
-        template <class... _Tag>                                                                                       \
-        [[maybe_unused]] _ClassName(typename _Tag::__allow_ctad...)->_ClassName<_Tag...>
-#    else
-#      define MSTD_CTAD_SUPPORTED_FOR_TYPE(ClassName)                                                               \
-        template <class... _Tag>                                                                                       \
-        ClassName(typename _Tag::__allow_ctad...)->ClassName<_Tag...>
-#    endif
+#  ifdef MSTD_COMPILER_CLANG_BASED
+#    define MSTD_CTAD_SUPPORTED_FOR_TYPE(_ClassName)                                     \
+      template <class... _Tag>                                                           \
+      [[maybe_unused]] _ClassName(typename _Tag::__allow_ctad...)->_ClassName<_Tag...>
 #  else
-#    define MSTD_CTAD_SUPPORTED_FOR_TYPE(_ClassName) static_assert(true, "")
+#    define MSTD_CTAD_SUPPORTED_FOR_TYPE(ClassName)                                      \
+      template <class... _Tag>                                                           \
+      ClassName(typename _Tag::__allow_ctad...)->ClassName<_Tag...>
 #  endif
 
 #  if defined(__OBJC__) && defined(MSTD_APPLE_CLANG_VER)
@@ -956,11 +848,7 @@ typedef __char32_t char32_t;
 #  endif
 
 // This is to work around https://llvm.org/PR156809
-#  ifndef MSTD_CXX03_LANG
-#    define MSTD_CTOR_LIFETIMEBOUND MSTD_LIFETIMEBOUND
-#  else
-#    define MSTD_CTOR_LIFETIMEBOUND
-#  endif
+#  define MSTD_CTOR_LIFETIMEBOUND MSTD_LIFETIMEBOUND
 
 #  if __has_cpp_attribute(_Clang::__noescape__)
 #    define MSTD_NOESCAPE [[_Clang::__noescape__]]
