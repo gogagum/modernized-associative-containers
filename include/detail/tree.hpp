@@ -70,7 +70,7 @@ template <class _Tp, class _VoidPtr>
 class __tree_node;
 
 template <class _Key, class _Value>
-struct __value_type;
+struct ValueType;
 
 /*
  *
@@ -494,7 +494,7 @@ void __tree_remove(_NodePtr __root, _NodePtr __z) noexcept {
 // node traits
 
 template <class _Tp>
-inline const bool __is_tree_value_type_v = __is_specialization_v<_Tp, __value_type>;
+inline const bool __is_tree_value_type_v = __is_specialization_v<_Tp, ValueType>;
 
 template <class _Tp>
 struct __get_tree_key_type {
@@ -502,7 +502,7 @@ struct __get_tree_key_type {
 };
 
 template <class _Key, class _ValueT>
-struct __get_tree_key_type<__value_type<_Key, _ValueT> > {
+struct __get_tree_key_type<ValueType<_Key, _ValueT> > {
     using type = _Key;
 };
 
@@ -515,7 +515,7 @@ struct __get_node_value_type {
 };
 
 template <class _Key, class _ValueT>
-struct __get_node_value_type<__value_type<_Key, _ValueT> > {
+struct __get_node_value_type<ValueType<_Key, _ValueT> > {
     using type = std::pair<const _Key, _ValueT>;
 };
 
@@ -600,7 +600,7 @@ public:
     using pointer = typename __alloc_traits::pointer;
 
 private:
-    allocator_type& __na_;
+    allocator_type& na_;
 
 public:
     bool __value_constructed;
@@ -609,18 +609,18 @@ public:
     __tree_node_destructor& operator=(const __tree_node_destructor&)            = delete;
 
     explicit __tree_node_destructor(allocator_type& __na, bool __val = false) noexcept
-    : __na_(__na),
+    : na_(__na),
     __value_constructed(__val) {}
 
     void operator()(pointer __p) noexcept {
         if (__value_constructed)
-            __alloc_traits::destroy(__na_, std::addressof(__p->__get_value()));
+            __alloc_traits::destroy(na_, std::addressof(__p->__get_value()));
         if (__p)
-            __alloc_traits::deallocate(__na_, __p, 1);
+            __alloc_traits::deallocate(na_, __p, 1);
     }
 
     template <class>
-    friend class __map_node_destructor;
+    friend class MapNodeDestructor;
 };
 
 template <class _NodeType, class _Alloc>
@@ -1183,7 +1183,7 @@ public:
     __end_node_pointer __lower_upper_bound_unique_impl(const _Key& __v) const {
         auto __rt     = __root();
         auto __result = __end_node();
-        auto __comp   = __lazy_synth_three_way_comparator<_Compare, _Key, value_type>(value_comp());
+        auto __comp   = LazySynthThreeWayComparator<_Compare, _Key, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__v, __rt->__get_value());
 
@@ -1746,7 +1746,7 @@ Tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
 
     __node_base_pointer* __node_ptr = __root_ptr();
     auto&& __transparent            = mstd::__as_transparent(value_comp());
-    auto __comp = __lazy_synth_three_way_comparator<__make_transparent_t<_Compare>, _Key, value_type>(__transparent);
+    auto __comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, _Key, value_type>(__transparent);
 
     while (true) {
         auto __comp_res = __comp(__v, __nd->__get_value());
@@ -2028,7 +2028,7 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     typename Tree<_Tp, _Compare, _Allocator>::size_type
     Tree<_Tp, _Compare, _Allocator>::__count_unique(const _Key& __k) const {
         __node_pointer __rt = __root();
-        auto __comp         = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+        auto __comp         = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__k, __rt->__get_value());
             if (__comp_res.__less()) {
@@ -2047,7 +2047,7 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     Tree<_Tp, _Compare, _Allocator>::__count_multi(const _Key& __k) const {
         __end_node_pointer __result = __end_node();
         __node_pointer __rt         = __root();
-        auto __comp                 = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+        auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__k, __rt->__get_value());
             if (__comp_res.__less()) {
@@ -2126,7 +2126,7 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
                         using _Pp                   = std::pair<iterator, iterator>;
                         __end_node_pointer __result = __end_node();
                         __node_pointer __rt         = __root();
-                        auto __comp                 = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+                        auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
                         while (__rt != nullptr) {
                             auto __comp_res = __comp(__k, __rt->__get_value());
                             if (__comp_res.__less()) {
@@ -2150,7 +2150,7 @@ Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k) const {
     using _Pp                   = std::pair<const_iterator, const_iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
@@ -2174,7 +2174,7 @@ Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) {
     using _Pp                   = std::pair<iterator, iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
@@ -2198,7 +2198,7 @@ Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) const {
     using _Pp                   = std::pair<const_iterator, const_iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = __lazy_synth_three_way_comparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
