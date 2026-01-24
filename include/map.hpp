@@ -1215,8 +1215,8 @@ public:
         class _Pp
       , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
     >
-    iterator insert(const_iterator pos, _Pp&& pos) {
-        return tree_.__emplace_hint_multi(pos.i_, std::forward<_Pp>(pos));
+    iterator insert(const_iterator pos, _Pp&& val) {
+        return tree_.__emplace_hint_multi(pos.i_, std::forward<_Pp>(val));
     }
 
     iterator insert(value_type&& value) {
