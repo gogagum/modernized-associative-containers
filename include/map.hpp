@@ -44,21 +44,21 @@
 
 namespace mstd {
 
-template <class _Key, class _CP, class _Compare>
+template <class KeyT, class _CP, class CompareT>
 class MapValueCompare {
-    MSTD_COMPRESSED_ELEMENT(_Compare, comp_);
+    MSTD_COMPRESSED_ELEMENT(CompareT, comp_);
 
 public:
-    MapValueCompare() noexcept(std::is_nothrow_default_constructible<_Compare>::value)
+    MapValueCompare() noexcept(std::is_nothrow_default_constructible<CompareT>::value)
     : comp_() {}
-    MapValueCompare(_Compare c) noexcept(std::is_nothrow_copy_constructible<_Compare>::value)
+    MapValueCompare(CompareT c) noexcept(std::is_nothrow_copy_constructible<CompareT>::value)
     : comp_(c) {}
-    const _Compare& key_comp() const noexcept { return comp_; }
+    const CompareT& key_comp() const noexcept { return comp_; }
 
     bool operator()(const _CP& x, const _CP& y) const { return comp_(x.first, y.first); }
-    bool operator()(const _CP& x, const _Key& y) const { return comp_(x.first, y); }
-    bool operator()(const _Key& x, const _CP& y) const { return comp_(x, y.first); }
-    void swap(MapValueCompare& y) noexcept(std::is_nothrow_swappable_v<_Compare>) { std::swap(comp_, y.comp_); }
+    bool operator()(const _CP& x, const KeyT& y) const { return comp_(x.first, y); }
+    bool operator()(const KeyT& x, const _CP& y) const { return comp_(x, y.first); }
+    void swap(MapValueCompare& y) noexcept(std::is_nothrow_swappable_v<CompareT>) { std::swap(comp_, y.comp_); }
 
     template <typename _K2>
     bool operator()(const _K2& x, const _CP& y) const { return comp_(x, y.first); }
@@ -67,110 +67,108 @@ public:
     bool operator()(const _CP& x, const _K2& y) const { return comp_(x.first, y); }
 };
 
-template <class _Key, class _MapValueT, class _Compare>
-struct __make_transparent<MapValueCompare<_Key, _MapValueT, _Compare> > {
-    using type = MapValueCompare<_Key, _MapValueT, __make_transparent_t<_Compare> >;
-};
+template <class MapValueT, class KeyT, class CompareT>
+struct LazySynthThreeWayComparator<MapValueCompare<KeyT, MapValueT, CompareT>, MapValueT, MapValueT> {
+    LazySynthThreeWayComparator<CompareT, KeyT, KeyT> comp_;
 
-template <class _MapValueT, class _Key, class _Compare>
-struct LazySynthThreeWayComparator<MapValueCompare<_Key, _MapValueT, _Compare>, _MapValueT, _MapValueT> {
-    LazySynthThreeWayComparator<_Compare, _Key, _Key> comp_;
-
-    LazySynthThreeWayComparator(const MapValueCompare<_Key, _MapValueT, _Compare>& comp)
+    LazySynthThreeWayComparator(const MapValueCompare<KeyT, MapValueT, CompareT>& comp)
     : comp_(comp.key_comp()) {}
 
-    auto operator()(const _MapValueT& __lhs, const _MapValueT& __rhs) const {
-        return comp_(__lhs.first, __rhs.first);
+    auto operator()(const MapValueT& lhs, const MapValueT& rhs) const {
+        return comp_(lhs.first, rhs.first);
     }
 };
 
-template <class _MapValueT, class _Key, class _TransparentKey, class _Compare>
-struct LazySynthThreeWayComparator<MapValueCompare<_Key, _MapValueT, _Compare>, _TransparentKey, _MapValueT> {
-    LazySynthThreeWayComparator<_Compare, _TransparentKey, _Key> comp_;
+template <class MapValueT, class KeyT, class TransparentKeyT, class CompareT>
+struct LazySynthThreeWayComparator<MapValueCompare<KeyT, MapValueT, CompareT>, TransparentKeyT, MapValueT> {
+    LazySynthThreeWayComparator<CompareT, TransparentKeyT, KeyT> comp_;
 
-    LazySynthThreeWayComparator(const MapValueCompare<_Key, _MapValueT, _Compare>& comp)
+    LazySynthThreeWayComparator(const MapValueCompare<KeyT, MapValueT, CompareT>& comp)
     : comp_(comp.key_comp()) {}
 
-    auto operator()(const _TransparentKey& __lhs, const _MapValueT& __rhs) const {
-        return comp_(__lhs, __rhs.first);
+    auto operator()(const TransparentKeyT& lhs, const MapValueT& rhs) const {
+        return comp_(lhs, rhs.first);
     }
 };
 
-template <class _MapValueT, class _Key, class _TransparentKey, class _Compare>
-struct LazySynthThreeWayComparator<MapValueCompare<_Key, _MapValueT, _Compare>, _MapValueT, _TransparentKey> {
-    LazySynthThreeWayComparator<_Compare, _Key, _TransparentKey> comp_;
+template <class MapValueT, class KeyT, class TransparentKeyT, class CompareT>
+struct LazySynthThreeWayComparator<MapValueCompare<KeyT, MapValueT, CompareT>, MapValueT, TransparentKeyT> {
+    LazySynthThreeWayComparator<CompareT, KeyT, TransparentKeyT> comp_;
 
-    LazySynthThreeWayComparator(const MapValueCompare<_Key, _MapValueT, _Compare>& comp)
+    LazySynthThreeWayComparator(const MapValueCompare<KeyT, MapValueT, CompareT>& comp)
     : comp_(comp.key_comp()) {}
 
-    auto operator()(const _MapValueT& __lhs, const _TransparentKey& __rhs) const {
-        return comp_(__lhs.first, __rhs);
+    auto operator()(const MapValueT& lhs, const TransparentKeyT& rhs) const {
+        return comp_(lhs.first, rhs);
     }
 };
 
-template <class _Key, class _CP, class _Compare>
+template <class KeyT, class _CP, class CompareT>
 inline void
-swap(MapValueCompare<_Key, _CP, _Compare>& x, MapValueCompare<_Key, _CP, _Compare>& y)
+swap(MapValueCompare<KeyT, _CP, CompareT>& x, MapValueCompare<KeyT, _CP, CompareT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class _Allocator>
+template <class AllocatorT>
 class MapNodeDestructor {
-    typedef _Allocator allocator_type;
-    typedef allocator_traits<allocator_type> AllocTraits_;
+    using AllocatorType_ = AllocatorT;
+    using AllocTraits_ = allocator_traits<AllocatorType_>;
 
 public:
     typedef typename AllocTraits_::pointer pointer;
 
 private:
-    allocator_type& na_;
+    AllocatorType_& na_;
 
 public:
     bool first_constructed;
     bool second_constructed;
 
-    explicit MapNodeDestructor(allocator_type& __na) noexcept
-    : na_(__na),
-      first_constructed(false),
-      second_constructed(false) {}
+    explicit MapNodeDestructor(AllocatorType_& na) noexcept
+    : na_{na}
+    , first_constructed{false}
+    , second_constructed{false} {}
 
-    MapNodeDestructor(__tree_node_destructor<allocator_type>&& x) noexcept
-    : na_(x.na_),
-      first_constructed(x.__value_constructed),
-      second_constructed(x.__value_constructed) {
+    MapNodeDestructor(__tree_node_destructor<AllocatorType_>&& x) noexcept
+    : na_(x.na_)
+    , first_constructed(x.__value_constructed)
+    , second_constructed(x.__value_constructed) {
         x.__value_constructed = false;
     }
 
     MapNodeDestructor& operator=(const MapNodeDestructor&) = delete;
 
-    void operator()(pointer __p) noexcept {
-        if (second_constructed)
-            AllocTraits_::destroy(na_, std::addressof(__p->__get_value().second));
-        if (first_constructed)
-            AllocTraits_::destroy(na_, std::addressof(__p->__get_value().first));
-        if (__p)
-            AllocTraits_::deallocate(na_, __p, 1);
+    void operator()(pointer ptr) noexcept {
+        if (second_constructed) {
+            AllocTraits_::destroy(na_, std::addressof(ptr->__get_value().second));
+        }
+        if (first_constructed) {
+            AllocTraits_::destroy(na_, std::addressof(ptr->__get_value().first));
+        }
+        if (ptr) {
+            AllocTraits_::deallocate(na_, ptr, 1);
+        }
     }
 };
 
-template <class _Key, class _Tp>
+template <class KeyT, class _Tp>
 struct ValueType;
 
-template <class _TreeIterator>
+template <class TreeIteratorT>
 class MapIterator {
-    _TreeIterator i_;
+    TreeIteratorT i_;
 
 public:
     using iterator_category = std::bidirectional_iterator_tag;
-    using value_type        = typename _TreeIterator::value_type;
-    using difference_type   = typename _TreeIterator::difference_type;
+    using value_type        = typename TreeIteratorT::value_type;
+    using difference_type   = typename TreeIteratorT::difference_type;
     using reference         = value_type&;
-    using pointer           = typename _TreeIterator::pointer;
+    using pointer           = typename TreeIteratorT::pointer;
 
     MapIterator() noexcept {}
 
-    MapIterator(_TreeIterator __i) noexcept : i_(__i) {}
+    MapIterator(TreeIteratorT __i) noexcept : i_(__i) {}
 
     reference operator*() const { return *i_; }
     pointer operator->() const { return std::pointer_traits<pointer>::pointer_to(*i_); }
@@ -213,35 +211,35 @@ public:
     friend struct __specialized_algorithm;
 };
 
-template <class _Alg, class _TreeIterator>
-struct __specialized_algorithm<_Alg, __iterator_pair<MapIterator<_TreeIterator>, MapIterator<_TreeIterator>>> {
-    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
+template <class _Alg, class TreeIteratorT>
+struct __specialized_algorithm<_Alg, __iterator_pair<MapIterator<TreeIteratorT>, MapIterator<TreeIteratorT>>> {
+    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<TreeIteratorT, TreeIteratorT>>;
 
     static const bool __has_algorithm = Tree_::__has_algorithm;
 
-    using Iterator_ = MapIterator<_TreeIterator>;
+    using Iterator_ = MapIterator<TreeIteratorT>;
 
-    template <class... _Args>
-    static void operator()(Iterator_ first, Iterator_ last, _Args&&... __args) {
-        Tree_()(first.i_, last.i_, std::forward<_Args>(__args)...);
+    template <class... ArgsT>
+    static void operator()(Iterator_ first, Iterator_ last, ArgsT&&... args) {
+        Tree_()(first.i_, last.i_, std::forward<ArgsT>(args)...);
     }
 };
 
-template <class _TreeIterator>
+template <class TreeIteratorT>
 class MapConstIterator {
-    _TreeIterator i_;
+    TreeIteratorT i_;
 
 public:
     using iterator_category = bidirectional_iterator_tag;
-    using value_type        = typename _TreeIterator::value_type;
-    using difference_type   = typename _TreeIterator::difference_type;
+    using value_type        = typename TreeIteratorT::value_type;
+    using difference_type   = typename TreeIteratorT::difference_type;
     using reference         = const value_type&;
-    using pointer           = typename _TreeIterator::pointer;
+    using pointer           = typename TreeIteratorT::pointer;
 
     MapConstIterator() noexcept {}
 
-    MapConstIterator(_TreeIterator i) noexcept : i_(i) {}
-    MapConstIterator(MapIterator< typename _TreeIterator::__non_const_iterator> i) noexcept : i_(i.i_) {}
+    MapConstIterator(TreeIteratorT i) noexcept : i_(i) {}
+    MapConstIterator(MapIterator< typename TreeIteratorT::__non_const_iterator> i) noexcept : i_(i.i_) {}
 
     reference operator*() const { return *i_; }
     pointer operator->() const { return std::pointer_traits<pointer>::pointer_to(*i_); }
@@ -284,32 +282,32 @@ public:
     friend struct __specialized_algorithm;
 };
 
-template <class _Alg, class _TreeIterator>
-struct __specialized_algorithm<_Alg, __iterator_pair<MapConstIterator<_TreeIterator>, MapConstIterator<_TreeIterator>>> {
-    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<_TreeIterator, _TreeIterator>>;
+template <class _Alg, class TreeIteratorT>
+struct __specialized_algorithm<_Alg, __iterator_pair<MapConstIterator<TreeIteratorT>, MapConstIterator<TreeIteratorT>>> {
+    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<TreeIteratorT, TreeIteratorT>>;
 
     static const bool __has_algorithm = Tree_::__has_algorithm;
 
-    using Iterator_ = MapConstIterator<_TreeIterator>;
+    using Iterator_ = MapConstIterator<TreeIteratorT>;
 
-    template <class... _Args>
-    static void operator()(Iterator_ first, Iterator_ last, _Args&&... args) {
-        Tree_()(first.i_, last.i_, std::forward<_Args>(args)...);
+    template <class... ArgsT>
+    static void operator()(Iterator_ first, Iterator_ last, ArgsT&&... args) {
+        Tree_()(first.i_, last.i_, std::forward<ArgsT>(args)...);
     }
 };
 
-template <class _Key, class _Tp, class _Compare = std::less<_Key>, class _Allocator = std::allocator<std::pair<const _Key, _Tp> > >
+template <class KeyT, class _Tp, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, _Tp> > >
 class multimap;
 
-template <class _Key, class _Tp, class _Compare = std::less<_Key>, class _Allocator = std::allocator<std::pair<const _Key, _Tp> > >
+template <class KeyT, class _Tp, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, _Tp> > >
 class map {
 public:
     // types:
-    typedef _Key key_type;
+    typedef KeyT key_type;
     typedef _Tp mapped_type;
     typedef std::pair<const key_type, mapped_type> value_type;
-    typedef std::type_identity_t<_Compare> key_compare;
-    typedef std::type_identity_t<_Allocator> allocator_type;
+    typedef std::type_identity_t<CompareT> key_compare;
+    typedef std::type_identity_t<AllocatorT> allocator_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
@@ -331,10 +329,9 @@ public:
     };
 
 private:
-    using ValueType_ = ValueType<key_type, mapped_type>;
-    typedef MapValueCompare<key_type, value_type, key_compare> __vc;
-    using Tree_ = Tree<ValueType_, __vc, allocator_type>;
-    typedef typename Tree_::__node_traits __node_traits;
+    using ValueType_    = ValueType<key_type, mapped_type>;
+    using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
+    using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
     using AllocTraits_ = allocator_traits<allocator_type>;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
@@ -362,44 +359,44 @@ public:
     map() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
-    : tree_(__vc(key_compare())) {}
+    : tree_(ValueCompare_(key_compare())) {}
 
     explicit map(const key_compare& comp) noexcept(
            std::is_nothrow_default_constructible<allocator_type>::value 
         && std::is_nothrow_copy_constructible<key_compare>::value)
-    : tree_(__vc(comp)) {}
+    : tree_(ValueCompare_(comp)) {}
 
     explicit map(const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {}
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {}
 
     template <class _InputIterator>
     map(_InputIterator __f, _InputIterator __l, const key_compare& comp = key_compare())
-    : tree_(__vc(comp)) {
+    : tree_(ValueCompare_(comp)) {
         insert(__f, __l);
     }
 
     template <class _InputIterator>
     map(_InputIterator __f, _InputIterator __l, const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
         insert(__f, __l);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
+    template <_ContainerCompatibleRange<value_type> RangeT>
     map(std::from_range_t,
-        _Range&& __range,
+        RangeT&& __range,
         const key_compare& comp = key_compare(),
         const allocator_type& __a = allocator_type())
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
-        insert_range(std::forward<_Range>(__range));
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
+        insert_range(std::forward<RangeT>(__range));
     }
     
     template <class _InputIterator>
     map(_InputIterator __f, _InputIterator __l, const allocator_type& alloc)
     : map(__f, __l, key_compare(), alloc) {}
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    map(std::from_range_t, _Range&& __range, const allocator_type& alloc)
-    : map(std::from_range, std::forward<_Range>(__range), key_compare(), alloc) {}
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    map(std::from_range_t, RangeT&& __range, const allocator_type& alloc)
+    : map(std::from_range, std::forward<RangeT>(__range), key_compare(), alloc) {}
 
     map(const map& __m) = default;
 
@@ -412,12 +409,12 @@ public:
     map& operator=(map&& __m) = default;
 
     map(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
-    : tree_(__vc(comp)) {
+    : tree_(ValueCompare_(comp)) {
         insert(init_list.begin(), init_list.end());
     }
 
     map(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
         insert(init_list.begin(), init_list.end());
     }
 
@@ -434,7 +431,7 @@ public:
 
     map(const map& __m, const allocator_type& __alloc) : tree_(__m.tree_, __alloc) {}
 
-    ~map() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
+    ~map() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), ""); }
 
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
     [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
@@ -462,21 +459,27 @@ public:
     mapped_type& operator[](const key_type& __k);
     mapped_type& operator[](key_type&& __k);
 
-    template <class _Arg,
-    std::enable_if_t<__is_transparently_comparable_v<_Compare, key_type, std::remove_cvref_t<_Arg> >, int> = 0>
+    template <
+        class _Arg
+      , std::enable_if_t<__is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<_Arg> >, int> = 0
+    >
     [[nodiscard]] mapped_type& at(_Arg&& __arg) {
         auto [_, child] = tree_.__find_equal(__arg);
-        if (child == nullptr)
+        if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
+        }
         return static_cast<__node_pointer>(child)->__get_value().second;
     }
 
-    template <class _Arg,
-    std::enable_if_t<__is_transparently_comparable_v<_Compare, key_type, std::remove_cvref_t<_Arg> >, int> = 0>
+    template <
+        class _Arg
+      , std::enable_if_t<__is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<_Arg> >, int> = 0
+    >
     [[nodiscard]] const mapped_type& at(_Arg&& __arg) const {
         auto [_, child] = tree_.__find_equal(__arg);
-        if (child == nullptr)
+        if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
+        }
         return static_cast<__node_pointer>(child)->__get_value().second;
     }
 
@@ -491,14 +494,14 @@ public:
         return value_compare(tree_.value_comp().key_comp());
     }
 
-    template <class... _Args>
-    std::pair<iterator, bool> emplace(_Args&&... __args) {
-        return tree_.__emplace_unique(std::forward<_Args>(__args)...);
+    template <class... ArgsT>
+    std::pair<iterator, bool> emplace(ArgsT&&... args) {
+        return tree_.__emplace_unique(std::forward<ArgsT>(args)...);
     }
 
-    template <class... _Args>
-    iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return tree_.__emplace_hint_unique(__p.i_, std::forward<_Args>(__args)...).first;
+    template <class... ArgsT>
+    iterator emplace_hint(const_iterator __p, ArgsT&&... args) {
+        return tree_.__emplace_hint_unique(__p.i_, std::forward<ArgsT>(args)...).first;
     }
 
     template <class _Pp, std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0>
@@ -511,7 +514,9 @@ public:
         return tree_.__emplace_hint_unique(__pos.i_, std::forward<_Pp>(__p)).first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.__emplace_unique(__v); }
+    std::pair<iterator, bool> insert(const value_type& __v) {
+        return tree_.__emplace_unique(__v);
+    }
 
     iterator insert(const_iterator __p, const value_type& __v) {
         return tree_.__emplace_hint_unique(__p.i_, __v).first;
@@ -525,56 +530,58 @@ public:
         return tree_.__emplace_hint_unique(__p.i_, std::move(__v)).first;
     }
 
-    void insert(std::initializer_list<value_type> init_list) { insert(init_list.begin(), init_list.end()); }
+    void insert(std::initializer_list<value_type> init_list) {
+        insert(init_list.begin(), init_list.end());
+    }
 
     template <class _InputIterator>
     void insert(_InputIterator first, _InputIterator last) {
         tree_.__insert_range_unique(first, last);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    void insert_range(_Range&& __range) {
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    void insert_range(RangeT&& range) {
         tree_.__insert_range_unique(
-            std::ranges::begin(__range),
-            std::ranges::end(__range)
+            std::ranges::begin(range),
+            std::ranges::end(range)
         );
     }
 
-    template <class... _Args>
-    std::pair<iterator, bool> try_emplace(const key_type& k, _Args&&... args) {
+    template <class... ArgsT>
+    std::pair<iterator, bool> try_emplace(const key_type& k, ArgsT&&... args) {
         return tree_.__emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(k),
-            std::forward_as_tuple(std::forward<_Args>(args)...)
+            std::forward_as_tuple(std::forward<ArgsT>(args)...)
         );
     }
 
-    template <class... _Args>
-    std::pair<iterator, bool> try_emplace(key_type&& k, _Args&&... args) {
+    template <class... ArgsT>
+    std::pair<iterator, bool> try_emplace(key_type&& k, ArgsT&&... args) {
         return tree_.__emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
-            std::forward_as_tuple(std::forward<_Args>(args)...)
+            std::forward_as_tuple(std::forward<ArgsT>(args)...)
         );
     }
 
-    template <class... _Args>
-    iterator try_emplace(const_iterator hint, const key_type& k, _Args&&... args) {
+    template <class... ArgsT>
+    iterator try_emplace(const_iterator hint, const key_type& k, ArgsT&&... args) {
         return tree_.__emplace_hint_unique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(k),
-            std::forward_as_tuple(std::forward<_Args>(args)...)
+            std::forward_as_tuple(std::forward<ArgsT>(args)...)
         ).first;
     }
 
-    template <class... _Args>
-    iterator try_emplace(const_iterator hint, key_type&& k, _Args&&... args) {
+    template <class... ArgsT>
+    iterator try_emplace(const_iterator hint, key_type&& k, ArgsT&&... args) {
         return tree_.__emplace_hint_unique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
-            std::forward_as_tuple(std::forward<_Args>(args)...)
+            std::forward_as_tuple(std::forward<ArgsT>(args)...)
         ).first;
     }
 
@@ -668,42 +675,57 @@ public:
 
     [[nodiscard]] iterator find(const key_type& __k) { return tree_.find(__k); }
     [[nodiscard]] const_iterator find(const key_type& __k) const { return tree_.find(__k); }
-    template <typename _K2,
-    std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
-    int> = 0>
+
+    template <
+        typename _K2
+      , std::enable_if_t<
+            __is_transparent_v<CompareT, _K2> || __is_transparently_comparable_v<CompareT, key_type, _K2>
+          , int
+        > = 0
+    >
     [[nodiscard]] iterator find(const _K2& __k) {
         return tree_.find(__k);
     }
-    template <typename _K2,
-    std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
-    int> = 0>
-    [[nodiscard]] const_iterator find(const _K2& __k) const {
-        return tree_.find(__k);
+
+    template <
+        typename _K2
+      , std::enable_if_t<
+            __is_transparent_v<CompareT, _K2> || __is_transparently_comparable_v<CompareT, key_type, _K2>
+          , int
+        > = 0
+    >
+    [[nodiscard]] const_iterator find(const _K2& k) const {
+        return tree_.find(k);
     }
 
-    [[nodiscard]] size_type count(const key_type& __k) const {
-        return tree_.__count_unique(__k);
+    [[nodiscard]] size_type count(const key_type& k) const {
+        return tree_.__count_unique(k);
     }
 
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
         return tree_.__count_multi(__k);
     }
 
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
-    template <typename _K2,
-    std::enable_if_t<__is_transparent_v<_Compare, _K2> || __is_transparently_comparable_v<_Compare, key_type, _K2>,
-    int> = 0>
-    [[nodiscard]] bool contains(const _K2& __k) const {
-        return find(__k) != end();
+
+    template <
+        typename _K2
+      , std::enable_if_t<
+            __is_transparent_v<CompareT, _K2> || __is_transparently_comparable_v<CompareT, key_type, _K2>
+          , int
+        > = 0
+    >
+    [[nodiscard]] bool contains(const _K2& k) const {
+        return find(k) != end();
     }
 
-    [[nodiscard]] iterator lower_bound(const key_type& __k) {
-        return tree_.__lower_bound_unique(__k);
+    [[nodiscard]] iterator lower_bound(const key_type& k) {
+        return tree_.__lower_bound_unique(k);
     }
 
-    [[nodiscard]] const_iterator lower_bound(const key_type& __k) const {
-        return tree_.__lower_bound_unique(__k);
+    [[nodiscard]] const_iterator lower_bound(const key_type& k) const {
+        return tree_.__lower_bound_unique(k);
     }
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
@@ -711,8 +733,8 @@ public:
     template <
         typename _K2
       , std::enable_if_t<
-            __is_transparent_v<_Compare, _K2>
-         || __is_transparently_comparable_v<_Compare, key_type, _K2>
+            __is_transparent_v<CompareT, _K2>
+         || __is_transparently_comparable_v<CompareT, key_type, _K2>
          ,  int
         > = 0
     >
@@ -723,8 +745,8 @@ public:
     template <
         typename _K2
       , std::enable_if_t<
-            __is_transparent_v<_Compare, _K2>
-         || __is_transparently_comparable_v<_Compare, key_type, _K2>
+            __is_transparent_v<CompareT, _K2>
+         || __is_transparently_comparable_v<CompareT, key_type, _K2>
          , int
         > = 0
     >
@@ -743,8 +765,8 @@ public:
     template <
         typename _K2
       , std::enable_if_t<
-            __is_transparent_v<_Compare, _K2>
-         || __is_transparently_comparable_v<_Compare, key_type, _K2>
+            __is_transparent_v<CompareT, _K2>
+         || __is_transparently_comparable_v<CompareT, key_type, _K2>
          ,  int
         > = 0
     >
@@ -754,8 +776,8 @@ public:
     template <
         typename _K2
       , std::enable_if_t<
-            __is_transparent_v<_Compare, _K2>
-         || __is_transparently_comparable_v<_Compare, key_type, _K2>
+            __is_transparent_v<CompareT, _K2>
+         || __is_transparently_comparable_v<CompareT, key_type, _K2>
          ,  int
         > = 0
     >
@@ -768,11 +790,11 @@ public:
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const {
         return tree_.__equal_range_unique(k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& k) {
         return tree_.__equal_range_multi(k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& k) const {
         return tree_.__equal_range_multi(k);
     }
@@ -789,53 +811,107 @@ private:
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map> >;
 };
 
-template <class _InputIterator,
-class _Compare   = std::less<__iter_key_type<_InputIterator>>,
-class _Allocator = std::allocator<__iter_to_alloc_type<_InputIterator>>,
-class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
--> map<__iter_key_type<_InputIterator>, __iter_mapped_type<_InputIterator>, _Compare, _Allocator>;
+template <
+    class _InputIterator
+  , class CompareT   = std::less<__iter_key_type<_InputIterator>>
+  , class AllocatorT = std::allocator<__iter_to_alloc_type<_InputIterator>>
+  , class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(
+    _InputIterator,
+    _InputIterator,
+    CompareT = CompareT(),
+    AllocatorT = AllocatorT()
+) -> map<
+        __iter_key_type<_InputIterator>
+      , __iter_mapped_type<_InputIterator>
+      , CompareT, AllocatorT
+>;
 
-template < std::ranges::input_range _Range,
-class _Compare   = std::less<__range_key_type<_Range>>,
-class _Allocator = std::allocator<__range_to_alloc_type<_Range>>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
--> map<__range_key_type<_Range>, __range_mapped_type<_Range>, _Compare, _Allocator>;
+template <
+    std::ranges::input_range RangeT
+  , class CompareT   = std::less<__range_key_type<RangeT>>
+  , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(
+    std::from_range_t,
+    RangeT&&,
+    CompareT = CompareT(),
+    AllocatorT = AllocatorT()
+) -> map<
+         __range_key_type<RangeT>
+       , __range_mapped_type<RangeT>
+       , CompareT
+       , AllocatorT
+     >;
 
-template <class _Key,
-class _Tp,
-class _Compare   = std::less<std::remove_const_t<_Key>>,
-class _Allocator = std::allocator<std::pair<const _Key, _Tp>>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(std::initializer_list<std::pair<_Key, _Tp>>, _Compare = _Compare(), _Allocator = _Allocator())
--> map<std::remove_const_t<_Key>, _Tp, _Compare, _Allocator>;
+template <
+    class KeyT
+  , class _Tp
+  , class CompareT   = std::less<std::remove_const_t<KeyT>>
+  , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(
+    std::initializer_list<std::pair<KeyT, _Tp>>,
+    CompareT = CompareT(),
+    AllocatorT = AllocatorT()
+) -> map<
+         std::remove_const_t<KeyT>
+       , _Tp
+       , CompareT
+       , AllocatorT
+     >;
 
-template <class _InputIterator,
-class _Allocator,
-class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
-class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(_InputIterator, _InputIterator, _Allocator)
--> map<__iter_key_type<_InputIterator>,
-__iter_mapped_type<_InputIterator>,
-std::less<__iter_key_type<_InputIterator>>,
-_Allocator>;
+template <
+    class _InputIterator
+  , class AllocatorT
+  , class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>
+  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(_InputIterator, _InputIterator, AllocatorT)
+-> map<
+    __iter_key_type<_InputIterator>
+  , __iter_mapped_type<_InputIterator>
+  , std::less<__iter_key_type<_InputIterator>>
+  , AllocatorT
+>;
 
-template < std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(std::from_range_t, _Range&&, _Allocator)
--> map<__range_key_type<_Range>, __range_mapped_type<_Range>, std::less<__range_key_type<_Range>>, _Allocator>;
+template<
+    std::ranges::input_range RangeT
+  , class AllocatorT
+  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(std::from_range_t, RangeT&&, AllocatorT)
+-> map<
+       __range_key_type<RangeT>
+     , __range_mapped_type<RangeT>
+     , std::less<__range_key_type<RangeT>>
+     , AllocatorT
+   >;
 
-template <class _Key, class _Tp, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-map(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
--> map<std::remove_const_t<_Key>, _Tp, std::less<std::remove_const_t<_Key>>, _Allocator>;
+template<
+    class KeyT,
+    class _Tp,
+    class AllocatorT,
+    class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+map(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
+-> map<
+       std::remove_const_t<KeyT>
+     , _Tp
+     , std::less<std::remove_const_t<KeyT>>
+     , AllocatorT
+   >;
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<_Key, _Tp, _Compare, _Allocator>>> {
-    using __map = map<_Key, _Tp, _Compare, _Allocator>;
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, _Tp, CompareT, AllocatorT>>> {
+    using __map = map<KeyT, _Tp, CompareT, AllocatorT>;
 
     static const bool __has_algorithm = true;
 
@@ -847,62 +923,62 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<_Key, 
     }
 };
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-_Tp& map<_Key, _Tp, _Compare, _Allocator>::operator[](const key_type& __k) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& __k) {
     return tree_.__emplace_unique(std::piecewise_construct, std::forward_as_tuple(__k), std::forward_as_tuple())
     .first->second;
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-_Tp& map<_Key, _Tp, _Compare, _Allocator>::operator[](key_type&& __k) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& __k) {
     return tree_
     .__emplace_unique(std::piecewise_construct, std::forward_as_tuple(std::move(__k)), std::forward_as_tuple())
     .first->second;
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-_Tp& map<_Key, _Tp, _Compare, _Allocator>::at(const key_type& __k) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& __k) {
     auto [_, child] = tree_.__find_equal(__k);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->__get_value().second;
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-const _Tp& map<_Key, _Tp, _Compare, _Allocator>::at(const key_type& __k) const {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+const _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& __k) const {
     auto [_, child] = tree_.__find_equal(__k);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->__get_value().second;
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 inline bool
-operator==(const map<_Key, _Tp, _Compare, _Allocator>& x, const map<_Key, _Tp, _Compare, _Allocator>& y) {
+operator==(const map<KeyT, _Tp, CompareT, AllocatorT>& x, const map<KeyT, _Tp, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-__synth_three_way_result<std::pair<const _Key, _Tp>>
-operator<=>(const map<_Key, _Tp, _Compare, _Allocator>& x, const map<_Key, _Tp, _Compare, _Allocator>& y) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+__synth_three_way_result<std::pair<const KeyT, _Tp>>
+operator<=>(const map<KeyT, _Tp, CompareT, AllocatorT>& x, const map<KeyT, _Tp, CompareT, AllocatorT>& y) {
     return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), mstd::__synth_three_way);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 inline void
-swap(map<_Key, _Tp, _Compare, _Allocator>& x, map<_Key, _Tp, _Compare, _Allocator>& y)
+swap(map<KeyT, _Tp, CompareT, AllocatorT>& x, map<KeyT, _Tp, CompareT, AllocatorT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator, class _Predicate>
-inline typename map<_Key, _Tp, _Compare, _Allocator>::size_type
-erase_if(map<_Key, _Tp, _Compare, _Allocator>& __c, _Predicate pred) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT, class _Predicate>
+inline typename map<KeyT, _Tp, CompareT, AllocatorT>::size_type
+erase_if(map<KeyT, _Tp, CompareT, AllocatorT>& __c, _Predicate pred) {
     return mstd::_MSTD_erase_if_container(__c, pred);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-struct __container_traits<map<_Key, _Tp, _Compare, _Allocator> > {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+struct __container_traits<map<KeyT, _Tp, CompareT, AllocatorT> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
@@ -911,15 +987,15 @@ struct __container_traits<map<_Key, _Tp, _Compare, _Allocator> > {
     static constexpr const bool __reservable = false;
 };
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 class multimap {
 public:
     // types:
-    typedef _Key key_type;
+    typedef KeyT key_type;
     typedef _Tp mapped_type;
     typedef std::pair<const key_type, mapped_type> value_type;
-    typedef std::type_identity_t<_Compare> key_compare;
-    typedef std::type_identity_t<_Allocator> allocator_type;
+    typedef std::type_identity_t<CompareT> key_compare;
+    typedef std::type_identity_t<AllocatorT> allocator_type;
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
@@ -942,11 +1018,10 @@ public:
     };
 
 private:
-    using ValueType_ = ValueType<key_type, mapped_type>;
-    typedef MapValueCompare<key_type, value_type, key_compare> __vc;
-    using Tree_ = Tree<ValueType_, __vc, allocator_type>;
-    typedef typename Tree_::__node_traits __node_traits;
-    typedef allocator_traits<allocator_type> AllocTraits_;
+    using ValueType_    = ValueType<key_type, mapped_type>;
+    using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
+    using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
+    using AllocTraits_  = allocator_traits<allocator_type>;
 
     Tree_ tree_;
 
@@ -970,43 +1045,43 @@ public:
     multimap() noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
         std::is_nothrow_copy_constructible<key_compare>::value)
-    : tree_(__vc(key_compare())) {}
+    : tree_(ValueCompare_(key_compare())) {}
 
     explicit multimap(const key_compare& comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_copy_constructible<key_compare>::value)
-    : tree_(__vc(comp)) {}
+    : tree_(ValueCompare_(comp)) {}
 
     explicit multimap(const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {}
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {}
 
     template <class _InputIterator>
     multimap(_InputIterator __f, _InputIterator __l, const key_compare& comp = key_compare())
-    : tree_(__vc(comp)) {
+    : tree_(ValueCompare_(comp)) {
         insert(__f, __l);
     }
 
     template <class _InputIterator>
     multimap(_InputIterator __f, _InputIterator __l, const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
         insert(__f, __l);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
+    template <_ContainerCompatibleRange<value_type> RangeT>
     multimap(std::from_range_t,
-             _Range&& __range,
+             RangeT&& __range,
              const key_compare& comp = key_compare(),
              const allocator_type& __a = allocator_type())
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
-        insert_range(std::forward<_Range>(__range));
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
+        insert_range(std::forward<RangeT>(__range));
     }
 
     template <class _InputIterator>
     multimap(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : multimap(__f, __l, key_compare(), __a) {}
     
-    template <_ContainerCompatibleRange<value_type> _Range>
-    multimap(std::from_range_t, _Range&& __range, const allocator_type& __a)
-    : multimap(std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    multimap(std::from_range_t, RangeT&& __range, const allocator_type& __a)
+    : multimap(std::from_range, std::forward<RangeT>(__range), key_compare(), __a) {}
     
     multimap(const multimap& __m) = default;
 
@@ -1019,12 +1094,12 @@ public:
     multimap& operator=(multimap&& __m) = default;
 
     multimap(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
-    : tree_(__vc(comp)) {
+    : tree_(ValueCompare_(comp)) {
         insert(init_list.begin(), init_list.end());
     }
 
     multimap(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& __a)
-    : tree_(__vc(comp), typename Tree_::allocator_type(__a)) {
+    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(__a)) {
         insert(init_list.begin(), init_list.end());
     }
 
@@ -1037,12 +1112,13 @@ public:
         return *this;
     }
 
-    explicit multimap(const allocator_type& __a) : tree_(typename Tree_::allocator_type(__a)) {}
+    explicit multimap(const allocator_type& allocator)
+    : tree_(typename Tree_::allocator_type(allocator)) {}
 
     multimap(const multimap& __m, const allocator_type& __a) : tree_(__m.tree_, __a) {}
 
     ~multimap() {
-        static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
+        static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), "");
     }
 
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
@@ -1076,14 +1152,14 @@ public:
         return value_compare(tree_.value_comp().key_comp());
     }
 
-    template <class... _Args>
-    iterator emplace(_Args&&... __args) {
-        return tree_.__emplace_multi(std::forward<_Args>(__args)...);
+    template <class... ArgsT>
+    iterator emplace(ArgsT&&... args) {
+        return tree_.__emplace_multi(std::forward<ArgsT>(args)...);
     }
 
-    template <class... _Args>
-    iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return tree_.__emplace_hint_multi(__p.i_, std::forward<_Args>(__args)...);
+    template <class... ArgsT>
+    iterator emplace_hint(const_iterator __p, ArgsT&&... args) {
+        return tree_.__emplace_hint_multi(__p.i_, std::forward<ArgsT>(args)...);
     }
 
     template <class _Pp, std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0>
@@ -1115,8 +1191,8 @@ public:
         tree_.__insert_range_multi(__f, __l);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    void insert_range(_Range&& __range) {
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    void insert_range(RangeT&& __range) {
         tree_.__insert_range_multi( std::ranges::begin(__range),  std::ranges::end(__range));
     }
 
@@ -1176,11 +1252,11 @@ public:
 
     [[nodiscard]] iterator find(const key_type& __k) { return tree_.find(__k); }
     [[nodiscard]] const_iterator find(const key_type& __k) const { return tree_.find(__k); }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] iterator find(const _K2& __k) {
         return tree_.find(__k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] const_iterator find(const _K2& __k) const {
         return tree_.find(__k);
     }
@@ -1188,13 +1264,13 @@ public:
     [[nodiscard]] size_type count(const key_type& __k) const {
         return tree_.__count_multi(__k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
         return tree_.__count_multi(__k);
     }
 
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] bool contains(const _K2& __k) const {
         return find(__k) != end();
     }
@@ -1207,12 +1283,12 @@ public:
         return tree_.__lower_bound_multi(__k);
     }
 
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] iterator lower_bound(const _K2& __k) {
         return tree_.__lower_bound_multi(__k);
     }
 
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] const_iterator lower_bound(const _K2& __k) const {
         return tree_.__lower_bound_multi(__k);
     }
@@ -1225,11 +1301,11 @@ public:
         return tree_.__upper_bound_multi(__k);
     }
 
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] iterator upper_bound(const _K2& __k) {
         return tree_.__upper_bound_multi(__k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] const_iterator upper_bound(const _K2& __k) const {
         return tree_.__upper_bound_multi(__k);
     }
@@ -1240,11 +1316,11 @@ public:
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& __k) const {
         return tree_.__equal_range_multi(__k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& __k) {
         return tree_.__equal_range_multi(__k);
     }
-    template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
+    template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& __k) const {
         return tree_.__equal_range_multi(__k);
     }
@@ -1260,53 +1336,92 @@ private:
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap> >;
 };
 
-template <class _InputIterator,
-class _Compare   = std::less<__iter_key_type<_InputIterator>>,
-class _Allocator = std::allocator<__iter_to_alloc_type<_InputIterator>>,
-class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
--> multimap<__iter_key_type<_InputIterator>, __iter_mapped_type<_InputIterator>, _Compare, _Allocator>;
+template <
+    class _InputIterator
+  , class CompareT   = std::less<__iter_key_type<_InputIterator>>
+  , class AllocatorT = std::allocator<__iter_to_alloc_type<_InputIterator>>
+  , class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(_InputIterator, _InputIterator, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> multimap<
+       __iter_key_type<_InputIterator>
+     , __iter_mapped_type<_InputIterator>
+     , CompareT
+     , AllocatorT
+   >;
 
-template < std::ranges::input_range _Range,
-class _Compare   = std::less<__range_key_type<_Range>>,
-class _Allocator = std::allocator<__range_to_alloc_type<_Range>>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
--> multimap<__range_key_type<_Range>, __range_mapped_type<_Range>, _Compare, _Allocator>;
+template <
+    std::ranges::input_range RangeT
+  , class CompareT   = std::less<__range_key_type<RangeT>>
+  , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> multimap<
+       __range_key_type<RangeT>
+     , __range_mapped_type<RangeT>
+     , CompareT
+     , AllocatorT
+   >;
 
-template <class _Key,
-class _Tp,
-class _Compare   = std::less<std::remove_const_t<_Key>>,
-class _Allocator = std::allocator<std::pair<const _Key, _Tp>>,
-class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
-class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(std::initializer_list<std::pair<_Key, _Tp>>, _Compare = _Compare(), _Allocator = _Allocator())
--> multimap<std::remove_const_t<_Key>, _Tp, _Compare, _Allocator>;
+template <
+    class KeyT
+  , class _Tp
+  , class CompareT   = std::less<std::remove_const_t<KeyT>>
+  , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
+  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
+  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(std::initializer_list<std::pair<KeyT, _Tp>>, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> multimap<std::remove_const_t<KeyT>, _Tp, CompareT, AllocatorT>;
 
-template <class _InputIterator,
-class _Allocator,
-class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
-class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(_InputIterator, _InputIterator, _Allocator)
--> multimap<__iter_key_type<_InputIterator>,
-__iter_mapped_type<_InputIterator>,
-std::less<__iter_key_type<_InputIterator>>,
-_Allocator>;
+template <
+    class _InputIterator
+  , class AllocatorT
+  , class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>
+  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(_InputIterator, _InputIterator, AllocatorT)
+-> multimap<
+       __iter_key_type<_InputIterator>
+     , __iter_mapped_type<_InputIterator>
+     , std::less<__iter_key_type<_InputIterator>>
+     , AllocatorT
+   >;
 
-template < std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(std::from_range_t, _Range&&, _Allocator)
--> multimap<__range_key_type<_Range>, __range_mapped_type<_Range>, std::less<__range_key_type<_Range>>, _Allocator>;
+template <
+    std::ranges::input_range RangeT
+  , class AllocatorT
+  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(std::from_range_t, RangeT&&, AllocatorT)
+-> multimap<
+       __range_key_type<RangeT>
+     , __range_mapped_type<RangeT>
+     , std::less<__range_key_type<RangeT>>
+     , AllocatorT
+   >;
 
-template <class _Key, class _Tp, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multimap(std::initializer_list<std::pair<_Key, _Tp>>, _Allocator)
--> multimap<std::remove_const_t<_Key>, _Tp, std::less<std::remove_const_t<_Key>>, _Allocator>;
+template <
+    class KeyT
+  , class _Tp
+  , class AllocatorT
+  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
+>
+multimap(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
+-> multimap<
+       std::remove_const_t<KeyT>
+     , _Tp
+     , std::less<std::remove_const_t<KeyT>>
+     , AllocatorT
+   >;
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<_Key, _Tp, _Compare, _Allocator>>> {
-    using __map = multimap<_Key, _Tp, _Compare, _Allocator>;
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<KeyT, _Tp, CompareT, AllocatorT>>> {
+    using __map = multimap<KeyT, _Tp, CompareT, AllocatorT>;
 
     static const bool __has_algorithm = true;
 
@@ -1318,34 +1433,34 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<_
     }
 };
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 inline bool
-operator==(const multimap<_Key, _Tp, _Compare, _Allocator>& x, const multimap<_Key, _Tp, _Compare, _Allocator>& y) {
+operator==(const multimap<KeyT, _Tp, CompareT, AllocatorT>& x, const multimap<KeyT, _Tp, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-__synth_three_way_result<std::pair<const _Key, _Tp>>
-operator<=>(const multimap<_Key, _Tp, _Compare, _Allocator>& x,
-            const multimap<_Key, _Tp, _Compare, _Allocator>& y) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+__synth_three_way_result<std::pair<const KeyT, _Tp>>
+operator<=>(const multimap<KeyT, _Tp, CompareT, AllocatorT>& x,
+            const multimap<KeyT, _Tp, CompareT, AllocatorT>& y) {
     return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), __synth_three_way);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 inline void
-swap(multimap<_Key, _Tp, _Compare, _Allocator>& x, multimap<_Key, _Tp, _Compare, _Allocator>& y)
+swap(multimap<KeyT, _Tp, CompareT, AllocatorT>& x, multimap<KeyT, _Tp, CompareT, AllocatorT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator, class _Predicate>
-inline typename multimap<_Key, _Tp, _Compare, _Allocator>::size_type
-erase_if(multimap<_Key, _Tp, _Compare, _Allocator>& __c, _Predicate pred) {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT, class _Predicate>
+inline typename multimap<KeyT, _Tp, CompareT, AllocatorT>::size_type
+erase_if(multimap<KeyT, _Tp, CompareT, AllocatorT>& __c, _Predicate pred) {
     return mstd::_MSTD_erase_if_container(__c, pred);
 }
 
-template <class _Key, class _Tp, class _Compare, class _Allocator>
-struct __container_traits<multimap<_Key, _Tp, _Compare, _Allocator> > {
+template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+struct __container_traits<multimap<KeyT, _Tp, CompareT, AllocatorT> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.

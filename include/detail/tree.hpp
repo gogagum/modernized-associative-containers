@@ -69,7 +69,7 @@ class __tree_node_base;
 template <class _Tp, class _VoidPtr>
 class __tree_node;
 
-template <class _Key, class _Value>
+template <class KeyT, class _Value>
 struct ValueType;
 
 /*
@@ -501,9 +501,9 @@ struct __get_tree_key_type {
     using type = _Tp;
 };
 
-template <class _Key, class _ValueT>
-struct __get_tree_key_type<ValueType<_Key, _ValueT> > {
-    using type = _Key;
+template <class KeyT, class _ValueT>
+struct __get_tree_key_type<ValueType<KeyT, _ValueT> > {
+    using type = KeyT;
 };
 
 template <class _Tp>
@@ -514,9 +514,9 @@ struct __get_node_value_type {
     using type = _Tp;
 };
 
-template <class _Key, class _ValueT>
-struct __get_node_value_type<ValueType<_Key, _ValueT> > {
-    using type = std::pair<const _Key, _ValueT>;
+template <class KeyT, class _ValueT>
+struct __get_node_value_type<ValueType<KeyT, _ValueT> > {
+    using type = std::pair<const KeyT, _ValueT>;
 };
 
 template <class _Tp>
@@ -1150,40 +1150,40 @@ public:
 
     iterator erase(const_iterator __p);
     iterator erase(const_iterator __f, const_iterator __l);
-    template <class _Key>
-    size_type __erase_unique(const _Key& __k);
-    template <class _Key>
-    size_type __erase_multi(const _Key& __k);
+    template <class KeyT>
+    size_type __erase_unique(const KeyT& __k);
+    template <class KeyT>
+    size_type __erase_multi(const KeyT& __k);
 
     void
     __insert_node_at(__end_node_pointer __parent, __node_base_pointer& __child, __node_base_pointer __new_node) noexcept;
 
-    template <class _Key>
-    iterator find(const _Key& __key) {
+    template <class KeyT>
+    iterator find(const KeyT& __key) {
         auto [__, __match] = __find_equal(__key);
         if (__match == nullptr)
             return end();
         return iterator(static_cast<__node_pointer>(__match));
     }
 
-    template <class _Key>
-    const_iterator find(const _Key& __key) const {
+    template <class KeyT>
+    const_iterator find(const KeyT& __key) const {
         auto [__, __match] = __find_equal(__key);
         if (__match == nullptr)
             return end();
         return const_iterator(static_cast<__node_pointer>(__match));
     }
 
-    template <class _Key>
-    size_type __count_unique(const _Key& __k) const;
-    template <class _Key>
-    size_type __count_multi(const _Key& __k) const;
+    template <class KeyT>
+    size_type __count_unique(const KeyT& __k) const;
+    template <class KeyT>
+    size_type __count_multi(const KeyT& __k) const;
 
-    template <bool _LowerBound, class _Key>
-    __end_node_pointer __lower_upper_bound_unique_impl(const _Key& __v) const {
+    template <bool _LowerBound, class KeyT>
+    __end_node_pointer __lower_upper_bound_unique_impl(const KeyT& __v) const {
         auto __rt     = __root();
         auto __result = __end_node();
-        auto __comp   = LazySynthThreeWayComparator<_Compare, _Key, value_type>(value_comp());
+        auto __comp   = LazySynthThreeWayComparator<_Compare, KeyT, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__v, __rt->__get_value());
 
@@ -1201,74 +1201,74 @@ public:
         return __result;
     }
 
-    template <class _Key>
-    iterator __lower_bound_unique(const _Key& __v) {
+    template <class KeyT>
+    iterator __lower_bound_unique(const KeyT& __v) {
         return iterator(__lower_upper_bound_unique_impl<true>(__v));
     }
 
-    template <class _Key>
-    const_iterator __lower_bound_unique(const _Key& __v) const {
+    template <class KeyT>
+    const_iterator __lower_bound_unique(const KeyT& __v) const {
         return const_iterator(__lower_upper_bound_unique_impl<true>(__v));
     }
 
-    template <class _Key>
-    iterator __upper_bound_unique(const _Key& __v) {
+    template <class KeyT>
+    iterator __upper_bound_unique(const KeyT& __v) {
         return iterator(__lower_upper_bound_unique_impl<false>(__v));
     }
 
-    template <class _Key>
-    const_iterator __upper_bound_unique(const _Key& __v) const {
+    template <class KeyT>
+    const_iterator __upper_bound_unique(const KeyT& __v) const {
         return iterator(__lower_upper_bound_unique_impl<false>(__v));
     }
 
 private:
-    template <class _Key>
+    template <class KeyT>
     iterator
-    __lower_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result);
+    __lower_bound_multi(const KeyT& __v, __node_pointer __root, __end_node_pointer __result);
 
-    template <class _Key>
+    template <class KeyT>
     const_iterator
-    __lower_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result) const;
+    __lower_bound_multi(const KeyT& __v, __node_pointer __root, __end_node_pointer __result) const;
 
 public:
-    template <class _Key>
-    iterator __lower_bound_multi(const _Key& __v) {
+    template <class KeyT>
+    iterator __lower_bound_multi(const KeyT& __v) {
         return __lower_bound_multi(__v, __root(), __end_node());
     }
-    template <class _Key>
-    const_iterator __lower_bound_multi(const _Key& __v) const {
+    template <class KeyT>
+    const_iterator __lower_bound_multi(const KeyT& __v) const {
         return __lower_bound_multi(__v, __root(), __end_node());
     }
 
-    template <class _Key>
-    iterator __upper_bound_multi(const _Key& __v) {
+    template <class KeyT>
+    iterator __upper_bound_multi(const KeyT& __v) {
         return __upper_bound_multi(__v, __root(), __end_node());
     }
 
-    template <class _Key>
-    const_iterator __upper_bound_multi(const _Key& __v) const {
+    template <class KeyT>
+    const_iterator __upper_bound_multi(const KeyT& __v) const {
         return __upper_bound_multi(__v, __root(), __end_node());
     }
 
 private:
-    template <class _Key>
+    template <class KeyT>
     iterator
-    __upper_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result);
+    __upper_bound_multi(const KeyT& __v, __node_pointer __root, __end_node_pointer __result);
 
-    template <class _Key>
+    template <class KeyT>
     const_iterator
-    __upper_bound_multi(const _Key& __v, __node_pointer __root, __end_node_pointer __result) const;
+    __upper_bound_multi(const KeyT& __v, __node_pointer __root, __end_node_pointer __result) const;
 
 public:
-    template <class _Key>
-    std::pair<iterator, iterator> __equal_range_unique(const _Key& __k);
-    template <class _Key>
-    std::pair<const_iterator, const_iterator> __equal_range_unique(const _Key& __k) const;
+    template <class KeyT>
+    std::pair<iterator, iterator> __equal_range_unique(const KeyT& __k);
+    template <class KeyT>
+    std::pair<const_iterator, const_iterator> __equal_range_unique(const KeyT& __k) const;
 
-    template <class _Key>
-    std::pair<iterator, iterator> __equal_range_multi(const _Key& __k);
-    template <class _Key>
-    std::pair<const_iterator, const_iterator> __equal_range_multi(const _Key& __k) const;
+    template <class KeyT>
+    std::pair<iterator, iterator> __equal_range_multi(const KeyT& __k);
+    template <class KeyT>
+    std::pair<const_iterator, const_iterator> __equal_range_multi(const KeyT& __k) const;
 
     using _Dp           = __tree_node_destructor<__node_allocator>;
     using __node_holder = std::unique_ptr<__node, _Dp>;
@@ -1277,17 +1277,17 @@ public:
 
     // FIXME: Make this function const qualified. Unfortunately doing so
     // breaks existing code which uses non-const callable comparators.
-    template <class _Key>
-    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v);
+    template <class KeyT>
+    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const KeyT& __v);
 
-    template <class _Key>
-    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const _Key& __v) const {
+    template <class KeyT>
+    std::pair<__end_node_pointer, __node_base_pointer&> __find_equal(const KeyT& __v) const {
         return const_cast<Tree*>(this)->__find_equal(__v);
     }
 
-    template <class _Key>
+    template <class KeyT>
     std::pair<__end_node_pointer, __node_base_pointer&>
-    __find_equal(const_iterator __hint, __node_base_pointer& __dummy, const _Key& __v);
+    __find_equal(const_iterator __hint, __node_base_pointer& __dummy, const KeyT& __v);
 
     void __copy_assign_alloc(const Tree& __t) {
         __copy_assign_alloc(__t, std::integral_constant<bool, __node_traits::propagate_on_container_copy_assignment::value>());
@@ -1731,10 +1731,10 @@ typename Tree<_Tp, _Compare, _Allocator>::__node_base_pointer& Tree<_Tp, _Compar
     // If __v exists, return the parent of the node of __v and a reference to the pointer to the node of __v.
     // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     std::pair<typename Tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
 typename Tree<_Tp, _Compare, _Allocator>::__node_base_pointer&>
-Tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
+Tree<_Tp, _Compare, _Allocator>::__find_equal(const KeyT& __v) {
     using _Pair = std::pair<__end_node_pointer, __node_base_pointer&>;
 
     __node_pointer __nd = __root();
@@ -1746,7 +1746,7 @@ Tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
 
     __node_base_pointer* __node_ptr = __root_ptr();
     auto&& __transparent            = mstd::__as_transparent(value_comp());
-    auto __comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, _Key, value_type>(__transparent);
+    auto __comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, KeyT, value_type>(__transparent);
 
     while (true) {
         auto __comp_res = __comp(__v, __nd->__get_value());
@@ -1776,10 +1776,10 @@ Tree<_Tp, _Compare, _Allocator>::__find_equal(const _Key& __v) {
 // If __v exists, return the parent of the node of __v and a reference to the pointer to the node of __v.
 // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
 template <class _Tp, class _Compare, class _Allocator>
-template <class _Key>
+template <class KeyT>
 std::pair<typename Tree<_Tp, _Compare, _Allocator>::__end_node_pointer,
 typename Tree<_Tp, _Compare, _Allocator>::__node_base_pointer&>
-Tree<_Tp, _Compare, _Allocator>::__find_equal(const_iterator __hint, __node_base_pointer& __dummy, const _Key& __v) {
+Tree<_Tp, _Compare, _Allocator>::__find_equal(const_iterator __hint, __node_base_pointer& __dummy, const KeyT& __v) {
     using _Pair = std::pair<__end_node_pointer, __node_base_pointer&>;
 
     if (__hint == end() || value_comp()(__v, *__hint)) { // check before
@@ -2002,9 +2002,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     }
 
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__erase_unique(const _Key& __k) {
+    Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& __k) {
         iterator __i = find(__k);
         if (__i == end())
             return 0;
@@ -2013,9 +2013,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     }
 
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__erase_multi(const _Key& __k) {
+    Tree<_Tp, _Compare, _Allocator>::__erase_multi(const KeyT& __k) {
         std::pair<iterator, iterator> __p = __equal_range_multi(__k);
         size_type __r                = 0;
         for (; __p.first != __p.second; ++__r)
@@ -2024,11 +2024,11 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     }
 
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__count_unique(const _Key& __k) const {
+    Tree<_Tp, _Compare, _Allocator>::__count_unique(const KeyT& __k) const {
         __node_pointer __rt = __root();
-        auto __comp         = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+        auto __comp         = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__k, __rt->__get_value());
             if (__comp_res.__less()) {
@@ -2042,12 +2042,12 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     }
 
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__count_multi(const _Key& __k) const {
+    Tree<_Tp, _Compare, _Allocator>::__count_multi(const KeyT& __k) const {
         __end_node_pointer __result = __end_node();
         __node_pointer __rt         = __root();
-        auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+        auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
         while (__rt != nullptr) {
             auto __comp_res = __comp(__k, __rt->__get_value());
             if (__comp_res.__less()) {
@@ -2064,9 +2064,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
     }
 
     template <class _Tp, class _Compare, class _Allocator>
-    template <class _Key>
+    template <class KeyT>
     typename Tree<_Tp, _Compare, _Allocator>::iterator Tree<_Tp, _Compare, _Allocator>::__lower_bound_multi(
-        const _Key& __v, __node_pointer __root, __end_node_pointer __result) {
+        const KeyT& __v, __node_pointer __root, __end_node_pointer __result) {
         while (__root != nullptr) {
             if (!value_comp()(__root->__get_value(), __v)) {
                 __result = static_cast<__end_node_pointer>(__root);
@@ -2078,9 +2078,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
         }
 
         template <class _Tp, class _Compare, class _Allocator>
-        template <class _Key>
+        template <class KeyT>
         typename Tree<_Tp, _Compare, _Allocator>::const_iterator Tree<_Tp, _Compare, _Allocator>::__lower_bound_multi(
-            const _Key& __v, __node_pointer __root, __end_node_pointer __result) const {
+            const KeyT& __v, __node_pointer __root, __end_node_pointer __result) const {
                 while (__root != nullptr) {
                     if (!value_comp()(__root->__get_value(), __v)) {
                         __result = static_cast<__end_node_pointer>(__root);
@@ -2092,9 +2092,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
             }
 
             template <class _Tp, class _Compare, class _Allocator>
-            template <class _Key>
+            template <class KeyT>
             typename Tree<_Tp, _Compare, _Allocator>::iterator Tree<_Tp, _Compare, _Allocator>::__upper_bound_multi(
-                const _Key& __v, __node_pointer __root, __end_node_pointer __result) {
+                const KeyT& __v, __node_pointer __root, __end_node_pointer __result) {
                 while (__root != nullptr) {
                     if (value_comp()(__v, __root->__get_value())) {
                         __result = static_cast<__end_node_pointer>(__root);
@@ -2106,9 +2106,9 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
                 }
 
                 template <class _Tp, class _Compare, class _Allocator>
-                template <class _Key>
+                template <class KeyT>
                 typename Tree<_Tp, _Compare, _Allocator>::const_iterator Tree<_Tp, _Compare, _Allocator>::__upper_bound_multi(
-                    const _Key& __v, __node_pointer __root, __end_node_pointer __result) const {
+                    const KeyT& __v, __node_pointer __root, __end_node_pointer __result) const {
                         while (__root != nullptr) {
                             if (value_comp()(__v, __root->__get_value())) {
                                 __result = static_cast<__end_node_pointer>(__root);
@@ -2120,13 +2120,13 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
                     }
 
                     template <class _Tp, class _Compare, class _Allocator>
-                    template <class _Key>
+                    template <class KeyT>
                     std::pair<typename Tree<_Tp, _Compare, _Allocator>::iterator, typename Tree<_Tp, _Compare, _Allocator>::iterator>
-                    Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k) {
+                    Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const KeyT& __k) {
                         using _Pp                   = std::pair<iterator, iterator>;
                         __end_node_pointer __result = __end_node();
                         __node_pointer __rt         = __root();
-                        auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+                        auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
                         while (__rt != nullptr) {
                             auto __comp_res = __comp(__k, __rt->__get_value());
                             if (__comp_res.__less()) {
@@ -2143,14 +2143,14 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
                     }
 
                     template <class _Tp, class _Compare, class _Allocator>
-                    template <class _Key>
+                    template <class KeyT>
                     std::pair<typename Tree<_Tp, _Compare, _Allocator>::const_iterator,
 typename Tree<_Tp, _Compare, _Allocator>::const_iterator>
-Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k) const {
+Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const KeyT& __k) const {
     using _Pp                   = std::pair<const_iterator, const_iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
@@ -2168,13 +2168,13 @@ Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const _Key& __k) const {
 }
 
 template <class _Tp, class _Compare, class _Allocator>
-template <class _Key>
+template <class KeyT>
 std::pair<typename Tree<_Tp, _Compare, _Allocator>::iterator, typename Tree<_Tp, _Compare, _Allocator>::iterator>
-Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) {
+Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const KeyT& __k) {
     using _Pp                   = std::pair<iterator, iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
@@ -2191,14 +2191,14 @@ Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) {
 }
 
 template <class _Tp, class _Compare, class _Allocator>
-template <class _Key>
+template <class KeyT>
 std::pair<typename Tree<_Tp, _Compare, _Allocator>::const_iterator,
 typename Tree<_Tp, _Compare, _Allocator>::const_iterator>
-Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const _Key& __k) const {
+Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const KeyT& __k) const {
     using _Pp                   = std::pair<const_iterator, const_iterator>;
     __end_node_pointer __result = __end_node();
     __node_pointer __rt         = __root();
-    auto __comp                 = LazySynthThreeWayComparator<value_compare, _Key, value_type>(value_comp());
+    auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
     while (__rt != nullptr) {
         auto __comp_res = __comp(__k, __rt->__get_value());
         if (__comp_res.__less()) {
