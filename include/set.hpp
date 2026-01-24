@@ -542,14 +542,14 @@ erase_if(multiset<Key, Compare, Allocator>& c, Predicate pred);  // C++20
 
 namespace mstd {
 
-template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >
+template <class KeyT, class _Compare = std::less<KeyT>, class _Allocator = std::allocator<KeyT> >
 class multiset;
 
-template <class _Key, class _Compare = std::less<_Key>, class _Allocator = std::allocator<_Key> >
+template <class KeyT, class _Compare = std::less<KeyT>, class _Allocator = std::allocator<KeyT> >
 class set {
 public:
     // types:
-    typedef _Key key_type;
+    typedef KeyT key_type;
     typedef key_type value_type;
     typedef std::type_identity_t<_Compare> key_compare;
     typedef key_compare value_compare;
@@ -608,22 +608,22 @@ public:
         insert(__f, __l);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
+    template <_ContainerCompatibleRange<value_type> RangeT>
     set(std::from_range_t,
-        _Range&& __range,
+        RangeT&& __range,
         const key_compare& __comp = key_compare(),
         const allocator_type& __a = allocator_type())
     : tree_(__comp, __a) {
-        insert_range(std::forward<_Range>(__range));
+        insert_range(std::forward<RangeT>(__range));
     }
     
     template <class _InputIterator>
     set(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
     : set(__f, __l, key_compare(), __a) {}
     
-    template <_ContainerCompatibleRange<value_type> _Range>
-    set(std::from_range_t, _Range&& __range, const allocator_type& __a)
-    : set (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    set(std::from_range_t, RangeT&& __range, const allocator_type& __a)
+    : set (std::from_range, std::forward<RangeT>(__range), key_compare(), __a) {}
     
     set(const set& __s) = default;
 
@@ -658,7 +658,7 @@ public:
 
     set& operator=(set&& __s) = default;
 
-    ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), ""); }
+    ~set() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, _Compare>()), ""); }
 
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
     [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
@@ -703,8 +703,8 @@ public:
         tree_.__insert_range_unique(__first, __last);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    void insert_range(_Range&& __range) {
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    void insert_range(RangeT&& __range) {
         tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
@@ -861,20 +861,20 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
 set(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
 -> set<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
 
-template <std::ranges::input_range _Range,
-class _Compare   = std::less<std::ranges::range_value_t<_Range>>,
-class _Allocator = std::allocator<std::ranges::range_value_t<_Range>>,
+template <std::ranges::input_range RangeT,
+class _Compare   = std::less<std::ranges::range_value_t<RangeT>>,
+class _Allocator = std::allocator<std::ranges::range_value_t<RangeT>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
-set(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
--> set<std::ranges::range_value_t<_Range>, _Compare, _Allocator>;
+set(std::from_range_t, RangeT&&, _Compare = _Compare(), _Allocator = _Allocator())
+-> set<std::ranges::range_value_t<RangeT>, _Compare, _Allocator>;
 
-template <class _Key,
-class _Compare   = std::less<_Key>,
-class _Allocator = std::allocator<_Key>,
+template <class KeyT,
+class _Compare   = std::less<KeyT>,
+class _Allocator = std::allocator<KeyT>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
-set(std::initializer_list<_Key>, _Compare = _Compare(), _Allocator = _Allocator()) -> set<_Key, _Compare, _Allocator>;
+set(std::initializer_list<KeyT>, _Compare = _Compare(), _Allocator = _Allocator()) -> set<KeyT, _Compare, _Allocator>;
 
 template <class _InputIterator,
 class _Allocator,
@@ -883,16 +883,16 @@ class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 set(_InputIterator, _InputIterator, _Allocator)
 -> set<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
 
-template <std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-set(std::from_range_t, _Range&&, _Allocator)
--> set<std::ranges::range_value_t<_Range>, std::less<std::ranges::range_value_t<_Range>>, _Allocator>;
+template <std::ranges::input_range RangeT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(std::from_range_t, RangeT&&, _Allocator)
+-> set<std::ranges::range_value_t<RangeT>, std::less<std::ranges::range_value_t<RangeT>>, _Allocator>;
 
-template <class _Key, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-set(std::initializer_list<_Key>, _Allocator) -> set<_Key, std::less<_Key>, _Allocator>;
+template <class KeyT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+set(std::initializer_list<KeyT>, _Allocator) -> set<KeyT, std::less<KeyT>, _Allocator>;
 
-template <class _Alg, class _Key, class _Compare, class _Allocator>
-struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocator>>> {
-    using __set = set<_Key, _Compare, _Allocator>;
+template <class _Alg, class KeyT, class _Compare, class _Allocator>
+struct __specialized_algorithm<_Alg, __single_range<set<KeyT, _Compare, _Allocator>>> {
+    using __set = set<KeyT, _Compare, _Allocator>;
 
     static const bool __has_algorithm =
     __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;
@@ -905,33 +905,33 @@ struct __specialized_algorithm<_Alg, __single_range<set<_Key, _Compare, _Allocat
     }
 };
 
-template <class _Key, class _Compare, class _Allocator>
+template <class KeyT, class _Compare, class _Allocator>
 inline bool
-operator==(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+operator==(const set<KeyT, _Compare, _Allocator>& __x, const set<KeyT, _Compare, _Allocator>& __y) {
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
-template <class _Key, class _Compare, class _Allocator>
-__synth_three_way_result<_Key>
-operator<=>(const set<_Key, _Compare, _Allocator>& __x, const set<_Key, _Compare, _Allocator>& __y) {
+template <class KeyT, class _Compare, class _Allocator>
+__synth_three_way_result<KeyT>
+operator<=>(const set<KeyT, _Compare, _Allocator>& __x, const set<KeyT, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), mstd::__synth_three_way);
 }
 
 // specialized algorithms:
-template <class _Key, class _Compare, class _Allocator>
-inline void swap(set<_Key, _Compare, _Allocator>& __x, set<_Key, _Compare, _Allocator>& __y)
+template <class KeyT, class _Compare, class _Allocator>
+inline void swap(set<KeyT, _Compare, _Allocator>& __x, set<KeyT, _Compare, _Allocator>& __y)
 noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
-template <class _Key, class _Compare, class _Allocator, class _Predicate>
-inline typename set<_Key, _Compare, _Allocator>::size_type
-erase_if(set<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
+template <class KeyT, class _Compare, class _Allocator, class _Predicate>
+inline typename set<KeyT, _Compare, _Allocator>::size_type
+erase_if(set<KeyT, _Compare, _Allocator>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }
 
-template <class _Key, class _Compare, class _Allocator>
-struct __container_traits<set<_Key, _Compare, _Allocator> > {
+template <class KeyT, class _Compare, class _Allocator>
+struct __container_traits<set<KeyT, _Compare, _Allocator> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
@@ -940,11 +940,11 @@ struct __container_traits<set<_Key, _Compare, _Allocator> > {
     static constexpr bool __reservable = false;
 };
 
-template <class _Key, class _Compare, class _Allocator>
+template <class KeyT, class _Compare, class _Allocator>
 class multiset {
 public:
     // types:
-    typedef _Key key_type;
+    typedef KeyT key_type;
     typedef key_type value_type;
     typedef std::type_identity_t<_Compare> key_compare;
     typedef key_compare value_compare;
@@ -1007,18 +1007,18 @@ public:
         insert(__f, __l);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
+    template <_ContainerCompatibleRange<value_type> RangeT>
     multiset(std::from_range_t,
-             _Range&& __range,
+             RangeT&& __range,
              const key_compare& __comp = key_compare(),
              const allocator_type& __a = allocator_type())
     : tree_(__comp, __a) {
-        insert_range(std::forward<_Range>(__range));
+        insert_range(std::forward<RangeT>(__range));
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    multiset(std::from_range_t, _Range&& __range, const allocator_type& __a)
-    : multiset (std::from_range, std::forward<_Range>(__range), key_compare(), __a) {}
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    multiset(std::from_range_t, RangeT&& __range, const allocator_type& __a)
+    : multiset (std::from_range, std::forward<RangeT>(__range), key_compare(), __a) {}
     
     multiset(const multiset& __s) = default;
 
@@ -1052,7 +1052,7 @@ public:
     multiset& operator=(multiset&& __s) = default;
 
     ~multiset() {
-        static_assert(sizeof(mstd::__diagnose_non_const_comparator<_Key, _Compare>()), "");
+        static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, _Compare>()), "");
     }
 
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
@@ -1098,8 +1098,8 @@ public:
         tree_.__insert_range_multi(__first, __last);
     }
 
-    template <_ContainerCompatibleRange<value_type> _Range>
-    void insert_range(_Range&& __range) {
+    template <_ContainerCompatibleRange<value_type> RangeT>
+    void insert_range(RangeT&& __range) {
         tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
@@ -1254,21 +1254,21 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
 multiset(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
 -> multiset<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
 
-template <std::ranges::input_range _Range,
-class _Compare   = std::less<std::ranges::range_value_t<_Range>>,
-class _Allocator = std::allocator<std::ranges::range_value_t<_Range>>,
+template <std::ranges::input_range RangeT,
+class _Compare   = std::less<std::ranges::range_value_t<RangeT>>,
+class _Allocator = std::allocator<std::ranges::range_value_t<RangeT>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
-multiset(std::from_range_t, _Range&&, _Compare = _Compare(), _Allocator = _Allocator())
--> multiset<std::ranges::range_value_t<_Range>, _Compare, _Allocator>;
+multiset(std::from_range_t, RangeT&&, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<std::ranges::range_value_t<RangeT>, _Compare, _Allocator>;
 
-template <class _Key,
-class _Compare   = std::less<_Key>,
-class _Allocator = std::allocator<_Key>,
+template <class KeyT,
+class _Compare   = std::less<KeyT>,
+class _Allocator = std::allocator<KeyT>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
-multiset(std::initializer_list<_Key>, _Compare = _Compare(), _Allocator = _Allocator())
--> multiset<_Key, _Compare, _Allocator>;
+multiset(std::initializer_list<KeyT>, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<KeyT, _Compare, _Allocator>;
 
 template <class _InputIterator,
 class _Allocator,
@@ -1277,16 +1277,16 @@ class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multiset(_InputIterator, _InputIterator, _Allocator)
 -> multiset<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
 
-template <std::ranges::input_range _Range, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multiset(std::from_range_t, _Range&&, _Allocator)
--> multiset<std::ranges::range_value_t<_Range>, std::less<std::ranges::range_value_t<_Range>>, _Allocator>;
+template <std::ranges::input_range RangeT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+multiset(std::from_range_t, RangeT&&, _Allocator)
+-> multiset<std::ranges::range_value_t<RangeT>, std::less<std::ranges::range_value_t<RangeT>>, _Allocator>;
 
-template <class _Key, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multiset(std::initializer_list<_Key>, _Allocator) -> multiset<_Key, std::less<_Key>, _Allocator>;
+template <class KeyT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
+multiset(std::initializer_list<KeyT>, _Allocator) -> multiset<KeyT, std::less<KeyT>, _Allocator>;
 
-template <class _Alg, class _Key, class _Compare, class _Allocator>
-struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Allocator>>> {
-    using __set = multiset<_Key, _Compare, _Allocator>;
+template <class _Alg, class KeyT, class _Compare, class _Allocator>
+struct __specialized_algorithm<_Alg, __single_range<multiset<KeyT, _Compare, _Allocator>>> {
+    using __set = multiset<KeyT, _Compare, _Allocator>;
 
     static const bool __has_algorithm =
     __specialized_algorithm<_Alg, __single_range<typename __set::__base>>::__has_algorithm;
@@ -1299,33 +1299,33 @@ struct __specialized_algorithm<_Alg, __single_range<multiset<_Key, _Compare, _Al
     }
 };
 
-template <class _Key, class _Compare, class _Allocator>
+template <class KeyT, class _Compare, class _Allocator>
 inline bool
-operator==(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+operator==(const multiset<KeyT, _Compare, _Allocator>& __x, const multiset<KeyT, _Compare, _Allocator>& __y) {
     return __x.size() == __y.size() && std::equal(__x.begin(), __x.end(), __y.begin());
 }
 
-template <class _Key, class _Compare, class _Allocator>
-__synth_three_way_result<_Key>
-operator<=>(const multiset<_Key, _Compare, _Allocator>& __x, const multiset<_Key, _Compare, _Allocator>& __y) {
+template <class KeyT, class _Compare, class _Allocator>
+__synth_three_way_result<KeyT>
+operator<=>(const multiset<KeyT, _Compare, _Allocator>& __x, const multiset<KeyT, _Compare, _Allocator>& __y) {
     return std::lexicographical_compare_three_way(__x.begin(), __x.end(), __y.begin(), __y.end(), __synth_three_way);
 }
 
-template <class _Key, class _Compare, class _Allocator>
+template <class KeyT, class _Compare, class _Allocator>
 inline void
-swap(multiset<_Key, _Compare, _Allocator>& __x, multiset<_Key, _Compare, _Allocator>& __y)
+swap(multiset<KeyT, _Compare, _Allocator>& __x, multiset<KeyT, _Compare, _Allocator>& __y)
 noexcept(noexcept(__x.swap(__y))) {
     __x.swap(__y);
 }
 
-template <class _Key, class _Compare, class _Allocator, class _Predicate>
-inline typename multiset<_Key, _Compare, _Allocator>::size_type
-erase_if(multiset<_Key, _Compare, _Allocator>& __c, _Predicate __pred) {
+template <class KeyT, class _Compare, class _Allocator, class _Predicate>
+inline typename multiset<KeyT, _Compare, _Allocator>::size_type
+erase_if(multiset<KeyT, _Compare, _Allocator>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }
 
-template <class _Key, class _Compare, class _Allocator>
-struct __container_traits<multiset<_Key, _Compare, _Allocator> > {
+template <class KeyT, class _Compare, class _Allocator>
+struct __container_traits<multiset<KeyT, _Compare, _Allocator> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.

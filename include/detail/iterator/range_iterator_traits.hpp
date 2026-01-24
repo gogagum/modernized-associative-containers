@@ -18,15 +18,15 @@
 
 namespace mstd {
 
-template <std::ranges::input_range _Range>
-using __range_key_type = std::remove_const_t<typename std::ranges::range_value_t<_Range>::first_type>;
+template <std::ranges::input_range RangeT>
+using __range_key_type = std::remove_const_t<typename std::ranges::range_value_t<RangeT>::first_type>;
 
-template <std::ranges::input_range _Range>
-using __range_mapped_type = typename std::ranges::range_value_t<_Range>::second_type;
+template <std::ranges::input_range RangeT>
+using __range_mapped_type = typename std::ranges::range_value_t<RangeT>::second_type;
 
-template <std::ranges::input_range _Range>
+template <std::ranges::input_range RangeT>
 using __range_to_alloc_type =
-    std::pair<const typename std::ranges::range_value_t<_Range>::first_type, typename std::ranges::range_value_t<_Range>::second_type>;
+    std::pair<const typename std::ranges::range_value_t<RangeT>::first_type, typename std::ranges::range_value_t<RangeT>::second_type>;
 
 } // namespace mstd
 

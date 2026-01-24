@@ -16,11 +16,11 @@
 
 namespace mstd {
 
-template <class _Tp, class _Key = void, class = void>
+template <class _Tp, class KeyT = void, class = void>
 inline const bool __is_transparent_v = false;
 
-template <class _Tp, class _Key>
-inline const bool __is_transparent_v<_Tp, _Key, std::void_t<typename _Tp::is_transparent> > = true;
+template <class _Tp, class KeyT>
+inline const bool __is_transparent_v<_Tp, KeyT, std::void_t<typename _Tp::is_transparent> > = true;
 
 // Two types are considered transparently comparable if `comparator(key, arg)` is equivalent to `comparator(key,
 // <implicit cast to KeyT>(arg))`.

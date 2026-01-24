@@ -16,9 +16,9 @@
 
 namespace mstd {
 
-template <class _Range, class _Tp>
+template <class RangeT, class _Tp>
 concept _ContainerCompatibleRange =
-    std::ranges::input_range<_Range> && std::convertible_to<std::ranges::range_reference_t<_Range>, _Tp>;
+    std::ranges::input_range<RangeT> && std::convertible_to<std::ranges::range_reference_t<RangeT>, _Tp>;
 
 
 } // namespace mstd
