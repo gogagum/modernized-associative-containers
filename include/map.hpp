@@ -763,7 +763,7 @@ public:
         > = 0
     >
     [[nodiscard]] iterator lower_bound(const _K2& k) {
-        return tree_.__lower_bound_multi(k);
+        return tree_.lowerBoundMulti(k);
     }
 
     template <
@@ -775,7 +775,7 @@ public:
         > = 0
     >
     [[nodiscard]] const_iterator lower_bound(const _K2& k) const {
-        return tree_.__lower_bound_multi(k);
+        return tree_.lowerBoundMulti(k);
     }
 
     [[nodiscard]] iterator upper_bound(const key_type& k) {
@@ -795,7 +795,7 @@ public:
         > = 0
     >
     [[nodiscard]] iterator upper_bound(const _K2& k) {
-        return tree_.__upper_bound_multi(k);
+        return tree_.upperBoundMulti(k);
     }
     template <
         typename _K2
@@ -806,7 +806,7 @@ public:
         > = 0
     >
     [[nodiscard]] const_iterator upper_bound(const _K2& k) const {
-        return tree_.__upper_bound_multi(k);
+        return tree_.upperBoundMulti(k);
     }
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& k) {
         return tree_.__equal_range_unique(k);
@@ -1371,11 +1371,11 @@ public:
     }
 
     [[nodiscard]] iterator lower_bound(const key_type& key) {
-        return tree_.__lower_bound_multi(key);
+        return tree_.lowerBoundMulti(key);
     }
 
     [[nodiscard]] const_iterator lower_bound(const key_type& key) const {
-        return tree_.__lower_bound_multi(key);
+        return tree_.lowerBoundMulti(key);
     }
 
     template <
@@ -1383,7 +1383,7 @@ public:
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] iterator lower_bound(const _K2& key) {
-        return tree_.__lower_bound_multi(key);
+        return tree_.lowerBoundMulti(key);
     }
 
     template <
@@ -1391,15 +1391,15 @@ public:
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] const_iterator lower_bound(const _K2& key) const {
-        return tree_.__lower_bound_multi(key);
+        return tree_.lowerBoundMulti(key);
     }
 
     [[nodiscard]] iterator upper_bound(const key_type& key) {
-        return tree_.__upper_bound_multi(key);
+        return tree_.upperBoundMulti(key);
     }
 
     [[nodiscard]] const_iterator upper_bound(const key_type& key) const {
-        return tree_.__upper_bound_multi(key);
+        return tree_.upperBoundMulti(key);
     }
 
     template <
@@ -1407,14 +1407,14 @@ public:
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] iterator upper_bound(const _K2& key) {
-        return tree_.__upper_bound_multi(key);
+        return tree_.upperBoundMulti(key);
     }
     template <
         typename _K2
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] const_iterator upper_bound(const _K2& key) const {
-        return tree_.__upper_bound_multi(key);
+        return tree_.upperBoundMulti(key);
     }
 
     [[nodiscard]] std::pair<iterator, iterator>
