@@ -130,7 +130,7 @@ public:
     , first_constructed{false}
     , second_constructed{false} {}
 
-    MapNodeDestructor(__tree_node_destructor<AllocatorType_>&& x) noexcept
+    MapNodeDestructor(TreeNodeDestructor<AllocatorType_>&& x) noexcept
     : na_(x.na_)
     , first_constructed(x.__value_constructed)
     , second_constructed(x.__value_constructed) {
@@ -141,10 +141,10 @@ public:
 
     void operator()(pointer ptr) noexcept {
         if (second_constructed) {
-            AllocTraits_::destroy(na_, std::addressof(ptr->__get_value().second));
+            AllocTraits_::destroy(na_, std::addressof(ptr->get_value().second));
         }
         if (first_constructed) {
-            AllocTraits_::destroy(na_, std::addressof(ptr->__get_value().first));
+            AllocTraits_::destroy(na_, std::addressof(ptr->get_value().first));
         }
         if (ptr) {
             AllocTraits_::deallocate(na_, ptr, 1);
@@ -276,7 +276,7 @@ public:
     template <class, class, class, class>
     friend class multimap;
     template <class, class, class>
-    friend class __tree_const_iterator;
+    friend class TreeConstIterator;
 
     template <class, class...>
     friend struct __specialized_algorithm;
@@ -475,7 +475,7 @@ public:
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
-        return static_cast<__node_pointer>(child)->__get_value().second;
+        return static_cast<__node_pointer>(child)->get_value().second;
     }
 
     template <
@@ -494,7 +494,7 @@ public:
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
-        return static_cast<__node_pointer>(child)->__get_value().second;
+        return static_cast<__node_pointer>(child)->get_value().second;
     }
 
     [[nodiscard]] mapped_type& at(const key_type& key);
@@ -976,7 +976,7 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) {
     auto [_, child] = tree_.__find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
-    return static_cast<__node_pointer>(child)->__get_value().second;
+    return static_cast<__node_pointer>(child)->get_value().second;
 }
 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
@@ -984,7 +984,7 @@ const _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) const {
     auto [_, child] = tree_.__find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
-    return static_cast<__node_pointer>(child)->__get_value().second;
+    return static_cast<__node_pointer>(child)->get_value().second;
 }
 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
