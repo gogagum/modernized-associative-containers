@@ -686,16 +686,16 @@ public:
     // modifiers:
     template <class... _Args>
     std::pair<iterator, bool> emplace(_Args&&... __args) {
-        return tree_.__emplace_unique(std::forward<_Args>(__args)...);
+        return tree_.emplace_unique(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
     iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return tree_.__emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
+        return tree_.emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.__emplace_unique(__v); }
+    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.emplace_unique(__v); }
     iterator insert(const_iterator __p, const value_type& __v) {
-        return tree_.__emplace_hint_unique(__p, __v).first;
+        return tree_.emplace_hint_unique(__p, __v).first;
     }
 
     template <class InputIteratorT>
@@ -709,11 +709,11 @@ public:
     }
     
     std::pair<iterator, bool> insert(value_type&& __v) {
-        return tree_.__emplace_unique(std::move(__v));
+        return tree_.emplace_unique(std::move(__v));
     }
 
     iterator insert(const_iterator __p, value_type&& __v) {
-        return tree_.__emplace_hint_unique(__p, std::move(__v)).first;
+        return tree_.emplace_hint_unique(__p, std::move(__v)).first;
     }
 
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
@@ -766,7 +766,7 @@ public:
     
     void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { tree_.swap(__s.tree_); }
 
-    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.__alloc(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.alloc(); }
     [[nodiscard]] key_compare key_comp() const { return tree_.value_comp(); }
     [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 
@@ -1161,7 +1161,7 @@ public:
         tree_.swap(__s.tree_);
     }
 
-    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.__alloc(); }
+    [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.alloc(); }
     [[nodiscard]] key_compare key_comp() const { return tree_.value_comp(); }
     [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 

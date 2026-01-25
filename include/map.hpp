@@ -471,7 +471,7 @@ public:
         > = 0
     >
     [[nodiscard]] mapped_type& at(_Arg&& arg) {
-        auto [_, child] = tree_.__find_equal(arg);
+        auto [_, child] = tree_.find_equal(arg);
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
@@ -490,7 +490,7 @@ public:
         > = 0
     >
     [[nodiscard]] const mapped_type& at(_Arg&& arg) const {
-        auto [_, child] = tree_.__find_equal(arg);
+        auto [_, child] = tree_.find_equal(arg);
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
@@ -501,7 +501,7 @@ public:
     [[nodiscard]] const mapped_type& at(const key_type& key) const;
 
     [[nodiscard]] allocator_type get_allocator() const noexcept {
-        return allocator_type(tree_.__alloc());
+        return allocator_type(tree_.alloc());
     }
     [[nodiscard]] key_compare key_comp() const { return tree_.value_comp().key_comp(); }
     [[nodiscard]] value_compare value_comp() const {
@@ -510,13 +510,13 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> emplace(ArgsT&&... args) {
-        return tree_.__emplace_unique(std::forward<ArgsT>(args)...);
+        return tree_.emplace_unique(std::forward<ArgsT>(args)...);
     }
 
     template <class... ArgsT>
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
         return tree_
-            .__emplace_hint_unique(pos.i_, std::forward<ArgsT>(args)...)
+            .emplace_hint_unique(pos.i_, std::forward<ArgsT>(args)...)
             .first;
     }
 
@@ -525,7 +525,7 @@ public:
       , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
     >
     std::pair<iterator, bool> insert(_Pp&& pos) {
-        return tree_.__emplace_unique(std::forward<_Pp>(pos));
+        return tree_.emplace_unique(std::forward<_Pp>(pos));
     }
 
     template <
@@ -534,24 +534,24 @@ public:
     >
     iterator insert(const_iterator __pos, _Pp&& pos) {
         return tree_
-            .__emplace_hint_unique(__pos.i_, std::forward<_Pp>(pos))
+            .emplace_hint_unique(__pos.i_, std::forward<_Pp>(pos))
             .first;
     }
 
     std::pair<iterator, bool> insert(const value_type& __v) {
-        return tree_.__emplace_unique(__v);
+        return tree_.emplace_unique(__v);
     }
 
     iterator insert(const_iterator pos, const value_type& __v) {
-        return tree_.__emplace_hint_unique(pos.i_, __v).first;
+        return tree_.emplace_hint_unique(pos.i_, __v).first;
     }
 
     std::pair<iterator, bool> insert(value_type&& __v) {
-        return tree_.__emplace_unique(std::move(__v));
+        return tree_.emplace_unique(std::move(__v));
     }
 
     iterator insert(const_iterator pos, value_type&& __v) {
-        return tree_.__emplace_hint_unique(pos.i_, std::move(__v)).first;
+        return tree_.emplace_hint_unique(pos.i_, std::move(__v)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -573,7 +573,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> try_emplace(const key_type& k, ArgsT&&... args) {
-        return tree_.__emplace_unique(
+        return tree_.emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(k),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -582,7 +582,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> try_emplace(key_type&& k, ArgsT&&... args) {
-        return tree_.__emplace_unique(
+        return tree_.emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -591,7 +591,7 @@ public:
 
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, const key_type& k, ArgsT&&... args) {
-        return tree_.__emplace_hint_unique(
+        return tree_.emplace_hint_unique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(k),
@@ -601,7 +601,7 @@ public:
 
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, key_type&& k, ArgsT&&... args) {
-        return tree_.__emplace_hint_unique(
+        return tree_.emplace_hint_unique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
@@ -611,7 +611,7 @@ public:
 
     template <class _Vp>
     std::pair<iterator, bool> insert_or_assign(const key_type& k, _Vp&& v) {
-        auto result = tree_.__emplace_unique(k, std::forward<_Vp>(v));
+        auto result = tree_.emplace_unique(k, std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
             iter->second = std::forward<_Vp>(v);
@@ -621,7 +621,7 @@ public:
 
     template <class _Vp>
     std::pair<iterator, bool> insert_or_assign(key_type&& k, _Vp&& v) {
-        auto result = tree_.__emplace_unique(std::move(k), std::forward<_Vp>(v));
+        auto result = tree_.emplace_unique(std::move(k), std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
             iter->second = std::forward<_Vp>(v);
@@ -631,7 +631,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, const key_type& k, _Vp&& v) {
-        auto [r, inserted] = tree_.__emplace_hint_unique(hint.i_, k, std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplace_hint_unique(hint.i_, k, std::forward<_Vp>(v));
         if (!inserted) {
             r->second = std::forward<_Vp>(v);
         }
@@ -640,7 +640,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, key_type&& k, _Vp&& v) {
-        auto [r, inserted] = tree_.__emplace_hint_unique(hint.i_, std::move(k), std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplace_hint_unique(hint.i_, std::move(k), std::forward<_Vp>(v));
         if (!inserted) {
             r->second = std::forward<_Vp>(v);
         }
@@ -950,7 +950,7 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
     return tree_
-        .__emplace_unique(
+        .emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(key),
             std::forward_as_tuple()
@@ -962,7 +962,7 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& key) {
     return tree_
-        .__emplace_unique(
+        .emplace_unique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple()
@@ -973,7 +973,7 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& key) {
 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) {
-    auto [_, child] = tree_.__find_equal(key);
+    auto [_, child] = tree_.find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->get_value().second;
@@ -981,7 +981,7 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) {
 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 const _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) const {
-    auto [_, child] = tree_.__find_equal(key);
+    auto [_, child] = tree_.find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->get_value().second;
@@ -1186,7 +1186,7 @@ public:
     [[nodiscard]] size_type max_size() const noexcept { return tree_.max_size(); }
 
     [[nodiscard]] allocator_type get_allocator() const noexcept {
-        return allocator_type(tree_.__alloc());
+        return allocator_type(tree_.alloc());
     }
     [[nodiscard]] key_compare key_comp() const { return tree_.value_comp().key_comp(); }
     [[nodiscard]] value_compare value_comp() const {
