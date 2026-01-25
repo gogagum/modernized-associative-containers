@@ -510,13 +510,13 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> emplace(ArgsT&&... args) {
-        return tree_.emplace_unique(std::forward<ArgsT>(args)...);
+        return tree_.emplaceUnique(std::forward<ArgsT>(args)...);
     }
 
     template <class... ArgsT>
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
         return tree_
-            .emplace_hint_unique(pos.i_, std::forward<ArgsT>(args)...)
+            .emplaceHintUnique(pos.i_, std::forward<ArgsT>(args)...)
             .first;
     }
 
@@ -525,7 +525,7 @@ public:
       , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
     >
     std::pair<iterator, bool> insert(_Pp&& pos) {
-        return tree_.emplace_unique(std::forward<_Pp>(pos));
+        return tree_.emplaceUnique(std::forward<_Pp>(pos));
     }
 
     template <
@@ -534,24 +534,24 @@ public:
     >
     iterator insert(const_iterator __pos, _Pp&& pos) {
         return tree_
-            .emplace_hint_unique(__pos.i_, std::forward<_Pp>(pos))
+            .emplaceHintUnique(__pos.i_, std::forward<_Pp>(pos))
             .first;
     }
 
     std::pair<iterator, bool> insert(const value_type& __v) {
-        return tree_.emplace_unique(__v);
+        return tree_.emplaceUnique(__v);
     }
 
     iterator insert(const_iterator pos, const value_type& __v) {
-        return tree_.emplace_hint_unique(pos.i_, __v).first;
+        return tree_.emplaceHintUnique(pos.i_, __v).first;
     }
 
     std::pair<iterator, bool> insert(value_type&& __v) {
-        return tree_.emplace_unique(std::move(__v));
+        return tree_.emplaceUnique(std::move(__v));
     }
 
     iterator insert(const_iterator pos, value_type&& __v) {
-        return tree_.emplace_hint_unique(pos.i_, std::move(__v)).first;
+        return tree_.emplaceHintUnique(pos.i_, std::move(__v)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -573,7 +573,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> try_emplace(const key_type& k, ArgsT&&... args) {
-        return tree_.emplace_unique(
+        return tree_.emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(k),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -582,7 +582,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> try_emplace(key_type&& k, ArgsT&&... args) {
-        return tree_.emplace_unique(
+        return tree_.emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -591,7 +591,7 @@ public:
 
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, const key_type& k, ArgsT&&... args) {
-        return tree_.emplace_hint_unique(
+        return tree_.emplaceHintUnique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(k),
@@ -601,7 +601,7 @@ public:
 
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, key_type&& k, ArgsT&&... args) {
-        return tree_.emplace_hint_unique(
+        return tree_.emplaceHintUnique(
             hint.i_,
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
@@ -611,7 +611,7 @@ public:
 
     template <class _Vp>
     std::pair<iterator, bool> insert_or_assign(const key_type& k, _Vp&& v) {
-        auto result = tree_.emplace_unique(k, std::forward<_Vp>(v));
+        auto result = tree_.emplaceUnique(k, std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
             iter->second = std::forward<_Vp>(v);
@@ -621,7 +621,7 @@ public:
 
     template <class _Vp>
     std::pair<iterator, bool> insert_or_assign(key_type&& k, _Vp&& v) {
-        auto result = tree_.emplace_unique(std::move(k), std::forward<_Vp>(v));
+        auto result = tree_.emplaceUnique(std::move(k), std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
             iter->second = std::forward<_Vp>(v);
@@ -631,7 +631,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, const key_type& k, _Vp&& v) {
-        auto [r, inserted] = tree_.emplace_hint_unique(hint.i_, k, std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, k, std::forward<_Vp>(v));
         if (!inserted) {
             r->second = std::forward<_Vp>(v);
         }
@@ -640,7 +640,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, key_type&& k, _Vp&& v) {
-        auto [r, inserted] = tree_.emplace_hint_unique(hint.i_, std::move(k), std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, std::move(k), std::forward<_Vp>(v));
         if (!inserted) {
             r->second = std::forward<_Vp>(v);
         }
@@ -723,12 +723,12 @@ public:
     }
 
     [[nodiscard]] size_type count(const key_type& k) const {
-        return tree_.__count_unique(k);
+        return tree_.countUnique(k);
     }
 
     template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& key) const {
-        return tree_.__count_multi(key);
+        return tree_.countMulti(key);
     }
 
     [[nodiscard]] bool contains(const key_type& key) const { return find(key) != end(); }
@@ -950,7 +950,7 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, 
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
     return tree_
-        .emplace_unique(
+        .emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(key),
             std::forward_as_tuple()
@@ -962,7 +962,7 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
 template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& key) {
     return tree_
-        .emplace_unique(
+        .emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(key)),
             std::forward_as_tuple()
@@ -1195,12 +1195,12 @@ public:
 
     template <class... ArgsT>
     iterator emplace(ArgsT&&... args) {
-        return tree_.__emplace_multi(std::forward<ArgsT>(args)...);
+        return tree_.emplaceMulti(std::forward<ArgsT>(args)...);
     }
 
     template <class... ArgsT>
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
-        return tree_.__emplace_hint_multi(pos.i_, std::forward<ArgsT>(args)...);
+        return tree_.emplaceHintMulti(pos.i_, std::forward<ArgsT>(args)...);
     }
 
     template <
@@ -1208,7 +1208,7 @@ public:
       , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
     >
     iterator insert(_Pp&& pos) {
-        return tree_.__emplace_multi(std::forward<_Pp>(pos));
+        return tree_.emplaceMulti(std::forward<_Pp>(pos));
     }
 
     template <
@@ -1216,15 +1216,15 @@ public:
       , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
     >
     iterator insert(const_iterator pos, _Pp&& val) {
-        return tree_.__emplace_hint_multi(pos.i_, std::forward<_Pp>(val));
+        return tree_.emplaceHintMulti(pos.i_, std::forward<_Pp>(val));
     }
 
     iterator insert(value_type&& value) {
-        return tree_.__emplace_multi(std::move(value));
+        return tree_.emplaceMulti(std::move(value));
     }
 
     iterator insert(const_iterator pos, value_type&& __v) {
-        return tree_.__emplace_hint_multi(pos.i_, std::move(__v));
+        return tree_.emplaceHintMulti(pos.i_, std::move(__v));
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -1232,11 +1232,11 @@ public:
     }
 
     iterator insert(const value_type& __v) {
-        return tree_.__emplace_multi(__v);
+        return tree_.emplaceMulti(__v);
     }
 
     iterator insert(const_iterator pos, const value_type& __v) {
-        return tree_.__emplace_hint_multi(pos.i_, __v);
+        return tree_.emplaceHintMulti(pos.i_, __v);
     }
 
     template <class InputIteratorT>
@@ -1348,14 +1348,14 @@ public:
     }
 
     [[nodiscard]] size_type count(const key_type& key) const {
-        return tree_.__count_multi(key);
+        return tree_.countMulti(key);
     }
     template <
         typename _K2
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] size_type count(const _K2& key) const {
-        return tree_.__count_multi(key);
+        return tree_.countMulti(key);
     }
 
     [[nodiscard]] bool contains(const key_type& key) const {
@@ -1589,10 +1589,10 @@ struct __container_traits<multimap<KeyT, _Tp, CompareT, AllocatorT> > {
 
 namespace mstd {
 namespace pmr {
-    template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-    using map = mstd::map<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
-    template <class _KeyT, class _ValueT, class _CompareT = std::less<_KeyT>>
-    using multimap = mstd::multimap<_KeyT, _ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, _ValueT>>>;
+    template <class _KeyT, class ValueT, class _CompareT = std::less<_KeyT>>
+    using map = mstd::map<_KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, ValueT>>>;
+    template <class _KeyT, class ValueT, class _CompareT = std::less<_KeyT>>
+    using multimap = mstd::multimap<_KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, ValueT>>>;
 } // namespace pmr
 } // namespace mstd
 

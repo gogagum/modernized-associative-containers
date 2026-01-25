@@ -686,16 +686,16 @@ public:
     // modifiers:
     template <class... _Args>
     std::pair<iterator, bool> emplace(_Args&&... __args) {
-        return tree_.emplace_unique(std::forward<_Args>(__args)...);
+        return tree_.emplaceUnique(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
     iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return tree_.emplace_hint_unique(__p, std::forward<_Args>(__args)...).first;
+        return tree_.emplaceHintUnique(__p, std::forward<_Args>(__args)...).first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.emplace_unique(__v); }
+    std::pair<iterator, bool> insert(const value_type& __v) { return tree_.emplaceUnique(__v); }
     iterator insert(const_iterator __p, const value_type& __v) {
-        return tree_.emplace_hint_unique(__p, __v).first;
+        return tree_.emplaceHintUnique(__p, __v).first;
     }
 
     template <class InputIteratorT>
@@ -709,11 +709,11 @@ public:
     }
     
     std::pair<iterator, bool> insert(value_type&& __v) {
-        return tree_.emplace_unique(std::move(__v));
+        return tree_.emplaceUnique(std::move(__v));
     }
 
     iterator insert(const_iterator __p, value_type&& __v) {
-        return tree_.emplace_hint_unique(__p, std::move(__v)).first;
+        return tree_.emplaceHintUnique(__p, std::move(__v)).first;
     }
 
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
@@ -783,11 +783,11 @@ public:
     }
     
     [[nodiscard]] size_type count(const key_type& __k) const {
-        return tree_.__count_unique(__k);
+        return tree_.countUnique(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
-        return tree_.__count_multi(__k);
+        return tree_.countMulti(__k);
     }
 
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
@@ -1081,16 +1081,16 @@ public:
     // modifiers:
     template <class... _Args>
     iterator emplace(_Args&&... __args) {
-        return tree_.__emplace_multi(std::forward<_Args>(__args)...);
+        return tree_.emplaceMulti(std::forward<_Args>(__args)...);
     }
     template <class... _Args>
     iterator emplace_hint(const_iterator __p, _Args&&... __args) {
-        return tree_.__emplace_hint_multi(__p, std::forward<_Args>(__args)...);
+        return tree_.emplaceHintMulti(__p, std::forward<_Args>(__args)...);
     }
 
-    iterator insert(const value_type& __v) { return tree_.__emplace_multi(__v); }
+    iterator insert(const value_type& __v) { return tree_.emplaceMulti(__v); }
     iterator insert(const_iterator __p, const value_type& __v) {
-        return tree_.__emplace_hint_multi(__p, __v);
+        return tree_.emplaceHintMulti(__p, __v);
     }
 
     template <class InputIteratorT>
@@ -1103,10 +1103,10 @@ public:
         tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
-    iterator insert(value_type&& __v) { return tree_.__emplace_multi(std::move(__v)); }
+    iterator insert(value_type&& __v) { return tree_.emplaceMulti(std::move(__v)); }
 
     iterator insert(const_iterator __p, value_type&& __v) {
-        return tree_.__emplace_hint_multi(__p, std::move(__v));
+        return tree_.emplaceHintMulti(__p, std::move(__v));
     }
 
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
@@ -1178,11 +1178,11 @@ public:
     }
     
     [[nodiscard]] size_type count(const key_type& __k) const {
-        return tree_.__count_multi(__k);
+        return tree_.countMulti(__k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<_Compare, _K2>, int> = 0>
     [[nodiscard]] size_type count(const _K2& __k) const {
-        return tree_.__count_multi(__k);
+        return tree_.countMulti(__k);
     }
     
     [[nodiscard]] bool contains(const key_type& __k) const { return find(__k) != end(); }
