@@ -826,7 +826,7 @@ public:
 private:
     typedef typename Tree_::__node __node;
     typedef typename Tree_::__node_allocator __node_allocator;
-    typedef typename Tree_::__node_pointer __node_pointer;
+    typedef typename Tree_::node_pointer __node_pointer;
     typedef typename Tree_::__node_base_pointer __node_base_pointer;
 
     typedef MapNodeDestructor<__node_allocator> _Dp;
@@ -1445,7 +1445,7 @@ public:
 private:
     typedef typename Tree_::__node __node;
     typedef typename Tree_::__node_allocator __node_allocator;
-    typedef typename Tree_::__node_pointer __node_pointer;
+    typedef typename Tree_::node_pointer __node_pointer;
 
     typedef MapNodeDestructor<__node_allocator> _Dp;
     typedef std::unique_ptr<__node, _Dp> __node_holder;
