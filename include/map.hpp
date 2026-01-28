@@ -745,11 +745,11 @@ public:
     }
 
     [[nodiscard]] iterator lower_bound(const key_type& k) {
-        return tree_.__lower_bound_unique(k);
+        return tree_.lowerBoundUnique(k);
     }
 
     [[nodiscard]] const_iterator lower_bound(const key_type& k) const {
-        return tree_.__lower_bound_unique(k);
+        return tree_.lowerBoundUnique(k);
     }
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
@@ -779,11 +779,11 @@ public:
     }
 
     [[nodiscard]] iterator upper_bound(const key_type& k) {
-        return tree_.__upper_bound_unique(k);
+        return tree_.upperBoundUnique(k);
     }
 
     [[nodiscard]] const_iterator upper_bound(const key_type& k) const {
-        return tree_.__upper_bound_unique(k);
+        return tree_.upperBoundUnique(k);
     }
 
     template <
@@ -809,18 +809,18 @@ public:
         return tree_.upperBoundMulti(k);
     }
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& k) {
-        return tree_.__equal_range_unique(k);
+        return tree_.equalRangeUnique(k);
     }
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const {
-        return tree_.__equal_range_unique(k);
+        return tree_.equalRangeUnique(k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& k) {
-        return tree_.__equal_range_multi(k);
+        return tree_.equalRangeMulti(k);
     }
     template <typename _K2, std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const _K2& k) const {
-        return tree_.__equal_range_multi(k);
+        return tree_.equalRangeMulti(k);
     }
 
 private:
@@ -1419,18 +1419,18 @@ public:
 
     [[nodiscard]] std::pair<iterator, iterator>
     equal_range(const key_type& key) {
-        return tree_.__equal_range_multi(key);
+        return tree_.equalRangeMulti(key);
     }
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const key_type& key) const {
-        return tree_.__equal_range_multi(key);
+        return tree_.equalRangeMulti(key);
     }
     template <
         typename _K2
       , std::enable_if_t<__is_transparent_v<CompareT, _K2>, int> = 0
     >
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const _K2& key) {
-        return tree_.__equal_range_multi(key);
+        return tree_.equalRangeMulti(key);
     }
 
     template <
@@ -1439,7 +1439,7 @@ public:
     >
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const _K2& key) const {
-        return tree_.__equal_range_multi(key);
+        return tree_.equalRangeMulti(key);
     }
 
 private:

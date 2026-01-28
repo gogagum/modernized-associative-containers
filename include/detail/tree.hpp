@@ -1298,56 +1298,57 @@ public:
         return 0;
     }
 
-    template <bool _LowerBound, class KeyT>
-    __end_node_pointer __lower_upper_bound_unique_impl(const KeyT& __v) const {
-        auto __rt     = root();
-        auto __result = endNode();
-        auto __comp   = LazySynthThreeWayComparator<_Compare, KeyT, value_type>(value_comp());
-        while (__rt != nullptr) {
-            auto __comp_res = __comp(__v, __rt->get_value());
-
-            if (__comp_res.__less()) {
-                __result = static_cast<__end_node_pointer>(__rt);
-                __rt     = static_cast<__node_pointer>(__rt->__left_);
-            } else if (__comp_res.__greater()) {
-                __rt = static_cast<__node_pointer>(__rt->__right_);
-            } else if constexpr (_LowerBound) {
-                return static_cast<__end_node_pointer>(__rt);
-            } else {
-                return __rt->__right_ ? static_cast<__end_node_pointer>(mstd::tree_min(__rt->__right_)) : __result;
-            }
-        }
-        return __result;
+    template <class KeyT>
+    iterator lowerBoundUnique(const KeyT& key) {
+        return iterator(lowerUpperBoundUniqueImpl_<true>(key));
     }
 
     template <class KeyT>
-    iterator __lower_bound_unique(const KeyT& __v) {
-        return iterator(__lower_upper_bound_unique_impl<true>(__v));
+    const_iterator lowerBoundUnique(const KeyT& key) const {
+        return const_iterator(lowerUpperBoundUniqueImpl_<true>(key));
     }
 
     template <class KeyT>
-    const_iterator __lower_bound_unique(const KeyT& __v) const {
-        return const_iterator(__lower_upper_bound_unique_impl<true>(__v));
+    iterator upperBoundUnique(const KeyT& key) {
+        return iterator(lowerUpperBoundUniqueImpl_<false>(key));
     }
 
     template <class KeyT>
-    iterator __upper_bound_unique(const KeyT& __v) {
-        return iterator(__lower_upper_bound_unique_impl<false>(__v));
-    }
-
-    template <class KeyT>
-    const_iterator __upper_bound_unique(const KeyT& __v) const {
-        return iterator(__lower_upper_bound_unique_impl<false>(__v));
+    const_iterator upperBoundUnique(const KeyT& key) const {
+        return const_iterator(lowerUpperBoundUniqueImpl_<false>(key));
     }
 
 private:
+    template <bool _LowerBound, class KeyT>
+    __end_node_pointer lowerUpperBoundUniqueImpl_(const KeyT& key) const {
+        auto root_node = root();
+        auto result    = endNode();
+        auto comp      = LazySynthThreeWayComparator<_Compare, KeyT, value_type>(value_comp());
+        while (root_node != nullptr) {
+            const auto comp_res = comp(key, root_node->get_value());
+
+            if (comp_res.__less()) {
+                result = static_cast<__end_node_pointer>(root_node);
+                root_node     = static_cast<__node_pointer>(root_node->__left_);
+            } else if (comp_res.__greater()) {
+                root_node = static_cast<__node_pointer>(root_node->__right_);
+            } else if constexpr (_LowerBound) {
+                return static_cast<__end_node_pointer>(root_node);
+            } else {
+                return root_node->__right_
+                    ? static_cast<__end_node_pointer>(mstd::tree_min(root_node->__right_))
+                    : result;
+            }
+        }
+        return result;
+    }
+
     template <class KeyT>
-    iterator
-    lowerBoundMulti_(const KeyT& key, __node_pointer root_node, __end_node_pointer result) {
+    iterator lowerBoundMulti_(const KeyT& key, __node_pointer root_node, __end_node_pointer result) {
         while (root_node != nullptr) {
             if (!value_comp()(root_node->get_value(), key)) {
-                result = static_cast<__end_node_pointer>(root_node);
-                root_node   = static_cast<__node_pointer>(root_node->__left_);
+                result    = static_cast<__end_node_pointer>(root_node);
+                root_node = static_cast<__node_pointer>(root_node->__left_);
             } else {
                 root_node = static_cast<__node_pointer>(root_node->__right_);
             }
@@ -1356,12 +1357,11 @@ private:
     }
 
     template <class KeyT>
-    const_iterator
-    lowerBoundMulti_(const KeyT& key, __node_pointer root_node, __end_node_pointer result) const {
+    const_iterator lowerBoundMulti_(const KeyT& key, __node_pointer root_node, __end_node_pointer result) const {
         while (root_node != nullptr) {
             if (!value_comp()(root_node->get_value(), key)) {
-                result = static_cast<__end_node_pointer>(root_node);
-                root_node   = static_cast<__node_pointer>(root_node->__left_);
+                result    = static_cast<__end_node_pointer>(root_node);
+                root_node = static_cast<__node_pointer>(root_node->__left_);
             } else {
                 root_node = static_cast<__node_pointer>(root_node->__right_);
             }
@@ -1419,14 +1419,112 @@ public:
 
 public:
     template <class KeyT>
-    std::pair<iterator, iterator> __equal_range_unique(const KeyT& __k);
-    template <class KeyT>
-    std::pair<const_iterator, const_iterator> __equal_range_unique(const KeyT& __k) const;
+    std::pair<iterator, iterator> equalRangeUnique(const KeyT& key) {
+        auto result    = endNode();
+        auto root_node = root();
+        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+        while (root_node != nullptr) {
+            const auto comp_res = comp(key, root_node->get_value());
+            if (comp_res.__less()) {
+                result    = static_cast<__end_node_pointer>(root_node);
+                root_node = static_cast<__node_pointer>(root_node->__left_);
+            } else if (comp_res.__greater()) {
+                root_node = static_cast<__node_pointer>(root_node->__right_);
+            } else {
+                return {
+                    iterator(root_node),
+                    iterator(
+                        (root_node->__right_ != nullptr)
+                        ? static_cast<__end_node_pointer>(mstd::tree_min(root_node->__right_))
+                        : result
+                    ),
+                };
+            }
+        }
+        return {
+            iterator(result),
+            iterator(result),
+        };
+    }
 
     template <class KeyT>
-    std::pair<iterator, iterator> __equal_range_multi(const KeyT& __k);
+    std::pair<const_iterator, const_iterator> equalRangeUnique(const KeyT& key) const {
+        auto result    = endNode();
+        auto root_node = root();
+        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+        while (root_node != nullptr) {
+            const auto comp_res = comp(key, root_node->get_value());
+            if (comp_res.__less()) {
+                result    = static_cast<__end_node_pointer>(root_node);
+                root_node = static_cast<__node_pointer>(root_node->__left_);
+            } else if (comp_res.__greater()) {
+                root_node = static_cast<__node_pointer>(root_node->__right_);
+            } else {  // Equal
+                return {
+                    const_iterator(root_node),
+                    const_iterator(
+                        (root_node->__right_ != nullptr)
+                        ? static_cast<__end_node_pointer>(mstd::tree_min(root_node->__right_))
+                        : result
+                    ),
+                };
+            }
+        }
+        return {
+            const_iterator(result),
+            const_iterator(result),
+        };
+    }
+
     template <class KeyT>
-    std::pair<const_iterator, const_iterator> __equal_range_multi(const KeyT& __k) const;
+    std::pair<iterator, iterator> equalRangeMulti(const KeyT& key) {
+        auto result = endNode();
+        auto root_node   = root();
+        auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+        while (root_node != nullptr) {
+            const auto comp_res = comp(key, root_node->get_value());
+            if (comp_res.__less()) {
+                result    = static_cast<__end_node_pointer>(root_node);
+                root_node = static_cast<__node_pointer>(root_node->__left_);
+            } else if (comp_res.__greater()) {
+                root_node = static_cast<__node_pointer>(root_node->__right_);
+            } else {  // Equal
+                return {
+                    lowerBoundMulti_(key, static_cast<__node_pointer>(root_node->__left_), static_cast<__end_node_pointer>(root_node)),
+                    upperBoundMulti_(key, static_cast<__node_pointer>(root_node->__right_), result)
+                };
+            }
+        }
+        return {
+            iterator(result),
+            iterator(result),
+        };
+    }
+
+    template <class KeyT>
+    std::pair<const_iterator, const_iterator> equalRangeMulti(const KeyT& key) const {
+        auto result    = endNode();
+        auto root_node = root();
+        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+        while (root_node != nullptr) {
+            const auto comp_res = comp(key, root_node->get_value());
+            if (comp_res.__less()) {
+                result = static_cast<__end_node_pointer>(root_node);
+                root_node   = static_cast<__node_pointer>(root_node->__left_);
+            } else if (comp_res.__greater()) {
+                root_node = static_cast<__node_pointer>(root_node->__right_);
+            } else {  // Equal
+                return {
+                    lowerBoundMulti_(key, static_cast<__node_pointer>(root_node->__left_), static_cast<__end_node_pointer>(root_node)),
+                    upperBoundMulti_(key, static_cast<__node_pointer>(root_node->__right_), result),
+                };
+            }
+        }
+        return {
+            const_iterator(result),
+            const_iterator(result),
+        };
+    }
 
     using _Dp           = TreeNodeDestructor<__node_allocator>;
     using __node_holder = std::unique_ptr<__node, _Dp>;
@@ -2167,129 +2265,12 @@ auto Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& key) -> size_ty
 template <class _Tp, class _Compare, class _Allocator>
 template <class KeyT>
 auto Tree<_Tp, _Compare, _Allocator>::__erase_multi(const KeyT& key) -> size_type {
-    auto [begin, end] = __equal_range_multi(key);
+    auto [begin, end] = equalRangeMulti(key);
     size_type ret_cnt = 0;
     for (; begin != end; ++ret_cnt) {
         begin = erase(begin);
     }
     return ret_cnt;
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const KeyT& key)
-  -> std::pair<iterator, iterator> {
-    auto result = endNode();
-    auto root_node   = root();
-    auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-    while (root_node != nullptr) {
-        const auto comp_res = comp(key, root_node->get_value());
-        if (comp_res.__less()) {
-            result = static_cast<__end_node_pointer>(root_node);
-            root_node   = static_cast<__node_pointer>(root_node->__left_);
-        } else if (comp_res.__greater()) {
-            root_node = static_cast<__node_pointer>(root_node->__right_);
-        } else {
-            return {
-                iterator(root_node),
-                iterator(
-                    (root_node->__right_ != nullptr)
-                    ? static_cast<__end_node_pointer>(mstd::tree_min(root_node->__right_))
-                    : result
-                ),
-            };
-        }
-    }
-    return {
-        iterator(result),
-        iterator(result),
-    };
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::__equal_range_unique(const KeyT& key) const
-  -> std::pair<const_iterator, const_iterator> {
-    auto result = endNode();
-    auto root_node   = root();
-    auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-    while (root_node != nullptr) {
-        const auto comp_res = comp(key, root_node->get_value());
-        if (comp_res.__less()) {
-            result = static_cast<__end_node_pointer>(root_node);
-            root_node   = static_cast<__node_pointer>(root_node->__left_);
-        } else if (comp_res.__greater()) {
-            root_node = static_cast<__node_pointer>(root_node->__right_);
-        } else {  // Equal
-            return {
-                const_iterator(root_node),
-                const_iterator(
-                    (root_node->__right_ != nullptr)
-                    ? static_cast<__end_node_pointer>(mstd::tree_min(root_node->__right_))
-                    : result
-                ),
-            };
-        }
-    }
-    return {
-        const_iterator(result),
-        const_iterator(result),
-    };
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const KeyT& key)
-  -> std::pair<iterator, iterator> {
-    auto result = endNode();
-    auto root_node   = root();
-    auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-    while (root_node != nullptr) {
-        const auto comp_res = comp(key, root_node->get_value());
-        if (comp_res.__less()) {
-            result = static_cast<__end_node_pointer>(root_node);
-            root_node     = static_cast<__node_pointer>(root_node->__left_);
-        } else if (comp_res.__greater()) {
-            root_node = static_cast<__node_pointer>(root_node->__right_);
-        } else {  // Equal
-            return {
-                lowerBoundMulti_(key, static_cast<__node_pointer>(root_node->__left_), static_cast<__end_node_pointer>(root_node)),
-                upperBoundMulti_(key, static_cast<__node_pointer>(root_node->__right_), result)
-            };
-        }
-    }
-    return {
-        iterator(result),
-        iterator(result),
-    };
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto
-Tree<_Tp, _Compare, _Allocator>::__equal_range_multi(const KeyT& key) const
-  -> std::pair<const_iterator, const_iterator> {
-    auto result    = endNode();
-    auto root_node = root();
-    auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-    while (root_node != nullptr) {
-        const auto comp_res = comp(key, root_node->get_value());
-        if (comp_res.__less()) {
-            result = static_cast<__end_node_pointer>(root_node);
-            root_node   = static_cast<__node_pointer>(root_node->__left_);
-        } else if (comp_res.__greater()) {
-            root_node = static_cast<__node_pointer>(root_node->__right_);
-        } else {  // Equal
-            return {
-                lowerBoundMulti_(key, static_cast<__node_pointer>(root_node->__left_), static_cast<__end_node_pointer>(root_node)),
-                upperBoundMulti_(key, static_cast<__node_pointer>(root_node->__right_), result),
-            };
-        }
-    }
-    return {
-        const_iterator(result),
-        const_iterator(result),
-    };
 }
 
 template <class _Tp, class _Compare, class _Allocator>
