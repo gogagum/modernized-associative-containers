@@ -45,7 +45,7 @@ template <class _Tp, class _Ptr, class _Alloc>
 using __const_pointer_t =
     typename __rebind_or_alias_pointer<_Alloc, __const_pointer_member, _Ptr, const _Tp>::type;
 
-// __void_pointer
+// void_pointer
 template <class _Alloc>
 using __void_pointer_member = typename _Alloc::void_pointer;
 
