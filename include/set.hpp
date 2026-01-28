@@ -578,7 +578,7 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    typedef __set_node_handle<typename __base::__node, allocator_type> node_type;
+    typedef __set_node_handle<typename __base::node, allocator_type> node_type;
     typedef __insert_return_type<iterator, node_type> insert_return_type;
     
     template <class _Key2, class _Compare2, class _Alloc2>
@@ -972,7 +972,7 @@ public:
     typedef typename __base::const_iterator const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-    typedef __set_node_handle<typename __base::__node, allocator_type> node_type;
+    typedef __set_node_handle<typename __base::node, allocator_type> node_type;
 
     template <class _Key2, class _Compare2, class _Alloc2>
     friend class set;
