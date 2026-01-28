@@ -239,7 +239,7 @@ public:
     MapConstIterator() noexcept {}
 
     MapConstIterator(TreeIteratorT i) noexcept : i_(i) {}
-    MapConstIterator(MapIterator< typename TreeIteratorT::__non_const_iterator> i) noexcept : i_(i.i_) {}
+    MapConstIterator(MapIterator< typename TreeIteratorT::non_const_iterator> i) noexcept : i_(i.i_) {}
 
     reference operator*() const { return *i_; }
     pointer operator->() const { return std::pointer_traits<pointer>::pointer_to(*i_); }
@@ -649,7 +649,7 @@ public:
 
     iterator erase(const_iterator p) { return tree_.erase(p.i_); }
     iterator erase(iterator p) { return tree_.erase(p.i_); }
-    size_type erase(const key_type& k) { return tree_.__erase_unique(k); }
+    size_type erase(const key_type& k) { return tree_.eraseUnique(k); }
     iterator erase(const_iterator f, const_iterator l) { return tree_.erase(f.i_, l.i_); }
     
     void clear() noexcept { tree_.clear(); }
@@ -1258,7 +1258,7 @@ public:
     }
 
     size_type erase(const key_type& k) {
-        return tree_.__erase_multi(k);
+        return tree_.eraseMulti(k);
     }
 
     iterator erase(const_iterator begin, const_iterator end) {
