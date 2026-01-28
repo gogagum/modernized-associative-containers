@@ -687,7 +687,7 @@ void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& p
     }
 }
 
-template <class _Tp, class NodePtrT, class _DiffType>
+template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeIterator {
     using _NodeTypes        = __tree_node_types<NodePtrT>;
     using node_pointer      = NodePtrT;
@@ -699,7 +699,7 @@ class TreeIterator {
 public:
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type        = __get_node_value_type_t<_Tp>;
-    using difference_type   = _DiffType;
+    using difference_type   = DiffTypeT;
     using reference         = value_type&;
     using pointer           = __rebind_pointer_t<NodePtrT, value_type>;
 
@@ -757,13 +757,13 @@ private:
 };
 
 // This also handles {multi,}set::iterator, since they're just aliases to Tree::iterator
-template <class _Tp, class NodePtrT, class _DiffType>
+template <class _Tp, class NodePtrT, class DiffTypeT>
 struct __specialized_algorithm<
 _Algorithm::__for_each,
-__iterator_pair<TreeIterator<_Tp, NodePtrT, _DiffType>, TreeIterator<_Tp, NodePtrT, _DiffType>>> {
+__iterator_pair<TreeIterator<_Tp, NodePtrT, DiffTypeT>, TreeIterator<_Tp, NodePtrT, DiffTypeT>>> {
     static const bool __has_algorithm = true;
 
-    using __iterator = TreeIterator<_Tp, NodePtrT, _DiffType>;
+    using __iterator = TreeIterator<_Tp, NodePtrT, DiffTypeT>;
 
     template <class FuncT, class ProjT>
     static void operator()(__iterator __first, __iterator __last, FuncT& __func, ProjT& __proj) {
@@ -771,7 +771,7 @@ __iterator_pair<TreeIterator<_Tp, NodePtrT, _DiffType>, TreeIterator<_Tp, NodePt
     }
 };
 
-template <class _Tp, class NodePtrT, class _DiffType>
+template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeConstIterator {
     using _NodeTypes          = __tree_node_types<NodePtrT>;
     using node_pointer      = NodePtrT;
@@ -781,16 +781,16 @@ class TreeConstIterator {
     end_node_pointer __ptr_;
 
 public:
-    using iterator_category    = std::bidirectional_iterator_tag;
-    using value_type           = __get_node_value_type_t<_Tp>;
-    using difference_type      = _DiffType;
-    using reference            = const value_type&;
-    using pointer              = __rebind_pointer_t<NodePtrT, const value_type>;
-    using __non_const_iterator = TreeIterator<_Tp, node_pointer, difference_type>;
+    using iterator_category  = std::bidirectional_iterator_tag;
+    using value_type         = __get_node_value_type_t<_Tp>;
+    using difference_type    = DiffTypeT;
+    using reference          = const value_type&;
+    using pointer            = __rebind_pointer_t<NodePtrT, const value_type>;
+    using non_const_iterator = TreeIterator<_Tp, node_pointer, difference_type>;
 
     TreeConstIterator() noexcept : __ptr_(nullptr) {}
 
-    TreeConstIterator(__non_const_iterator __p) noexcept : __ptr_(__p.__ptr_) {}
+    TreeConstIterator(non_const_iterator non_const_iter) noexcept : __ptr_(non_const_iter.__ptr_) {}
 
     reference operator*() const { return __get_np()->get_value(); }
     pointer operator->() const {
@@ -819,17 +819,17 @@ public:
         return __t;
     }
 
-    friend bool operator==(const TreeConstIterator& __x, const TreeConstIterator& __y) {
-        return __x.__ptr_ == __y.__ptr_;
+    friend bool operator==(const TreeConstIterator& lhs, const TreeConstIterator& rhs) {
+        return lhs.__ptr_ == rhs.__ptr_;
     }
 
-    friend bool operator!=(const TreeConstIterator& __x, const TreeConstIterator& __y) {
-        return !(__x == __y);
+    friend bool operator!=(const TreeConstIterator& lhs, const TreeConstIterator& rhs) {
+        return !(lhs == rhs);
     }
 
 private:
-    explicit TreeConstIterator(node_pointer __p) noexcept : __ptr_(__p) {}
-    explicit TreeConstIterator(end_node_pointer __p) noexcept : __ptr_(__p) {}
+    explicit TreeConstIterator(node_pointer ptr) noexcept : __ptr_(ptr) {}
+    explicit TreeConstIterator(end_node_pointer ptr) noexcept : __ptr_(ptr) {}
     node_pointer __get_np() const { return static_cast<node_pointer>(__ptr_); }
 
     template <class, class, class>
@@ -840,17 +840,21 @@ private:
 };
 
 // This also handles {multi,}set::const_iterator, since they're just aliases to Tree::iterator
-template <class _Tp, class NodePtrT, class _DiffType>
+template <class Tp, class NodePtrT, class DiffTypeT>
 struct __specialized_algorithm<
-_Algorithm::__for_each,
-__iterator_pair<TreeConstIterator<_Tp, NodePtrT, _DiffType>, TreeConstIterator<_Tp, NodePtrT, _DiffType>>> {
+    _Algorithm::__for_each
+  , __iterator_pair<
+        TreeConstIterator<Tp, NodePtrT, DiffTypeT>
+      , TreeConstIterator<Tp, NodePtrT, DiffTypeT>
+    >
+> {
     static const bool __has_algorithm = true;
 
-    using __iterator = TreeConstIterator<_Tp, NodePtrT, _DiffType>;
+    using __iterator = TreeConstIterator<Tp, NodePtrT, DiffTypeT>;
 
     template <class FuncT, class ProjT>
-    static void operator()(__iterator __first, __iterator __last, FuncT& __func, ProjT& __proj) {
-        mstd::tree_iterate_subrange(__first, __last, __func, __proj);
+    static void operator()(__iterator begin, __iterator end, FuncT& func, ProjT& proj) {
+        mstd::tree_iterate_subrange(begin, end, func, proj);
     }
 };
 
@@ -866,7 +870,7 @@ public:
 
 private:
     using __alloc_traits = std::allocator_traits<allocator_type>;
-    using key_type                       = __get_tree_key_type_t<_Tp>;
+    using key_type       = __get_tree_key_type_t<_Tp>;
 
 public:
     using pointer         = typename __alloc_traits::pointer;
@@ -1194,26 +1198,115 @@ public:
         }
     }
 
-    iterator __remove_node_pointer(node_pointer) noexcept;
+    iterator __remove_node_pointer(node_pointer ptr) noexcept {
+        iterator ret(ptr);
+        ++ret;
+        if (__begin_node_ == ptr) {
+            __begin_node_ = ret.__ptr_;
+        }
+        --__size_;
+        mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(ptr));
+        return ret;
+    }
 
     template <class _NodeHandle, class _InsertReturnType>
-    _InsertReturnType __node_handle_insert_unique(_NodeHandle&&);
-    template <class _NodeHandle>
-    iterator __node_handle_insert_unique(const_iterator, _NodeHandle&&);
-    template <class _Comp2>
-    void __node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& __source);
+    _InsertReturnType __node_handle_insert_unique(_NodeHandle&& nh) {
+        if (nh.empty()) {
+            return _InsertReturnType{end(), false, _NodeHandle()};
+        }
+        auto ptr = nh.__ptr_;
+        auto [parent, child] = find_equal(ptr->get_value());
+        if (child != nullptr) {
+            return _InsertReturnType{iterator(static_cast<node_pointer>(child)), false, std::move(nh)};
+        }
+        insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
+        nh.__release_ptr();
+        return _InsertReturnType{iterator(ptr), true, _NodeHandle()};
+    }
 
     template <class _NodeHandle>
-    iterator __node_handle_insert_multi(_NodeHandle&&);
-    template <class _NodeHandle>
-    iterator __node_handle_insert_multi(const_iterator, _NodeHandle&&);
+    iterator __node_handle_insert_unique(const_iterator hint, _NodeHandle&& nh) {
+        if (nh.empty()) {
+            return end();
+        }
+        auto ptr = nh.__ptr_;
+        node_base_pointer dummy;
+        auto [parent, child] = find_equal(hint, dummy, ptr->get_value());
+        auto ret             = static_cast<node_pointer>(child);
+        if (child == nullptr) {
+            insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
+            ret = ptr;
+            nh.__release_ptr();
+        }
+        return iterator(ret);
+    }
+
     template <class _Comp2>
-    void __node_handle_merge_multi(Tree<_Tp, _Comp2, _Allocator>& __source);
+    void __node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& source) {
+        for (iterator iter = source.begin(); iter != source.end();) {
+            auto src_ptr = iter.__get_np();
+            auto [parent, child] = find_equal(src_ptr->get_value());
+            ++iter;
+            if (child != nullptr) {
+                continue;
+            }
+            source.__remove_node_pointer(src_ptr);
+            insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
+        }
+    }
 
     template <class _NodeHandle>
-    _NodeHandle __node_handle_extract(key_type const&);
+    iterator __node_handle_insert_multi(_NodeHandle&& nh) {
+        if (nh.empty()) {
+            return end();
+        }
+        auto ptr = nh.__ptr_;
+        end_node_pointer parent;
+        auto& child = findLeafHigh_(parent, ptr->get_value());
+        insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
+        nh.__release_ptr();
+        return iterator(ptr);
+    }
+
     template <class _NodeHandle>
-    _NodeHandle __node_handle_extract(const_iterator);
+    iterator __node_handle_insert_multi(const_iterator hint, _NodeHandle&& nh) {
+        if (nh.empty()) {
+            return end();
+        }
+        auto ptr = nh.__ptr_;
+        end_node_pointer parent;
+        auto& child = __find_leaf(hint, parent, ptr->get_value());
+        insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
+        nh.__release_ptr();
+        return iterator(ptr);
+    }
+
+    template <class _Comp2>
+        void __node_handle_merge_multi(Tree<_Tp, _Comp2, _Allocator>& source) {
+        for (iterator iter = source.begin(); iter != source.end();) {
+            auto src_ptr = iter.__get_np();
+            end_node_pointer parent;
+            auto& child = findLeafHigh_(parent, src_ptr->get_value());
+            ++iter;
+            source.__remove_node_pointer(src_ptr);
+            insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
+        }
+    }
+
+    template <class _NodeHandle>
+    _NodeHandle __node_handle_extract(key_type const& key) {
+        if (const auto iter = find(key); iter != end()) {
+            return __node_handle_extract<_NodeHandle>(iter);
+        }
+        return _NodeHandle();
+    }
+
+    template <class _NodeHandle>
+    _NodeHandle __node_handle_extract(const_iterator pos) {
+        auto node_ptr = pos.__get_np();
+        __remove_node_pointer(node_ptr);
+        return _NodeHandle(node_ptr, alloc());
+    }
 
     iterator erase(const_iterator pos) {
         auto node_ptr        = pos.__get_np();
@@ -1232,9 +1325,23 @@ public:
     }
 
     template <class KeyT>
-    size_type __erase_unique(const KeyT& __k);
+    size_type eraseUnique(const KeyT& key) {
+        if (const auto iter = find(key); iter != end()) {
+            erase(iter);
+            return 1;
+        }
+        return 0;
+    }
+
     template <class KeyT>
-    size_type __erase_multi(const KeyT& __k);
+    size_type eraseMulti(const KeyT& key) {
+        auto [begin, end] = equalRangeMulti(key);
+        size_type ret_cnt = 0;
+        for (; begin != end; ++ret_cnt) {
+            begin = erase(end);
+        }
+        return ret_cnt;
+    }
 
     void insertNodeAt(end_node_pointer parent, node_base_pointer& child, node_base_pointer new_node) noexcept {
         new_node->__left_   = nullptr;
@@ -1538,21 +1645,134 @@ public:
     using _Dp         = TreeNodeDestructor<node_allocator>;
     using node_holder = std::unique_ptr<node, _Dp>;
 
-    node_holder remove(const_iterator pos) noexcept;
+    node_holder remove(const_iterator pos) noexcept {
+        auto node_ptr = pos.__get_np();
+        if (__begin_node_ == pos.__ptr_) {
+            if (node_ptr->__right_ != nullptr) {
+                __begin_node_ = static_cast<end_node_pointer>(node_ptr->__right_);
+            } else {
+                __begin_node_ = static_cast<end_node_pointer>(node_ptr->__parent_);
+            }
+        }
+        --__size_;
+        mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(node_ptr));
+        return node_holder(node_ptr, _Dp(nodeAlloc(), true));
+    }
 
     // FIXME: Make this function const qualified. Unfortunately doing so
     // breaks existing code which uses non-const callable comparators.
+
+    // Find __v
+    // If __v exists, return the parent of the node of __v and a reference to the pointer to the node of __v.
+    // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& __v);
+    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) {
+        node_pointer __nd = root();
+
+        if (__nd == nullptr) {
+            auto __end = endNode();
+            return {
+                __end,
+                __end->__left_,
+            };
+        }
+
+        node_base_pointer* __node_ptr = root_ptr();
+        auto&& __transparent            = mstd::__as_transparent(value_comp());
+        auto comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, KeyT, value_type>(__transparent);
+    
+        while (true) {
+            const auto comp_res = comp(key, __nd->get_value());
+    
+            if (comp_res.__less()) {
+                if (__nd->__left_ == nullptr) {
+                    return {
+                        static_cast<end_node_pointer>(__nd),
+                        __nd->__left_,
+                    };
+                }
+    
+                __node_ptr = std::addressof(__nd->__left_);
+                __nd       = static_cast<node_pointer>(__nd->__left_);
+            } else if (comp_res.__greater()) {
+                if (__nd->__right_ == nullptr) {
+                    return {
+                        static_cast<end_node_pointer>(__nd),
+                        __nd->__right_,
+                    };
+                }
+                __node_ptr = std::addressof(__nd->__right_);
+                __nd       = static_cast<node_pointer>(__nd->__right_);
+            } else {
+                return {
+                    static_cast<end_node_pointer>(__nd),
+                    *__node_ptr,
+                };
+            }
+        }
+    }
 
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& __v) const {
         return const_cast<Tree*>(this)->find_equal(__v);
     }
 
+    // Find key
+    // First check prior to hint.
+    // Next check after hint.
+    // Next do O(log N) search.
+    // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
+    // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&>
-    find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& __v);
+    find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& key) {
+        if (hint == end() || value_comp()(key, *hint)) { // check before
+            // key < *hint
+            const_iterator __prior = hint;
+            if (__prior == begin() || value_comp()(*--__prior, key)) {
+                // *prev(hint) < key < *hint
+                if (hint.__ptr_->__left_ == nullptr) {
+                    return {
+                        hint.__ptr_,
+                        hint.__ptr_->__left_,
+                    };
+                }
+                return {
+                    __prior.__ptr_,
+                    static_cast<node_pointer>(__prior.__ptr_)->__right_,
+                };
+            }
+            // key <= *prev(hint)
+            return find_equal(key);
+        }
+    
+        if (value_comp()(*hint, key)) { // check after
+            // *hint < key
+            const_iterator __next = std::next(hint);
+            if (__next == end() || value_comp()(key, *__next)) {
+                // *hint < key < *std::next(hint)
+                if (hint.__get_np()->__right_ == nullptr) {
+                    return {
+                        hint.__ptr_,
+                        static_cast<node_pointer>(hint.__ptr_)->__right_,
+                    };
+                }
+                return {
+                    __next.__ptr_,
+                    __next.__ptr_->__left_,
+                };
+            }
+            // *next(hint) <= key
+            return find_equal(key);
+        }
+    
+        // else key == *hint
+        dummy = static_cast<node_base_pointer>(hint.__ptr_);
+        return {
+            hint.__ptr_,
+            dummy,
+        };
+    }
 
     void copyAssignAlloc(const Tree& other) {
         copyAssignAlloc(other, std::integral_constant<bool, node_traits::propagate_on_container_copy_assignment::value>());
@@ -2024,276 +2244,6 @@ auto Tree<_Tp, _Compare, _Allocator>::__find_leaf(
     }
     // else __v > *hint
     return __find_leaf_low(parent, __v);
-}
-
-// Find __v
-// If __v exists, return the parent of the node of __v and a reference to the pointer to the node of __v.
-// If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::find_equal(const KeyT& key) -> std::pair<end_node_pointer, node_base_pointer&> {
-    node_pointer __nd = root();
-
-    if (__nd == nullptr) {
-        auto __end = endNode();
-        return {
-            __end,
-            __end->__left_,
-        };
-    }
-
-    node_base_pointer* __node_ptr = root_ptr();
-    auto&& __transparent            = mstd::__as_transparent(value_comp());
-    auto comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, KeyT, value_type>(__transparent);
-
-    while (true) {
-        const auto comp_res = comp(key, __nd->get_value());
-
-        if (comp_res.__less()) {
-            if (__nd->__left_ == nullptr) {
-                return {
-                    static_cast<end_node_pointer>(__nd),
-                    __nd->__left_,
-                };
-            }
-
-            __node_ptr = std::addressof(__nd->__left_);
-            __nd       = static_cast<node_pointer>(__nd->__left_);
-        } else if (comp_res.__greater()) {
-            if (__nd->__right_ == nullptr) {
-                return {
-                    static_cast<end_node_pointer>(__nd),
-                    __nd->__right_,
-                };
-            }
-            __node_ptr = std::addressof(__nd->__right_);
-            __nd       = static_cast<node_pointer>(__nd->__right_);
-        } else {
-            return {
-                static_cast<end_node_pointer>(__nd),
-                *__node_ptr,
-            };
-        }
-    }
-}
-
-// Find key
-// First check prior to hint.
-// Next check after hint.
-// Next do O(log N) search.
-// If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
-// If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& key)
-  -> std::pair<end_node_pointer, node_base_pointer&> {
-    if (hint == end() || value_comp()(key, *hint)) { // check before
-        // key < *hint
-        const_iterator __prior = hint;
-        if (__prior == begin() || value_comp()(*--__prior, key)) {
-            // *prev(hint) < key < *hint
-            if (hint.__ptr_->__left_ == nullptr) {
-                return {
-                    hint.__ptr_,
-                    hint.__ptr_->__left_,
-                };
-            }
-            return {
-                __prior.__ptr_,
-                static_cast<node_pointer>(__prior.__ptr_)->__right_,
-            };
-        }
-        // key <= *prev(hint)
-        return find_equal(key);
-    }
-
-    if (value_comp()(*hint, key)) { // check after
-        // *hint < key
-        const_iterator __next = std::next(hint);
-        if (__next == end() || value_comp()(key, *__next)) {
-            // *hint < key < *std::next(hint)
-            if (hint.__get_np()->__right_ == nullptr) {
-                return {
-                    hint.__ptr_,
-                    static_cast<node_pointer>(hint.__ptr_)->__right_,
-                };
-            }
-            return {
-                __next.__ptr_,
-                __next.__ptr_->__left_,
-            };
-        }
-        // *next(hint) <= key
-        return find_equal(key);
-    }
-
-    // else key == *hint
-    dummy = static_cast<node_base_pointer>(hint.__ptr_);
-    return {
-        hint.__ptr_,
-        dummy,
-    };
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-auto Tree<_Tp, _Compare, _Allocator>::__remove_node_pointer(node_pointer ptr) noexcept -> iterator {
-    iterator ret(ptr);
-    ++ret;
-    if (__begin_node_ == ptr) {
-        __begin_node_ = ret.__ptr_;
-    }
-    --__size_;
-    mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(ptr));
-    return ret;
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle, class _InsertReturnType>
-_InsertReturnType
-Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(_NodeHandle&& nh) {
-    if (nh.empty()) {
-        return _InsertReturnType{end(), false, _NodeHandle()};
-    }
-    auto ptr = nh.__ptr_;
-    auto [parent, child] = find_equal(ptr->get_value());
-    if (child != nullptr) {
-        return _InsertReturnType{iterator(static_cast<node_pointer>(child)), false, std::move(nh)};
-    }
-    insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
-    nh.__release_ptr();
-    return _InsertReturnType{iterator(ptr), true, _NodeHandle()};
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle>
-auto Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(const_iterator hint, _NodeHandle&& nh)
-  -> iterator {
-    if (nh.empty()) {
-        return end();
-    }
-    auto ptr = nh.__ptr_;
-    node_base_pointer dummy;
-    auto [parent, child] = find_equal(hint, dummy, ptr->get_value());
-    auto ret             = static_cast<node_pointer>(child);
-    if (child == nullptr) {
-        insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
-        ret = ptr;
-        nh.__release_ptr();
-    }
-    return iterator(ret);
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle>
-_NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& key) {
-    if (const auto iter = find(key); iter != end()) {
-        return __node_handle_extract<_NodeHandle>(iter);
-    }
-    return _NodeHandle();
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle>
-_NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator pos) {
-    auto node_ptr = pos.__get_np();
-    __remove_node_pointer(node_ptr);
-    return _NodeHandle(node_ptr, alloc());
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _Comp2>
-void Tree<_Tp, _Compare, _Allocator>::__node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& source) {
-    for (iterator iter = source.begin(); iter != source.end();) {
-        auto src_ptr = iter.__get_np();
-        auto [parent, child] = find_equal(src_ptr->get_value());
-        ++iter;
-        if (child != nullptr) {
-            continue;
-        }
-        source.__remove_node_pointer(src_ptr);
-        insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle>
-auto Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(_NodeHandle&& nh)
-  -> iterator {
-    if (nh.empty()) {
-        return end();
-    }
-    auto ptr = nh.__ptr_;
-    end_node_pointer parent;
-    auto& child = findLeafHigh_(parent, ptr->get_value());
-    insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
-    nh.__release_ptr();
-    return iterator(ptr);
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _NodeHandle>
-auto
-Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(const_iterator hint, _NodeHandle&& nh)
-  -> iterator {
-    if (nh.empty()) {
-        return end();
-    }
-    auto ptr = nh.__ptr_;
-    end_node_pointer parent;
-    auto& child = __find_leaf(hint, parent, ptr->get_value());
-    insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
-    nh.__release_ptr();
-    return iterator(ptr);
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class _Comp2>
-void Tree<_Tp, _Compare, _Allocator>::__node_handle_merge_multi(Tree<_Tp, _Comp2, _Allocator>& source) {
-    for (iterator iter = source.begin(); iter != source.end();) {
-        auto src_ptr = iter.__get_np();
-        end_node_pointer parent;
-        auto& child = findLeafHigh_(parent, src_ptr->get_value());
-        ++iter;
-        source.__remove_node_pointer(src_ptr);
-        insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& key) -> size_type {
-    if (const auto iter = find(key); iter != end()) {
-        erase(iter);
-        return 1;
-    }
-    return 0;
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-template <class KeyT>
-auto Tree<_Tp, _Compare, _Allocator>::__erase_multi(const KeyT& key) -> size_type {
-    auto [begin, end] = equalRangeMulti(key);
-    size_type ret_cnt = 0;
-    for (; begin != end; ++ret_cnt) {
-        begin = erase(end);
-    }
-    return ret_cnt;
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-typename Tree<_Tp, _Compare, _Allocator>::node_holder
-Tree<_Tp, _Compare, _Allocator>::remove(const_iterator pos) noexcept {
-    auto node_ptr = pos.__get_np();
-    if (__begin_node_ == pos.__ptr_) {
-        if (node_ptr->__right_ != nullptr) {
-            __begin_node_ = static_cast<end_node_pointer>(node_ptr->__right_);
-        } else {
-            __begin_node_ = static_cast<end_node_pointer>(node_ptr->__parent_);
-        }
-    }
-    --__size_;
-    mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(node_ptr));
-    return node_holder(node_ptr, _Dp(nodeAlloc(), true));
 }
 
 template <class _Tp, class _Compare, class _Allocator>

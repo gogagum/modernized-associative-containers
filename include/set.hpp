@@ -719,7 +719,7 @@ public:
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
     
     iterator erase(const_iterator __p) { return tree_.erase(__p); }
-    size_type erase(const key_type& __k) { return tree_.__erase_unique(__k); }
+    size_type erase(const key_type& __k) { return tree_.eraseUnique(__k); }
     iterator erase(const_iterator __f, const_iterator __l) { return tree_.erase(__f, __l); }
     void clear() noexcept { tree_.clear(); }
 
@@ -1112,7 +1112,7 @@ public:
     void insert(std::initializer_list<value_type> __il) { insert(__il.begin(), __il.end()); }
 
     iterator erase(const_iterator __p) { return tree_.erase(__p); }
-    size_type erase(const key_type& __k) { return tree_.__erase_multi(__k); }
+    size_type erase(const key_type& __k) { return tree_.eraseMulti(__k); }
     iterator erase(const_iterator __f, const_iterator __l) { return tree_.erase(__f, __l); }
     void clear() noexcept { tree_.clear(); }
 

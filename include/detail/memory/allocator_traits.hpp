@@ -65,8 +65,8 @@ using __const_void_pointer_t =
 template <class _Tp>
 using __size_type_member = typename _Tp::size_type;
 
-template <class _Alloc, class _DiffType>
-using __size_type = __detected_or_t<std::make_unsigned_t<_DiffType>, __size_type_member, _Alloc>;
+template <class _Alloc, class DiffTypeT>
+using __size_type = __detected_or_t<std::make_unsigned_t<DiffTypeT>, __size_type_member, _Alloc>;
 
 // __alloc_traits_difference_type
 template <class _Alloc, class _Ptr, class = void>
