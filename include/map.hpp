@@ -132,9 +132,9 @@ public:
 
     MapNodeDestructor(TreeNodeDestructor<AllocatorType_>&& x) noexcept
     : na_(x.na_)
-    , first_constructed(x.__value_constructed)
-    , second_constructed(x.__value_constructed) {
-        x.__value_constructed = false;
+    , first_constructed(x.value_constructed)
+    , second_constructed(x.value_constructed) {
+        x.value_constructed = false;
     }
 
     MapNodeDestructor& operator=(const MapNodeDestructor&) = delete;
@@ -348,7 +348,7 @@ public:
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    using node_type = MapNodeHandle<typename Tree_::__node, allocator_type>;
+    using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
     typedef __insert_return_type<iterator, node_type> insert_return_type;
 
     template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
@@ -824,13 +824,13 @@ public:
     }
 
 private:
-    typedef typename Tree_::__node __node;
-    typedef typename Tree_::__node_allocator __node_allocator;
+    typedef typename Tree_::node node;
+    typedef typename Tree_::node_allocator node_allocator;
     typedef typename Tree_::node_pointer __node_pointer;
-    typedef typename Tree_::__node_base_pointer __node_base_pointer;
+    typedef typename Tree_::node_base_pointer node_base_pointer;
 
-    typedef MapNodeDestructor<__node_allocator> _Dp;
-    typedef std::unique_ptr<__node, _Dp> __node_holder;
+    typedef MapNodeDestructor<node_allocator> _Dp;
+    typedef std::unique_ptr<node, _Dp> __node_holder;
 
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map> >;
 };
@@ -939,8 +939,8 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, 
 
     static const bool __has_algorithm = true;
 
-    template <class _Map, class _Func, class _Proj>
-    static auto operator()(_Map&& __map, _Func __func, _Proj __proj) {
+    template <class _Map, class FuncT, class ProjT>
+    static auto operator()(_Map&& __map, FuncT __func, ProjT __proj) {
         auto [_, __func2] = __specialized_algorithm<_Algorithm::__for_each, __single_range<typename __map::Tree_>>()(
             __map.tree_, std::move(__func), std::move(__proj));
         return std::make_pair(__map.end(), std::move(__func2));
@@ -1070,7 +1070,7 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    typedef MapNodeHandle<typename Tree_::__node, allocator_type> node_type;
+    typedef MapNodeHandle<typename Tree_::node, allocator_type> node_type;
 
     template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
     friend class map;
@@ -1443,12 +1443,12 @@ public:
     }
 
 private:
-    typedef typename Tree_::__node __node;
-    typedef typename Tree_::__node_allocator __node_allocator;
+    typedef typename Tree_::node node;
+    typedef typename Tree_::node_allocator node_allocator;
     typedef typename Tree_::node_pointer __node_pointer;
 
-    typedef MapNodeDestructor<__node_allocator> _Dp;
-    typedef std::unique_ptr<__node, _Dp> __node_holder;
+    typedef MapNodeDestructor<node_allocator> _Dp;
+    typedef std::unique_ptr<node, _Dp> __node_holder;
 
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap> >;
 };
@@ -1542,8 +1542,8 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<K
 
     static const bool __has_algorithm = true;
 
-    template <class _Map, class _Func, class _Proj>
-    static auto operator()(_Map&& __map, _Func __func, _Proj __proj) {
+    template <class _Map, class FuncT, class ProjT>
+    static auto operator()(_Map&& __map, FuncT __func, ProjT __proj) {
         auto [_, __func2] = __specialized_algorithm<_Algorithm::__for_each, __single_range<typename __map::Tree_>>()(
             __map.tree_, std::move(__func), std::move(__proj));
         return std::make_pair(__map.end(), std::move(__func2));
