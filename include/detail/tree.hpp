@@ -1952,11 +1952,8 @@ private:
     }
     void moveAssignAlloc_(Tree&, std::false_type) noexcept {}
 
-    template <
-        class FromT
-      , class ValueT = _Tp
-      , std::enable_if_t<__is_tree_value_type_v<ValueT>, int> = 0
-    >
+    template <class FromT , class ValueT = _Tp>
+    requires __is_tree_value_type_v<ValueT>
     static void assignValue_(__get_node_value_type_t<value_type>& lhs, FromT&& rhs) {
         using KeyType = std::remove_const_t<typename value_type::first_type>;
 
@@ -1966,12 +1963,8 @@ private:
         lhs.second                      = std::forward<FromT>(rhs).second;
     }
 
-    template <
-        class ToT
-      , class FromT
-      , class ValueT = _Tp
-      , std::enable_if_t<!__is_tree_value_type_v<ValueT>, int> = 0
-    >
+    template <class ToT, class FromT, class ValueT = _Tp>
+    requires (!__is_tree_value_type_v<ValueT>)
     static void assignValue_(ToT& lhs, FromT&& rhs) {
         lhs = std::forward<FromT>(rhs);
     }
@@ -2035,20 +2028,16 @@ private:
         return constructFromTree_(src, [this](const value_type& val) { return constructNode_(val); });
     }
 
-    template <
-        class ValueT = _Tp
-      , std::enable_if_t<__is_tree_value_type_v<ValueT>, int> = 0
-    >
+    template <class ValueT = _Tp>
+    requires __is_tree_value_type_v<ValueT>
     node_pointer moveConstructTree_(node_pointer src) {
         return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(const_cast<key_type&&>(val.first), std::move(val.second));
         });
     }
 
-    template <
-        class ValueT = _Tp
-      , std::enable_if_t<!__is_tree_value_type_v<ValueT>, int> = 0
-    >
+    template <class ValueT = _Tp>
+    requires (!__is_tree_value_type_v<ValueT>)
     node_pointer moveConstructTree_(node_pointer src) {
         return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(std::move(val));
