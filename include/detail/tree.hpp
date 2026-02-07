@@ -1520,8 +1520,8 @@ public:
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {
                 return std::distance(
-                    lowerBoundMulti_(key, static_cast<node_pointer>(root_node->__left_), static_cast<end_node_pointer>(root_node)),
-                    upperBoundMulti_(key, static_cast<node_pointer>(root_node->__right_), result)
+                    const_iterator{lowerUpperBoundMultiImpl_<true>(key, static_cast<node_pointer>(root_node->__left_), static_cast<end_node_pointer>(root_node))},
+                    const_iterator{lowerUpperBoundMultiImpl_<false>(key, static_cast<node_pointer>(root_node->__right_), result)}
                 );
             }
         }
@@ -1563,42 +1563,30 @@ private:
         return result;
     }
 
-    // TODO(gogagum): maybe join into lowerUpperBoundMulti?
-    template <class Self, class KeyT>
-    SelfIterator<Self> lowerBoundMulti_(this Self& self, const KeyT& key, node_pointer root_node, end_node_pointer result) {
+    template <bool lower_bound, class KeyT>
+    end_node_pointer lowerUpperBoundMultiImpl_(const KeyT& key, node_pointer root_node, end_node_pointer result) const {
+        auto comp = LazySynthThreeWayComparator<_Compare, KeyT, value_type>(value_comp());
         while (root_node != nullptr) {
-            if (!self.value_comp()(root_node->get_value(), key)) {
+            const auto comp_res = comp(key, root_node->get_value());
+            if (lower_bound ? (!comp_res.__greater()) : comp_res.__less()) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->__left_);
             } else {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             }
         }
-        return SelfIterator<Self>{result};
-    }
-
-    template <class Self, class KeyT>
-    SelfIterator<Self> upperBoundMulti_(this Self& self, const KeyT& key, node_pointer root_node, end_node_pointer result) {
-        while (root_node != nullptr) {
-            if (self.value_comp()(key, root_node->get_value())) {
-                result = static_cast<end_node_pointer>(root_node);
-                root_node   = static_cast<node_pointer>(root_node->__left_);
-            } else {
-                root_node = static_cast<node_pointer>(root_node->__right_);
-            }
-        }
-        return SelfIterator<Self>{result};
+        return result;
     }
 
 public:
     template <class Self, class KeyT>
     SelfIterator<Self> lowerBoundMulti(this Self& self, const KeyT& key) {
-        return self.lowerBoundMulti_(key, self.root(), self.endNode());
+        return SelfIterator<Self>{self.template lowerUpperBoundMultiImpl_<true>(key, self.root(), self.endNode())};
     }
     
     template <class Self, class KeyT>
     SelfIterator<Self> upperBoundMulti(this Self& self, const KeyT& key) {
-        return self.upperBoundMulti_(key, self.root(), self.endNode());
+        return SelfIterator<Self>{self.template lowerUpperBoundMultiImpl_<false>(key, self.root(), self.endNode())};
     }
 
 public:
@@ -1644,9 +1632,17 @@ public:
             } else if (comp_res.__greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {  // Equal
+                auto begin = self.template lowerUpperBoundMultiImpl_<true>(
+                                 key,
+                                 static_cast<node_pointer>(root_node->__left_),
+                                 static_cast<end_node_pointer>(root_node));
+                auto end = self.template lowerUpperBoundMultiImpl_<false>(
+                               key,
+                               static_cast<node_pointer>(root_node->__right_),
+                               result);
                 return {
-                    self.lowerBoundMulti_(key, static_cast<node_pointer>(root_node->__left_), static_cast<end_node_pointer>(root_node)),
-                    self.upperBoundMulti_(key, static_cast<node_pointer>(root_node->__right_), result)
+                    SelfIterator<Self>{begin},
+                    SelfIterator<Self>{end},
                 };
             }
         }
