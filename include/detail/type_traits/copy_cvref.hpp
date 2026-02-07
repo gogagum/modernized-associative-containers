@@ -14,26 +14,26 @@
 
 namespace mstd {
 
-template <class _From>
+template <class FromT>
 struct __copy_cvref {
-  template <class _To>
-  using __apply = __copy_cv_t<_From, _To>;
+  template <class ToT>
+  using __apply = __copy_cv_t<FromT, ToT>;
 };
 
-template <class _From>
-struct __copy_cvref<_From&> {
-  template <class _To>
-  using __apply = std::add_lvalue_reference_t<__copy_cv_t<_From, _To> >;
+template <class FromT>
+struct __copy_cvref<FromT&> {
+  template <class ToT>
+  using __apply = std::add_lvalue_reference_t<__copy_cv_t<FromT, ToT> >;
 };
 
-template <class _From>
-struct __copy_cvref<_From&&> {
-  template <class _To>
-  using __apply = std::add_rvalue_reference_t<__copy_cv_t<_From, _To> >;
+template <class FromT>
+struct __copy_cvref<FromT&&> {
+  template <class ToT>
+  using __apply = std::add_rvalue_reference_t<__copy_cv_t<FromT, ToT> >;
 };
 
-template <class _From, class _To>
-using __copy_cvref_t = typename __copy_cvref<_From>::template __apply<_To>;
+template <class FromT, class ToT>
+using __copy_cvref_t = typename __copy_cvref<FromT>::template __apply<ToT>;
 
 } // namespace mstd
 

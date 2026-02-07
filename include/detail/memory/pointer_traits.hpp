@@ -23,8 +23,8 @@
 
 namespace mstd {
 
-template <class _From, class _To>
-using __rebind_pointer_t = typename std::pointer_traits<_From>::template rebind<_To>;
+template <class FromT, class ToT>
+using __rebind_pointer_t = typename std::pointer_traits<FromT>::template rebind<ToT>;
 
 } // namespace mstd
 

@@ -700,12 +700,12 @@ public:
 
     template <class InputIteratorT>
     void insert(InputIteratorT __first, InputIteratorT __last) {
-        tree_.__insert_range_unique(__first, __last);
+        tree_.insertRangeUnique(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     void insert_range(RangeT&& __range) {
-        tree_.__insert_range_unique(std::ranges::begin(__range), std::ranges::end(__range));
+        tree_.insertRangeUnique(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
     std::pair<iterator, bool> insert(value_type&& __v) {
@@ -726,42 +726,42 @@ public:
     insert_return_type insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
-        return tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(__nh));
+        return tree_.template nodeHandleInsertUnique< node_type, insert_return_type>(std::move(__nh));
     }
     iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to set::insert()");
-        return tree_.template __node_handle_insert_unique<node_type>(__hint, std::move(__nh));
+        return tree_.template nodeHandleInsertUnique<node_type>(__hint, std::move(__nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template nodeHandleExtract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return tree_.template __node_handle_extract<node_type>(__it);
+        return tree_.template nodeHandleExtract<node_type>(__it);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(__source.tree_);
+        tree_.nodeHandleMergeUnique(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(__source.tree_);
+        tree_.nodeHandleMergeUnique(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(__source.tree_);
+        tree_.nodeHandleMergeUnique(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(__source.tree_);
+        tree_.nodeHandleMergeUnique(__source.tree_);
     }
     
     void swap(set& __s) noexcept(std::is_nothrow_swappable_v<__base>) { tree_.swap(__s.tree_); }
@@ -1095,12 +1095,12 @@ public:
 
     template <class InputIteratorT>
     void insert(InputIteratorT __first, InputIteratorT __last) {
-        tree_.__insert_range_multi(__first, __last);
+        tree_.insertRangeMulti(__first, __last);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     void insert_range(RangeT&& __range) {
-        tree_.__insert_range_multi(std::ranges::begin(__range), std::ranges::end(__range));
+        tree_.insertRangeMulti(std::ranges::begin(__range), std::ranges::end(__range));
     }
     
     iterator insert(value_type&& __v) { return tree_.emplaceMulti(std::move(__v)); }
@@ -1119,42 +1119,42 @@ public:
     iterator insert(node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
-        return tree_.template __node_handle_insert_multi<node_type>(std::move(__nh));
+        return tree_.template nodeHandleInsertMulti<node_type>(std::move(__nh));
     }
     iterator insert(const_iterator __hint, node_type&& __nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(__nh.empty() || __nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to multiset::insert()");
-        return tree_.template __node_handle_insert_multi<node_type>(__hint, std::move(__nh));
+        return tree_.template nodeHandleInsertMulti<node_type>(__hint, std::move(__nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template nodeHandleExtract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return tree_.template __node_handle_extract<node_type>(__it);
+        return tree_.template nodeHandleExtract<node_type>(__it);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_multi(__source.tree_);
+        tree_.nodeHandleMergeMulti(__source.tree_);
     }
     template <class _Compare2>
     void merge(multiset<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_multi(__source.tree_);
+        tree_.nodeHandleMergeMulti(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_multi(__source.tree_);
+        tree_.nodeHandleMergeMulti(__source.tree_);
     }
     template <class _Compare2>
     void merge(set<key_type, _Compare2, allocator_type>&& __source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             __source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_multi(__source.tree_);
+        tree_.nodeHandleMergeMulti(__source.tree_);
     }
     
     void swap(multiset& __s) noexcept(std::is_nothrow_swappable_v<__base>) {

@@ -351,9 +351,9 @@ public:
     using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
     typedef __insert_return_type<iterator, node_type> insert_return_type;
 
-    template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
+    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class map;
-    template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
+    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class multimap;
 
     map() noexcept(
@@ -560,12 +560,12 @@ public:
 
     template <class InputIteratorT>
     void insert(InputIteratorT first, InputIteratorT last) {
-        tree_.__insert_range_unique(first, last);
+        tree_.insertRangeUnique(first, last);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     void insert_range(RangeT&& range) {
-        tree_.__insert_range_unique(
+        tree_.insertRangeUnique(
             std::ranges::begin(range),
             std::ranges::end(range)
         );
@@ -657,42 +657,42 @@ public:
     insert_return_type insert(node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(nh.empty() || nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to map::insert()");
-        return tree_.template __node_handle_insert_unique< node_type, insert_return_type>(std::move(nh));
+        return tree_.template nodeHandleInsertUnique< node_type, insert_return_type>(std::move(nh));
     }
     iterator insert(const_iterator __hint, node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(nh.empty() || nh.get_allocator() == get_allocator(),
                                             "node_type with incompatible allocator passed to map::insert()");
-        return tree_.template __node_handle_insert_unique<node_type>(__hint.i_, std::move(nh));
+        return tree_.template nodeHandleInsertUnique<node_type>(__hint.i_, std::move(nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template nodeHandleExtract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return tree_.template __node_handle_extract<node_type>(__it.i_);
+        return tree_.template nodeHandleExtract<node_type>(__it.i_);
     }
     template <class _Compare2>
     void merge(map<key_type, mapped_type, _Compare2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(source.tree_);
+        tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class _Compare2>
     void merge(map<key_type, mapped_type, _Compare2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(source.tree_);
+        tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class _Compare2>
     void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(source.tree_);
+        tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class _Compare2>
     void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
-        tree_.__node_handle_merge_unique(source.tree_);
+        tree_.nodeHandleMergeUnique(source.tree_);
     }
 
     void swap(map& __m) noexcept(std::is_nothrow_swappable_v<Tree_>) { tree_.swap(__m.tree_); }
@@ -1072,9 +1072,9 @@ public:
 
     typedef MapNodeHandle<typename Tree_::node, allocator_type> node_type;
 
-    template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
+    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class map;
-    template <class _Key2, class _Value2, class _Comp2, class _Alloc2>
+    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class multimap;
 
     multimap() noexcept(
@@ -1241,12 +1241,12 @@ public:
 
     template <class InputIteratorT>
     void insert(InputIteratorT begin, InputIteratorT end) {
-        tree_.__insert_range_multi(begin, end);
+        tree_.insertRangeMulti(begin, end);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     void insert_range(RangeT&& range) {
-        tree_.__insert_range_multi(std::ranges::begin(range),  std::ranges::end(range));
+        tree_.insertRangeMulti(std::ranges::begin(range),  std::ranges::end(range));
     }
 
     iterator erase(const_iterator pos) {
@@ -1270,20 +1270,20 @@ public:
             nh.empty() || nh.get_allocator() == get_allocator(),
             "node_type with incompatible allocator passed to multimap::insert()"
         );
-        return tree_.template __node_handle_insert_multi<node_type>(std::move(nh));
+        return tree_.template nodeHandleInsertMulti<node_type>(std::move(nh));
     }
     iterator insert(const_iterator __hint, node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             nh.empty() || nh.get_allocator() == get_allocator(),
             "node_type with incompatible allocator passed to multimap::insert()"
         );
-        return tree_.template __node_handle_insert_multi<node_type>(__hint.i_, std::move(nh));
+        return tree_.template nodeHandleInsertMulti<node_type>(__hint.i_, std::move(nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
-        return tree_.template __node_handle_extract<node_type>(__key);
+        return tree_.template nodeHandleExtract<node_type>(__key);
     }
     [[nodiscard]] node_type extract(const_iterator __it) {
-        return tree_.template __node_handle_extract<node_type>(__it.i_);
+        return tree_.template nodeHandleExtract<node_type>(__it.i_);
     }
     template <class _Compare2>
     void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>& source) {
@@ -1291,7 +1291,7 @@ public:
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
-        return tree_.__node_handle_merge_multi(source.tree_);
+        return tree_.nodeHandleMergeMulti(source.tree_);
     }
     template <class _Compare2>
     void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>&& source) {
@@ -1299,7 +1299,7 @@ public:
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
-        return tree_.__node_handle_merge_multi(source.tree_);
+        return tree_.nodeHandleMergeMulti(source.tree_);
     }
     template <class _Compare2>
     void merge(map<key_type, mapped_type, _Compare2, allocator_type>& source) {
@@ -1307,7 +1307,7 @@ public:
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
-        return tree_.__node_handle_merge_multi(source.tree_);
+        return tree_.nodeHandleMergeMulti(source.tree_);
     }
     template <class _Compare2>
     void merge(map<key_type, mapped_type, _Compare2, allocator_type>&& source) {
@@ -1315,7 +1315,7 @@ public:
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
-        return tree_.__node_handle_merge_multi(source.tree_);
+        return tree_.nodeHandleMergeMulti(source.tree_);
     }
 
     void clear() noexcept { tree_.clear(); }
