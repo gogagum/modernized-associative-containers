@@ -130,14 +130,14 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
             return 0;
         }
     }
-    unsigned __h = mstd::tree_sub_invariant(node_ptr->__left_);
-    if (__h == 0) {
+    unsigned h = mstd::tree_sub_invariant(node_ptr->__left_);
+    if (h == 0) {
         return 0; // invalid left subtree
     }
-    if (__h != mstd::tree_sub_invariant(node_ptr->__right_)) {
+    if (h != mstd::tree_sub_invariant(node_ptr->__right_)) {
         return 0;                    // invalid or different height right subtree
     }
-    return __h + node_ptr->__is_black_; // return black height of this node
+    return h + node_ptr->__is_black_; // return black height of this node
 }
 
 // Determines if the red black tree rooted at root is a proper red black tree.
@@ -213,7 +213,7 @@ inline EndNodePtrT tree_next_iter(NodePtrT node_ptr) noexcept {
     return static_cast<EndNodePtrT>(node_ptr->__parent_);
 }
 
-// Returns:  pointer to the previous in-order node before __x.
+// Returns:  pointer to the previous in-order node before x.
 // Note: node_ptr may be the end node.
 template <class NodePtrT, class EndNodePtrT>
 inline NodePtrT tree_prev_iter(EndNodePtrT node_ptr) noexcept {
@@ -285,13 +285,13 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
     while (node_ptr != root && !node_ptr->parent_unsafe()->__is_black_) {
         // node_ptr->__parent_ != root because node_ptr->__parent_->__is_black == false
         if (mstd::tree_is_left_child(node_ptr->parent_unsafe())) {
-            NodePtrT __y = node_ptr->parent_unsafe()->parent_unsafe()->__right_;
-            if (__y != nullptr && !__y->__is_black_) {
+            NodePtrT y = node_ptr->parent_unsafe()->parent_unsafe()->__right_;
+            if (y != nullptr && !y->__is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->__is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->__is_black_ = node_ptr == root;
-                __y->__is_black_ = true;
+                y->__is_black_ = true;
             } else {
                 if (!mstd::tree_is_left_child(node_ptr)) {
                     node_ptr = node_ptr->parent_unsafe();
@@ -305,13 +305,13 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
                 break;
             }
         } else {
-            NodePtrT __y = node_ptr->parent_unsafe()->__parent_->__left_;
-            if (__y != nullptr && !__y->__is_black_) {
+            NodePtrT y = node_ptr->parent_unsafe()->__parent_->__left_;
+            if (y != nullptr && !y->__is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->__is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->__is_black_ = node_ptr == root;
-                __y->__is_black_ = true;
+                y->__is_black_ = true;
             } else {
                 if (mstd::tree_is_left_child(node_ptr)) {
                     node_ptr = node_ptr->parent_unsafe();
@@ -334,163 +334,177 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
 //                nor any of its children refer to node_ptr.  endNode->__left_
 //                may be different than the value passed in as root.
 template <class NodePtrT>
-void __tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
+void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(root != nullptr, "Root node should not be null");
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "The node to remove should not be null");
     MSTD_ASSERT_INTERNAL(mstd::tree_invariant(root), "The tree invariants should hold");
     // node_ptr will be removed from the tree.  Client still needs to destruct/deallocate it
-    // __y is either node_ptr, or if node_ptr has two children, tree_next(node_ptr).
-    // __y will have at most one child.
-    // __y will be the initial hole in the tree (make the hole at a leaf)
-    NodePtrT __y = (node_ptr->__left_ == nullptr || node_ptr->__right_ == nullptr) ? node_ptr : mstd::tree_next(node_ptr);
-    // __x is __y's possibly null single child
-    NodePtrT __x = __y->__left_ != nullptr ? __y->__left_ : __y->__right_;
-    // __w is __x's possibly null uncle (will become __x's sibling)
-    NodePtrT __w = nullptr;
-    // link __x to __y's parent, and find __w
-    if (__x != nullptr)
-        __x->__parent_ = __y->__parent_;
-    if (mstd::tree_is_left_child(__y)) {
-        __y->__parent_->__left_ = __x;
-        if (__y != root)
-            __w = __y->parent_unsafe()->__right_;
-        else
-            root = __x; // __w == nullptr
-    } else {
-        __y->parent_unsafe()->__right_ = __x;
-        // __y can't be root if it is a right child
-        __w = __y->__parent_->__left_;
+    // y is either node_ptr, or if node_ptr has two children, tree_next(node_ptr).
+    // y will have at most one child.
+    // y will be the initial hole in the tree (make the hole at a leaf)
+    NodePtrT y
+        = (node_ptr->__left_ == nullptr || node_ptr->__right_ == nullptr)
+          ? node_ptr
+          : mstd::tree_next(node_ptr);
+    // x is y's possibly null single child
+    NodePtrT x
+        = (y->__left_ != nullptr)
+          ? y->__left_
+          : y->__right_;
+    // w is x's possibly null uncle (will become x's sibling)
+    NodePtrT w = nullptr;
+    // link x to y's parent, and find w
+    if (x != nullptr) {
+        x->__parent_ = y->__parent_;
     }
-    bool __removed_black = __y->__is_black_;
-    // If we didn't remove node_ptr, do so now by splicing in __y for node_ptr,
-    //    but copy node_ptr's color.  This does not impact __x or __w.
-    if (__y != node_ptr) {
-        // node_ptr->__left_ != nullptr but node_ptr->__right_ might == __x == nullptr
-        __y->__parent_ = node_ptr->__parent_;
-        if (mstd::tree_is_left_child(node_ptr))
-            __y->__parent_->__left_ = __y;
-        else
-            __y->parent_unsafe()->__right_ = __y;
-        __y->__left_ = node_ptr->__left_;
-        __y->__left_->set_parent(__y);
-        __y->__right_ = node_ptr->__right_;
-        if (__y->__right_ != nullptr)
-            __y->__right_->set_parent(__y);
-        __y->__is_black_ = node_ptr->__is_black_;
-        if (root == node_ptr)
-            root = __y;
+    if (mstd::tree_is_left_child(y)) {
+        y->__parent_->__left_ = x;
+        if (y != root) {
+            w = y->parent_unsafe()->__right_;
+        } else {
+            root = x; // w == nullptr
+        }
+    } else {
+        y->parent_unsafe()->__right_ = x;
+        // y can't be root if it is a right child
+        w = y->__parent_->__left_;
+    }
+    const bool removed_black = y->__is_black_;
+    // If we didn't remove node_ptr, do so now by splicing in y for node_ptr,
+    //    but copy node_ptr's color.  This does not impact x or w.
+    if (y != node_ptr) {
+        // node_ptr->__left_ != nullptr but node_ptr->__right_ might == x == nullptr
+        y->__parent_ = node_ptr->__parent_;
+        if (mstd::tree_is_left_child(node_ptr)) {
+            y->__parent_->__left_ = y;
+        } else {
+            y->parent_unsafe()->__right_ = y;
+        }
+        y->__left_ = node_ptr->__left_;
+        y->__left_->set_parent(y);
+        y->__right_ = node_ptr->__right_;
+        if (y->__right_ != nullptr) {
+            y->__right_->set_parent(y);
+        }
+        y->__is_black_ = node_ptr->__is_black_;
+        if (root == node_ptr) {
+            root = y;
+        }
     }
     // There is no need to rebalance if we removed a red, or if we removed
     //     the last node.
-    if (__removed_black && root != nullptr) {
+    if (removed_black && root != nullptr) {
         // Rebalance:
-        // __x has an implicit black color (transferred from the removed __y)
+        // x has an implicit black color (transferred from the removed y)
         //    associated with it, no matter what its color is.
-        // If __x is root (in which case it can't be null), it is supposed
+        // If x is root (in which case it can't be null), it is supposed
         //    to be black anyway, and if it is doubly black, then the double
         //    can just be ignored.
-        // If __x is red (in which case it can't be null), then it can absorb
+        // If x is red (in which case it can't be null), then it can absorb
         //    the implicit black just by setting its color to black.
-        // Since __y was black and only had one child (which __x points to), __x
-        //   is either red with no children, else null, otherwise __y would have
+        // Since y was black and only had one child (which x points to), x
+        //   is either red with no children, else null, otherwise y would have
         //   different black heights under left and right pointers.
-        // if (__x == root || __x != nullptr && !__x->__is_black_)
-        if (__x != nullptr)
-            __x->__is_black_ = true;
-        else {
-            //  Else __x isn't root, and is "doubly black", even though it may
-            //     be null.  __w can not be null here, else the parent would
-            //     see a black height >= 2 on the __x side and a black height
-            //     of 1 on the __w side (__w must be a non-null black or a red
+        // if (x == root || x != nullptr && !x->__is_black_)
+        if (x != nullptr) {
+            x->__is_black_ = true;
+        } else {
+            //  Else x isn't root, and is "doubly black", even though it may
+            //     be null.  w can not be null here, else the parent would
+            //     see a black height >= 2 on the x side and a black height
+            //     of 1 on the w side (w must be a non-null black or a red
             //     with a non-null black child).
             while (true) {
-                if (!mstd::tree_is_left_child(__w)) // if node_ptr is left child
-                {
-                    if (!__w->__is_black_) {
-                        __w->__is_black_                    = true;
-                        __w->parent_unsafe()->__is_black_ = false;
-                        mstd::tree_left_rotate(__w->parent_unsafe());
-                        // __x is still valid
+                if (!mstd::tree_is_left_child(w)) { // if node_ptr is left child
+                    if (!w->__is_black_) {
+                        w->__is_black_                    = true;
+                        w->parent_unsafe()->__is_black_ = false;
+                        mstd::tree_left_rotate(w->parent_unsafe());
+                        // x is still valid
                         // reset root only if necessary
-                        if (root == __w->__left_)
-                            root = __w;
+                        if (root == w->__left_) {
+                            root = w;
+                        }
                         // reset sibling, and it still can't be null
-                        __w = __w->__left_->__right_;
+                        w = w->__left_->__right_;
                     }
-                    // __w->__is_black_ is now true, __w may have null children
-                    if ((__w->__left_ == nullptr || __w->__left_->__is_black_) &&
-                        (__w->__right_ == nullptr || __w->__right_->__is_black_)) {
-                        __w->__is_black_ = false;
-                    __x              = __w->parent_unsafe();
-                    // __x can no longer be null
-                    if (__x == root || !__x->__is_black_) {
-                        __x->__is_black_ = true;
-                        break;
-                    }
-                    // reset sibling, and it still can't be null
-                    __w = mstd::tree_is_left_child(__x) ? __x->parent_unsafe()->__right_ : __x->__parent_->__left_;
-                    // continue;
-                        } else // __w has a red child
-                        {
-                            if (__w->__right_ == nullptr || __w->__right_->__is_black_) {
-                                // __w left child is non-null and red
-                                __w->__left_->__is_black_ = true;
-                                __w->__is_black_          = false;
-                                mstd::tree_right_rotate(__w);
-                                // __w is known not to be root, so root hasn't changed
-                                // reset sibling, and it still can't be null
-                                __w = __w->parent_unsafe();
-                            }
-                            // __w has a right red child, left child may be null
-                            __w->__is_black_                    = __w->parent_unsafe()->__is_black_;
-                            __w->parent_unsafe()->__is_black_ = true;
-                            __w->__right_->__is_black_          = true;
-                            mstd::tree_left_rotate(__w->parent_unsafe());
+                    // w->__is_black_ is now true, w may have null children
+                    if ((w->__left_ == nullptr || w->__left_->__is_black_)
+                            && (w->__right_ == nullptr || w->__right_->__is_black_)) {
+                        w->__is_black_ = false;
+                        x              = w->parent_unsafe();
+                        // x can no longer be null
+                        if (x == root || !x->__is_black_) {
+                            x->__is_black_ = true;
                             break;
                         }
+                        // reset sibling, and it still can't be null
+                        w = mstd::tree_is_left_child(x)
+                            ? x->parent_unsafe()->__right_
+                            : x->__parent_->__left_;
+                        // continue;
+                    } else { // w has a red child
+                        if (w->__right_ == nullptr || w->__right_->__is_black_) {
+                            // w left child is non-null and red
+                            w->__left_->__is_black_ = true;
+                            w->__is_black_          = false;
+                            mstd::tree_right_rotate(w);
+                            // w is known not to be root, so root hasn't changed
+                            // reset sibling, and it still can't be null
+                            w = w->parent_unsafe();
+                        }
+                        // w has a right red child, left child may be null
+                        w->__is_black_                    = w->parent_unsafe()->__is_black_;
+                        w->parent_unsafe()->__is_black_ = true;
+                        w->__right_->__is_black_          = true;
+                        mstd::tree_left_rotate(w->parent_unsafe());
+                        break;
+                    }
                 } else {
-                    if (!__w->__is_black_) {
-                        __w->__is_black_                    = true;
-                        __w->parent_unsafe()->__is_black_ = false;
-                        mstd::tree_right_rotate(__w->parent_unsafe());
-                        // __x is still valid
+                    if (!w->__is_black_) {
+                        w->__is_black_                  = true;
+                        w->parent_unsafe()->__is_black_ = false;
+                        mstd::tree_right_rotate(w->parent_unsafe());
+                        // x is still valid
                         // reset root only if necessary
-                        if (root == __w->__right_)
-                            root = __w;
+                        if (root == w->__right_) {
+                            root = w;
+                        }
                         // reset sibling, and it still can't be null
-                        __w = __w->__right_->__left_;
+                        w = w->__right_->__left_;
                     }
-                    // __w->__is_black_ is now true, __w may have null children
-                    if ((__w->__left_ == nullptr || __w->__left_->__is_black_) &&
-                        (__w->__right_ == nullptr || __w->__right_->__is_black_)) {
-                        __w->__is_black_ = false;
-                    __x              = __w->parent_unsafe();
-                    // __x can no longer be null
-                    if (!__x->__is_black_ || __x == root) {
-                        __x->__is_black_ = true;
-                        break;
-                    }
-                    // reset sibling, and it still can't be null
-                    __w = mstd::tree_is_left_child(__x) ? __x->parent_unsafe()->__right_ : __x->__parent_->__left_;
-                    // continue;
-                        } else // __w has a red child
-                        {
-                            if (__w->__left_ == nullptr || __w->__left_->__is_black_) {
-                                // __w right child is non-null and red
-                                __w->__right_->__is_black_ = true;
-                                __w->__is_black_           = false;
-                                mstd::tree_left_rotate(__w);
-                                // __w is known not to be root, so root hasn't changed
-                                // reset sibling, and it still can't be null
-                                __w = __w->parent_unsafe();
-                            }
-                            // __w has a left red child, right child may be null
-                            __w->__is_black_                    = __w->parent_unsafe()->__is_black_;
-                            __w->parent_unsafe()->__is_black_ = true;
-                            __w->__left_->__is_black_           = true;
-                            mstd::tree_right_rotate(__w->parent_unsafe());
+                    // w->__is_black_ is now true, w may have null children
+                    if ((w->__left_ == nullptr || w->__left_->__is_black_)
+                            && (w->__right_ == nullptr || w->__right_->__is_black_)) {
+                        w->__is_black_ = false;
+                        x              = w->parent_unsafe();
+                        // x can no longer be null
+                        if (!x->__is_black_ || x == root) {
+                            x->__is_black_ = true;
                             break;
                         }
+                        // reset sibling, and it still can't be null
+                        w = mstd::tree_is_left_child(x)
+                            ? x->parent_unsafe()->__right_
+                            : x->__parent_->__left_;
+                        // continue;
+                    } else { // w has a red child
+                        if (w->__left_ == nullptr || w->__left_->__is_black_) {
+                            // w right child is non-null and red
+                            w->__right_->__is_black_ = true;
+                            w->__is_black_           = false;
+                            mstd::tree_left_rotate(w);
+                            // w is known not to be root, so root hasn't changed
+                            // reset sibling, and it still can't be null
+                            w = w->parent_unsafe();
+                        }
+                        // w has a left red child, right child may be null
+                        w->__is_black_                  = w->parent_unsafe()->__is_black_;
+                        w->parent_unsafe()->__is_black_ = true;
+                        w->__left_->__is_black_         = true;
+                        mstd::tree_right_rotate(w->parent_unsafe());
+                        break;
+                    }
                 }
             }
         }
@@ -588,9 +602,9 @@ private:
 public:
     __node_value_type& get_value() { return __value_; }
 
-    template <class _Alloc, class... ArgsT>
-    explicit TreeNode(_Alloc& __na, ArgsT&&... args) {
-        std::allocator_traits<_Alloc>::construct(__na, std::addressof(get_value()), std::forward<ArgsT>(args)...);
+    template <class AllocT, class... ArgsT>
+    explicit TreeNode(AllocT& node_alloc, ArgsT&&... args) {
+        std::allocator_traits<AllocT>::construct(node_alloc, std::addressof(get_value()), std::forward<ArgsT>(args)...);
     }
     ~TreeNode()                             = delete;
     TreeNode(TreeNode const&)            = delete;
@@ -962,7 +976,19 @@ public:
         __begin_node_ = endNode();
     }
 
-    Tree(const Tree& __t);
+    Tree(const Tree& other)
+    : __begin_node_(endNode())
+    , __node_alloc_(node_traits::select_on_container_copy_construction(other.nodeAlloc()))
+    , __size_(0)
+    , __value_comp_(other.value_comp()) {
+        if (other.size() == 0) {
+            return;
+        }
+        *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
+        root()->__parent_ = endNode();
+        __begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
+        __size_           = other.size();
+    }
 
     Tree(const Tree& other, const allocator_type& alloc)
     : __begin_node_(endNode())
@@ -973,21 +999,82 @@ public:
             return;
         }
 
-        *root_ptr()       = static_cast<node_base_pointer>(copy_construct_tree(other.root()));
+        *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
         root()->__parent_ = endNode();
-        __begin_node_       = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
-        __size_             = other.size();
+        __begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
+        __size_           = other.size();
     }
 
-    Tree& operator=(const Tree& __t);
+    Tree& operator=(const Tree& other) {
+        if (this == std::addressof(other)) {
+            return *this;
+        }
+        value_comp() = other.value_comp();
+        copyAssignAlloc(other);
+
+        if (__size_ != 0) {
+            *root_ptr() = static_cast<node_base_pointer>(copyAssignTree(root(), other.root()));
+        } else {
+            *root_ptr() = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
+            if (root()) {
+                root()->__parent_ = endNode();
+            }
+        }
+        __begin_node_
+            = endNode()->__left_
+              ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_))
+              : endNode();
+        __size_ = other.size();
+
+        return *this;
+    }
+
     template <class _ForwardIterator>
     void assign_unique(_ForwardIterator __first, _ForwardIterator __last);
 
-    Tree(Tree&& __t) noexcept(
+    Tree(Tree&& other) noexcept(
         std::is_nothrow_move_constructible<node_allocator>::value
      && std::is_nothrow_move_constructible<value_compare>::value
-    );
-    Tree(Tree&& __t, const allocator_type& __a);
+    )
+    : __begin_node_(std::move(other.__begin_node_))
+    , __end_node_(std::move(other.__end_node_))
+    , __node_alloc_(std::move(other.__node_alloc_))
+    , __size_(other.__size_)
+    , __value_comp_(std::move(other.__value_comp_)) {
+        if (__size_ == 0) {
+            __begin_node_ = endNode();
+        } else {
+            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            other.__begin_node_           = other.endNode();
+            other.endNode()->__left_      = nullptr;
+            other.__size_                 = 0;
+        }
+    }
+
+    Tree(Tree&& other, const allocator_type& alloc)
+    : __begin_node_(endNode())
+    , __node_alloc_(node_allocator(alloc))
+    , __size_(0)
+    , __value_comp_(std::move(other.value_comp())) {
+        if (other.size() == 0) {
+            return;
+        }
+        if (alloc == other.alloc()) {
+            __begin_node_                 = other.__begin_node_;
+            endNode()->__left_            = other.endNode()->__left_;
+            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            __size_                       = other.__size_;
+            other.__begin_node_           = other.endNode();
+            other.endNode()->__left_      = nullptr;
+            other.__size_                 = 0;
+        } else {
+            *root_ptr()       = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
+            root()->__parent_ = endNode();
+            __begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
+            __size_           = other.size();
+            other.clear(); // Ensure that other is in a valid state after moving out the keys
+        }
+    }
 
     Tree& operator=(Tree&& other)
     noexcept(
@@ -1000,7 +1087,7 @@ public:
          || std::allocator_traits<node_allocator>::is_always_equal::value
         )
     ) {
-        moveAssign(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
+        moveAssign_(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
         return *this;
     }
 
@@ -1028,8 +1115,23 @@ public:
         endNode()->__left_ = nullptr;
     }
 
-    void swap(Tree& __t)
-    noexcept(std::is_nothrow_swappable_v<value_compare>);
+    void swap(Tree& other) noexcept(std::is_nothrow_swappable_v<value_compare>) {
+        using std::swap;
+        swap(__begin_node_, other.__begin_node_);
+        swap(__end_node_, other.__end_node_);
+        mstd::__swap_allocator(nodeAlloc(), other.nodeAlloc());
+        swap(__size_, other.__size_);
+        swap(__value_comp_, other.__value_comp_);
+        if (__size_ == 0) {
+            __begin_node_ = endNode();
+        } else {
+            endNode()->__left_->__parent_ = endNode();
+        } if (other.__size_ == 0) {
+            other.__begin_node_ = other.endNode();
+        } else {
+            other.endNode()->__left_->__parent_ = other.endNode();
+        }
+    }
 
     template <class... ArgsT>
     iterator emplaceMulti(ArgsT&&... args) {
@@ -1042,9 +1144,9 @@ public:
 
     template <class... ArgsT>
     iterator emplaceHintMulti(const_iterator pos, ArgsT&&... args) {
-        node_holder holder = constructNode_(std::forward<ArgsT>(args)...);
+        auto holder = constructNode_(std::forward<ArgsT>(args)...);
         end_node_pointer parent;
-        node_base_pointer& child = __find_leaf(pos, parent, holder->get_value());
+        node_base_pointer& child = findLeaf_(pos, parent, holder->get_value());
         insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.get()));
         return iterator(static_cast<node_pointer>(holder.release()));
     }
@@ -1115,8 +1217,8 @@ public:
             std::forward<ArgsT>(args)...);
     }
 
-    template <class _InIter, class _Sent>
-    void __insert_range_multi(_InIter begin, _Sent end) {
+    template <class InIterT, class SentT>
+    void insertRangeMulti(InIterT begin, SentT end) {
         if (begin == end) {
             return;
         }
@@ -1133,7 +1235,7 @@ public:
         auto max_node = static_cast<node_pointer>(mstd::tree_max(static_cast<node_base_pointer>(root())));
 
         for (; begin != end; ++begin) {
-            node_holder holder = constructNode_(*begin);
+            auto holder = constructNode_(*begin);
             // Always check the max node first. This optimizes for sorted ranges inserted at the end.
             if (!value_comp()(holder->get_value(), max_node->get_value())) { // node >= __max_val
                 insertNodeAt(static_cast<end_node_pointer>(max_node),
@@ -1148,26 +1250,28 @@ public:
         }
     }
 
-    template <class _InIter, class _Sent>
-    void __insert_range_unique(_InIter __first, _Sent __last) {
-        if (__first == __last)
+    template <class InIterT, class SentT>
+    void insertRangeUnique(InIterT begin, SentT end) {
+        if (begin == end) {
             return;
+        }
 
         if (root() == nullptr) {
-            insertNodeAt(
-                endNode(), endNode()->__left_, static_cast<node_base_pointer>(constructNode_(*__first).release()));
-            ++__first;
+            insertNodeAt(endNode(),
+                         endNode()->__left_,
+                         static_cast<node_base_pointer>(constructNode_(*begin).release()));
+            ++begin;
         }
 
         auto max_node = static_cast<node_pointer>(mstd::tree_max(static_cast<node_base_pointer>(root())));
 
-        using __reference = decltype(*__first);
+        using Reference = decltype(*begin);
 
-        for (; __first != __last; ++__first) {
+        for (; begin != end; ++begin) {
             mstd::__try_key_extraction<key_type>(
-                [this, &max_node](const key_type& key, __reference&& val) {
+                [this, &max_node](const key_type& key, Reference&& val) {
                     if (value_comp()(max_node->get_value(), key)) { // key > max_node
-                        auto holder = constructNode_(std::forward<__reference>(val));
+                        auto holder = constructNode_(std::forward<Reference>(val));
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
                                      max_node->__right_,
                                      static_cast<node_base_pointer>(holder.get()));
@@ -1175,57 +1279,65 @@ public:
                     } else {
                         auto [parent, child] = find_equal(key);
                         if (child == nullptr) {
-                            auto holder = constructNode_(std::forward<__reference>(val));
+                            auto holder = constructNode_(std::forward<Reference>(val));
                             insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.release()));
                         }
                     }
                 },
-                [this, &max_node](__reference&& val) {
-                    node_holder __nd = constructNode_(std::forward<__reference>(val));
-                    if (value_comp()(max_node->get_value(), __nd->get_value())) { // node > max_node
+                [this, &max_node](Reference&& val) {
+                    auto holder = constructNode_(std::forward<Reference>(val));
+                    if (value_comp()(max_node->get_value(), holder->get_value())) { // node > max_node
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
-                                         max_node->__right_,
-                                         static_cast<node_base_pointer>(__nd.get()));
-                        max_node = __nd.release();
+                                     max_node->__right_,
+                                     static_cast<node_base_pointer>(holder.get()));
+                        max_node = holder.release();
                     } else {
-                        auto [parent, child] = find_equal(__nd->get_value());
+                        auto [parent, child] = find_equal(holder->get_value());
                         if (child == nullptr) {
-                            insertNodeAt(parent, child, static_cast<node_base_pointer>(__nd.release()));
+                            insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.release()));
                         }
                     }
                 },
-                *__first);
+                *begin);
         }
     }
 
-    iterator __remove_node_pointer(node_pointer ptr) noexcept {
+    iterator removeNodePointer(node_pointer ptr) noexcept {
         iterator ret(ptr);
         ++ret;
         if (__begin_node_ == ptr) {
             __begin_node_ = ret.__ptr_;
         }
         --__size_;
-        mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(ptr));
+        mstd::tree_remove(endNode()->__left_, static_cast<node_base_pointer>(ptr));
         return ret;
     }
 
-    template <class _NodeHandle, class _InsertReturnType>
-    _InsertReturnType __node_handle_insert_unique(_NodeHandle&& nh) {
+    template <class NodeHandleT, class InsertReturnType>
+    InsertReturnType nodeHandleInsertUnique(NodeHandleT&& nh) {
         if (nh.empty()) {
-            return _InsertReturnType{end(), false, _NodeHandle()};
+            return InsertReturnType{end(), false, NodeHandleT()};
         }
         auto ptr = nh.__ptr_;
         auto [parent, child] = find_equal(ptr->get_value());
         if (child != nullptr) {
-            return _InsertReturnType{iterator(static_cast<node_pointer>(child)), false, std::move(nh)};
+            return InsertReturnType{
+                iterator(static_cast<node_pointer>(child)),
+                false,
+                std::move(nh),
+            };
         }
         insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
         nh.__release_ptr();
-        return _InsertReturnType{iterator(ptr), true, _NodeHandle()};
+        return InsertReturnType{
+            iterator(ptr),
+            true,
+            NodeHandleT(),
+        };
     }
 
-    template <class _NodeHandle>
-    iterator __node_handle_insert_unique(const_iterator hint, _NodeHandle&& nh) {
+    template <class NodeHandleT>
+    iterator nodeHandleInsertUnique(const_iterator hint, NodeHandleT&& nh) {
         if (nh.empty()) {
             return end();
         }
@@ -1241,8 +1353,8 @@ public:
         return iterator(ret);
     }
 
-    template <class _Comp2>
-    void __node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& source) {
+    template <class Comp2T>
+    void nodeHandleMergeUnique(Tree<_Tp, Comp2T, _Allocator>& source) {
         for (iterator iter = source.begin(); iter != source.end();) {
             auto src_ptr = iter.__get_np();
             auto [parent, child] = find_equal(src_ptr->get_value());
@@ -1250,13 +1362,13 @@ public:
             if (child != nullptr) {
                 continue;
             }
-            source.__remove_node_pointer(src_ptr);
+            source.removeNodePointer(src_ptr);
             insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
         }
     }
 
-    template <class _NodeHandle>
-    iterator __node_handle_insert_multi(_NodeHandle&& nh) {
+    template <class NodeHandleT>
+    iterator nodeHandleInsertMulti(NodeHandleT&& nh) {
         if (nh.empty()) {
             return end();
         }
@@ -1268,49 +1380,49 @@ public:
         return iterator(ptr);
     }
 
-    template <class _NodeHandle>
-    iterator __node_handle_insert_multi(const_iterator hint, _NodeHandle&& nh) {
+    template <class NodeHandleT>
+    iterator nodeHandleInsertMulti(const_iterator hint, NodeHandleT&& nh) {
         if (nh.empty()) {
             return end();
         }
         auto ptr = nh.__ptr_;
         end_node_pointer parent;
-        auto& child = __find_leaf(hint, parent, ptr->get_value());
+        auto& child = findLeaf_(hint, parent, ptr->get_value());
         insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
         nh.__release_ptr();
         return iterator(ptr);
     }
 
-    template <class _Comp2>
-        void __node_handle_merge_multi(Tree<_Tp, _Comp2, _Allocator>& source) {
+    template <class Comp2T>
+    void nodeHandleMergeMulti(Tree<_Tp, Comp2T, _Allocator>& source) {
         for (iterator iter = source.begin(); iter != source.end();) {
             auto src_ptr = iter.__get_np();
             end_node_pointer parent;
             auto& child = findLeafHigh_(parent, src_ptr->get_value());
             ++iter;
-            source.__remove_node_pointer(src_ptr);
+            source.removeNodePointer(src_ptr);
             insertNodeAt(parent, child, static_cast<node_base_pointer>(src_ptr));
         }
     }
 
-    template <class _NodeHandle>
-    _NodeHandle __node_handle_extract(key_type const& key) {
+    template <class NodeHandleT>
+    NodeHandleT nodeHandleExtract(key_type const& key) {
         if (const auto iter = find(key); iter != end()) {
-            return __node_handle_extract<_NodeHandle>(iter);
+            return nodeHandleExtract<NodeHandleT>(iter);
         }
-        return _NodeHandle();
+        return NodeHandleT();
     }
 
-    template <class _NodeHandle>
-    _NodeHandle __node_handle_extract(const_iterator pos) {
+    template <class NodeHandleT>
+    NodeHandleT nodeHandleExtract(const_iterator pos) {
         auto node_ptr = pos.__get_np();
-        __remove_node_pointer(node_ptr);
-        return _NodeHandle(node_ptr, alloc());
+        removeNodePointer(node_ptr);
+        return NodeHandleT(node_ptr, alloc());
     }
 
     iterator erase(const_iterator pos) {
         auto node_ptr        = pos.__get_np();
-        auto ret             = __remove_node_pointer(node_ptr);
+        auto ret             = removeNodePointer(node_ptr);
         auto& node_allocator = nodeAlloc();
         node_traits::destroy(node_allocator, std::addressof(const_cast<value_type&>(*pos)));
         node_traits::deallocate(node_allocator, node_ptr, 1);
@@ -1435,7 +1547,7 @@ public:
     }
 
 private:
-    template <bool _LowerBound, class KeyT>
+    template <bool lower_bound, class KeyT>
     end_node_pointer lowerUpperBoundUniqueImpl_(const KeyT& key) const {
         auto root_node = root();
         auto result    = endNode();
@@ -1448,7 +1560,7 @@ private:
                 root_node     = static_cast<node_pointer>(root_node->__left_);
             } else if (comp_res.__greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
-            } else if constexpr (_LowerBound) {
+            } else if constexpr (lower_bound) {
                 return static_cast<end_node_pointer>(root_node);
             } else {
                 return root_node->__right_
@@ -1594,9 +1706,9 @@ public:
 
     template <class KeyT>
     std::pair<iterator, iterator> equalRangeMulti(const KeyT& key) {
-        auto result = endNode();
-        auto root_node   = root();
-        auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+        auto result    = endNode();
+        auto root_node = root();
+        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
             if (comp_res.__less()) {
@@ -1655,7 +1767,7 @@ public:
             }
         }
         --__size_;
-        mstd::__tree_remove(endNode()->__left_, static_cast<node_base_pointer>(node_ptr));
+        mstd::tree_remove(endNode()->__left_, static_cast<node_base_pointer>(node_ptr));
         return node_holder(node_ptr, _Dp(nodeAlloc(), true));
     }
 
@@ -1667,54 +1779,52 @@ public:
     // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) {
-        node_pointer __nd = root();
+        node_pointer node_ptr = root();
 
-        if (__nd == nullptr) {
-            auto __end = endNode();
+        if (node_ptr == nullptr) {
+            auto end = endNode();
             return {
-                __end,
-                __end->__left_,
+                end,
+                end->__left_,
             };
         }
 
-        node_base_pointer* __node_ptr = root_ptr();
-        auto&& __transparent            = mstd::__as_transparent(value_comp());
-        auto comp = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, KeyT, value_type>(__transparent);
+        node_base_pointer* node_base_ptr = root_ptr();
+        auto&& transparent = mstd::__as_transparent(value_comp());
+        auto comp          = LazySynthThreeWayComparator<__make_transparent_t<_Compare>, KeyT, value_type>(transparent);
     
         while (true) {
-            const auto comp_res = comp(key, __nd->get_value());
-    
+            const auto comp_res = comp(key, node_ptr->get_value());
             if (comp_res.__less()) {
-                if (__nd->__left_ == nullptr) {
+                if (node_ptr->__left_ == nullptr) {
                     return {
-                        static_cast<end_node_pointer>(__nd),
-                        __nd->__left_,
+                        static_cast<end_node_pointer>(node_ptr),
+                        node_ptr->__left_,
                     };
                 }
-    
-                __node_ptr = std::addressof(__nd->__left_);
-                __nd       = static_cast<node_pointer>(__nd->__left_);
+                node_base_ptr = std::addressof(node_ptr->__left_);
+                node_ptr      = static_cast<node_pointer>(node_ptr->__left_);
             } else if (comp_res.__greater()) {
-                if (__nd->__right_ == nullptr) {
+                if (node_ptr->__right_ == nullptr) {
                     return {
-                        static_cast<end_node_pointer>(__nd),
-                        __nd->__right_,
+                        static_cast<end_node_pointer>(node_ptr),
+                        node_ptr->__right_,
                     };
                 }
-                __node_ptr = std::addressof(__nd->__right_);
-                __nd       = static_cast<node_pointer>(__nd->__right_);
+                node_base_ptr = std::addressof(node_ptr->__right_);
+                node_ptr      = static_cast<node_pointer>(node_ptr->__right_);
             } else {
                 return {
-                    static_cast<end_node_pointer>(__nd),
-                    *__node_ptr,
+                    static_cast<end_node_pointer>(node_ptr),
+                    *node_base_ptr,
                 };
             }
         }
     }
 
     template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& __v) const {
-        return const_cast<Tree*>(this)->find_equal(__v);
+    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) const {
+        return const_cast<Tree*>(this)->find_equal(key);
     }
 
     // Find key
@@ -1728,8 +1838,8 @@ public:
     find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& key) {
         if (hint == end() || value_comp()(key, *hint)) { // check before
             // key < *hint
-            const_iterator __prior = hint;
-            if (__prior == begin() || value_comp()(*--__prior, key)) {
+            const_iterator prior = hint;
+            if (prior == begin() || value_comp()(*--prior, key)) {
                 // *prev(hint) < key < *hint
                 if (hint.__ptr_->__left_ == nullptr) {
                     return {
@@ -1738,8 +1848,8 @@ public:
                     };
                 }
                 return {
-                    __prior.__ptr_,
-                    static_cast<node_pointer>(__prior.__ptr_)->__right_,
+                    prior.__ptr_,
+                    static_cast<node_pointer>(prior.__ptr_)->__right_,
                 };
             }
             // key <= *prev(hint)
@@ -1748,8 +1858,8 @@ public:
     
         if (value_comp()(*hint, key)) { // check after
             // *hint < key
-            const_iterator __next = std::next(hint);
-            if (__next == end() || value_comp()(key, *__next)) {
+            const_iterator next = std::next(hint);
+            if (next == end() || value_comp()(key, *next)) {
                 // *hint < key < *std::next(hint)
                 if (hint.__get_np()->__right_ == nullptr) {
                     return {
@@ -1758,8 +1868,8 @@ public:
                     };
                 }
                 return {
-                    __next.__ptr_,
-                    __next.__ptr_->__left_,
+                    next.__ptr_,
+                    next.__ptr_->__left_,
                 };
             }
             // *next(hint) <= key
@@ -1787,7 +1897,34 @@ public:
     void copyAssignAlloc(const Tree&, std::false_type) {}
 
 private:
-    node_base_pointer& __find_leaf_low(end_node_pointer& parent, const value_type& __v);
+
+    // Find lower_bound place to insert
+    // Set parent to parent of null leaf
+    // Return reference to null leaf
+    node_base_pointer& findLeafLow_(end_node_pointer& parent, const value_type& value) {
+        node_pointer node_ptr = root();
+        if (node_ptr != nullptr) {
+            while (true) {
+                if (value_comp()(node_ptr->get_value(), value)) {
+                    if (node_ptr->__right_ != nullptr) {
+                        node_ptr = static_cast<node_pointer>(node_ptr->__right_);
+                    } else {
+                        parent = static_cast<end_node_pointer>(node_ptr);
+                        return node_ptr->__right_;
+                    }
+                } else {
+                    if (node_ptr->__left_ != nullptr) {
+                        node_ptr = static_cast<node_pointer>(node_ptr->__left_);
+                    } else {
+                        parent = static_cast<end_node_pointer>(node_ptr);
+                        return parent->__left_;
+                    }
+                }
+            }
+        }
+        parent = endNode();
+        return parent->__left_;
+    }
 
     // Find upper_bound place to insert
     // Set parent to parent of null leaf
@@ -1817,63 +1954,124 @@ private:
         return parent->__left_;
     }
 
+    // Find leaf place to insert closest to hint
+    // First check prior to hint.
+    // Next check after hint.
+    // Next do O(log N) search.
+    // Set parent to parent of null leaf
+    // Return reference to null leaf
     node_base_pointer&
-    __find_leaf(const_iterator hint, end_node_pointer& parent, const value_type& __v);
+    findLeaf_(const_iterator hint, end_node_pointer& parent, const value_type& value) {
+        if (hint == end() || !value_comp()(*hint, value)) // check before
+        {
+            // value <= *hint
+            const_iterator __prior = hint;
+            if (__prior == begin() || !value_comp()(value, *--__prior)) {
+                // *prev(hint) <= value <= *hint
+                if (hint.__ptr_->__left_ == nullptr) {
+                    parent = static_cast<end_node_pointer>(hint.__ptr_);
+                    return parent->__left_;
+                } else {
+                    parent = static_cast<end_node_pointer>(__prior.__ptr_);
+                    return static_cast<node_base_pointer>(__prior.__ptr_)->__right_;
+                }
+            }
+            // value < *prev(hint)
+            return findLeafHigh_(parent, value);
+        }
+        // else value > *hint
+        return findLeafLow_(parent, value);
+    }
 
     template <class... ArgsT>
     node_holder constructNode_(ArgsT&&... args) {
-        node_allocator& __na = nodeAlloc();
-        node_holder __h(node_traits::allocate(__na, 1), _Dp(__na));
-        std::construct_at(std::addressof(*__h), __na, std::forward<ArgsT>(args)...);
-        __h.get_deleter().value_constructed = true;
-        return __h;
+        node_allocator& node_alloc = nodeAlloc();
+        node_holder holder(node_traits::allocate(node_alloc, 1), _Dp(node_alloc));
+        std::construct_at(std::addressof(*holder), node_alloc, std::forward<ArgsT>(args)...);
+        holder.get_deleter().value_constructed = true;
+        return holder;
     }
 
     void destroy_(node_pointer node_ptr) noexcept {
         (TreeDeleter(__node_alloc_))(node_ptr);
     }
 
-    void moveAssign(Tree& __t, std::false_type);
-    void moveAssign(Tree& __t, std::true_type) noexcept(
+    void moveAssign_(Tree& other, std::false_type) {
+        if (nodeAlloc() == other.nodeAlloc()) {
+            moveAssign_(other, std::true_type());
+        } else {
+            value_comp() = std::move(other.value_comp());
+            if (__size_ != 0) {
+                *root_ptr() = static_cast<node_base_pointer>(moveAssignTree(root(), other.root()));
+            } else {
+                *root_ptr() = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
+                if (root())
+                    root()->__parent_ = endNode();
+            }
+            __begin_node_
+                = endNode()->__left_
+                ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_))
+                : endNode();
+            __size_ = other.size();
+            other.clear(); // Ensure that other is in a valid state after moving out the keys
+        }
+    }
+
+    void moveAssign_(Tree& other, std::true_type) noexcept(
         std::is_nothrow_move_assignable<value_compare>::value
      && std::is_nothrow_move_assignable<node_allocator>::value
-    );
+    ) {
+        destroy_(static_cast<node_pointer>(endNode()->__left_));
+        __begin_node_ = other.__begin_node_;
+        __end_node_   = other.__end_node_;
+        moveAssignAlloc_(other);
+        __size_       = other.__size_;
+        __value_comp_ = std::move(other.__value_comp_);
+        if (__size_ == 0) {
+            __begin_node_ = endNode();
+        } else {
+            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            other.__begin_node_           = other.endNode();
+            other.endNode()->__left_      = nullptr;
+            other.__size_                 = 0;
+        }
+    }
 
-    void __move_assign_alloc(Tree& other) noexcept(
+    void moveAssignAlloc_(Tree& other) noexcept(
         !node_traits::propagate_on_container_move_assignment::value
      || std::is_nothrow_move_assignable<node_allocator>::value
     ) {
-        __move_assign_alloc(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
+        moveAssignAlloc_(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
     }
 
-    void __move_assign_alloc(Tree& __t, std::true_type)
+    void moveAssignAlloc_(Tree& other, std::true_type)
     noexcept(std::is_nothrow_move_assignable<node_allocator>::value) {
-        nodeAlloc() = std::move(__t.nodeAlloc());
+        nodeAlloc() = std::move(other.nodeAlloc());
     }
-    void __move_assign_alloc(Tree&, std::false_type) noexcept {}
+    void moveAssignAlloc_(Tree&, std::false_type) noexcept {}
 
     template <
-        class _From
+        class FromT
       , class ValueT = _Tp
       , std::enable_if_t<__is_tree_value_type_v<ValueT>, int> = 0
     >
-    static void assignValue(__get_node_value_type_t<value_type>& lhs, _From&& rhs) {
-        using __key_type = std::remove_const_t<typename value_type::first_type>;
+    static void assignValue_(__get_node_value_type_t<value_type>& lhs, FromT&& rhs) {
+        using KeyType = std::remove_const_t<typename value_type::first_type>;
 
         // This is technically UB, since the object was constructed as `const`.
         // Clang doesn't optimize on this currently though.
-        const_cast<__key_type&>(lhs.first) = const_cast<__copy_cvref_t<_From, __key_type>&&>(rhs.first);
-        lhs.second                         = std::forward<_From>(rhs).second;
+        const_cast<KeyType&>(lhs.first) = const_cast<__copy_cvref_t<FromT, KeyType>&&>(rhs.first);
+        lhs.second                      = std::forward<FromT>(rhs).second;
     }
 
     template <
-        class _To
-      , class _From
+        class ToT
+      , class FromT
       , class ValueT = _Tp
       , std::enable_if_t<!__is_tree_value_type_v<ValueT>, int> = 0
     >
-    static void assignValue(_To& lhs, _From&& rhs) {
-        lhs = std::forward<_From>(rhs);
+    static void assignValue_(ToT& lhs, FromT&& rhs) {
+        lhs = std::forward<FromT>(rhs);
     }
 
     class TreeDeleter {
@@ -1903,39 +2101,44 @@ private:
     // copy the exact structure 1:1. Since this is for copy construction _only_ we know that we get a correct tree. If we
     // didn't get a correct tree, the invariants of Tree are broken and we have a much bigger problem than an improperly
     // balanced tree.
-    template <class _NodeConstructor>
-    node_pointer __construct_from_tree(node_pointer __src, _NodeConstructor __construct) {
-        if (!__src)
+    template <class NodeConstructorT>
+    node_pointer constructFromTree_(node_pointer src, NodeConstructorT construct) {
+        if (!src) {
             return nullptr;
+        }
 
-        node_holder new_node = __construct(__src->get_value());
+        node_holder new_node = construct(src->get_value());
 
-        std::unique_ptr<node, TreeDeleter> __left(
-            __construct_from_tree(static_cast<node_pointer>(__src->__left_), __construct), __node_alloc_);
-        node_pointer right = __construct_from_tree(static_cast<node_pointer>(__src->__right_), __construct);
+        std::unique_ptr<node, TreeDeleter> left{
+            constructFromTree_(static_cast<node_pointer>(src->__left_), construct),
+            __node_alloc_,
+        };
+        node_pointer right = constructFromTree_(static_cast<node_pointer>(src->__right_), construct);
 
-        node_pointer __new_node_ptr = new_node.release();
+        node_pointer new_node_ptr = new_node.release();
 
-        __new_node_ptr->__is_black_ = __src->__is_black_;
-        __new_node_ptr->__left_     = static_cast<node_base_pointer>(__left.release());
-        __new_node_ptr->__right_    = static_cast<node_base_pointer>(right);
-        if (__new_node_ptr->__left_)
-            __new_node_ptr->__left_->__parent_ = static_cast<end_node_pointer>(__new_node_ptr);
-        if (__new_node_ptr->__right_)
-            __new_node_ptr->__right_->__parent_ = static_cast<end_node_pointer>(__new_node_ptr);
-        return __new_node_ptr;
+        new_node_ptr->__is_black_ = src->__is_black_;
+        new_node_ptr->__left_     = static_cast<node_base_pointer>(left.release());
+        new_node_ptr->__right_    = static_cast<node_base_pointer>(right);
+        if (new_node_ptr->__left_) {
+            new_node_ptr->__left_->__parent_ = static_cast<end_node_pointer>(new_node_ptr);
+        }
+        if (new_node_ptr->__right_) {
+            new_node_ptr->__right_->__parent_ = static_cast<end_node_pointer>(new_node_ptr);
+        }
+        return new_node_ptr;
     }
 
-    node_pointer copy_construct_tree(node_pointer src) {
-        return __construct_from_tree(src, [this](const value_type& val) { return constructNode_(val); });
+    node_pointer copyConstructTree_(node_pointer src) {
+        return constructFromTree_(src, [this](const value_type& val) { return constructNode_(val); });
     }
 
     template <
         class ValueT = _Tp
       , std::enable_if_t<__is_tree_value_type_v<ValueT>, int> = 0
     >
-    node_pointer move_construct_tree(node_pointer src) {
-        return __construct_from_tree(src, [this](value_type& val) {
+    node_pointer moveConstructTree_(node_pointer src) {
+        return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(const_cast<key_type&&>(val.first), std::move(val.second));
         });
     }
@@ -1944,18 +2147,18 @@ private:
         class ValueT = _Tp
       , std::enable_if_t<!__is_tree_value_type_v<ValueT>, int> = 0
     >
-    node_pointer move_construct_tree(node_pointer src) {
-        return __construct_from_tree(src, [this](value_type& val) {
+    node_pointer moveConstructTree_(node_pointer src) {
+        return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(std::move(val));
         });
     }
 
-    template <class _Assignment, class _ConstructionAlg>
+    template <class AssignmentT, class ConstructionAlgT>
     // This copy assignment will always produce a correct red-black-tree assuming the incoming tree is correct, since our
     // own tree is a red-black-tree and the incoming tree is a red-black-tree. The invariants of a red-black-tree are
     // temporarily not met until all of the incoming red-black tree is copied.
     node_pointer assignFromTree(
-        node_pointer dest, node_pointer src, _Assignment assign, _ConstructionAlg construct_subtree) {
+        node_pointer dest, node_pointer src, AssignmentT assign, ConstructionAlgT construct_subtree) {
         if (!src) {
             destroy_(dest);
             return nullptr;
@@ -1968,12 +2171,10 @@ private:
         if (dest->__left_) {
             dest->__left_
                 = static_cast<node_base_pointer>(assignFromTree(
-                                                       static_cast<node_pointer>(dest->__left_),
-                                                       static_cast<node_pointer>(src->__left_),
-                                                       assign,
-                                                       construct_subtree)
-                  );
-
+                                                 static_cast<node_pointer>(dest->__left_),
+                                                 static_cast<node_pointer>(src->__left_),
+                                                 assign,
+                                                 construct_subtree));
             // Otherwise, we must create new nodes; copy-construct from here on
         } else if (src->__left_) {
             auto __new_left       = construct_subtree(static_cast<node_pointer>(src->__left_));
@@ -1985,11 +2186,10 @@ private:
         if (dest->__right_) {
             dest->__right_
                 = static_cast<node_base_pointer>(assignFromTree(
-                                                       static_cast<node_pointer>(dest->__right_),
-                                                       static_cast<node_pointer>(src->__right_),
-                                                       assign,
-                                                       construct_subtree)
-                  );
+                                                 static_cast<node_pointer>(dest->__right_),
+                                                 static_cast<node_pointer>(src->__right_),
+                                                 assign,
+                                                 construct_subtree));
         } else if (src->__right_) {
             auto new_right       = construct_subtree(static_cast<node_pointer>(src->__right_));
             dest->__right_       = static_cast<node_base_pointer>(new_right);
@@ -2003,8 +2203,8 @@ private:
         return assignFromTree(
             dest,
             src,
-            [](value_type& lhs, const value_type& rhs) { assignValue(lhs, rhs); },
-            [this](node_pointer node_ptr) { return copy_construct_tree(node_ptr); }
+            [](value_type& lhs, const value_type& rhs) { assignValue_(lhs, rhs); },
+            [this](node_pointer node_ptr) { return copyConstructTree_(node_ptr); }
         );
     }
 
@@ -2012,8 +2212,8 @@ private:
         return assignFromTree(
             dest,
             src,
-            [](value_type& lhs, value_type& rhs) { assignValue(lhs, std::move(rhs)); },
-            [this](node_pointer node_ptr) { return move_construct_tree(node_ptr); }
+            [](value_type& lhs, value_type& rhs) { assignValue_(lhs, std::move(rhs)); },
+            [this](node_pointer node_ptr) { return moveConstructTree_(node_ptr); }
         );
     }
 
@@ -2028,228 +2228,22 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<Tree<_Tp, 
 
     template <class _Tree, class FuncT, class ProjT>
     static auto operator()(_Tree&& __range, FuncT __func, ProjT __proj) {
-        if (__range.size() != 0)
+        if (__range.size() != 0) {
             mstd::tree_iterate_from_root<__copy_cvref_t<_Tree, typename std::remove_cvref_t<_Tree>::value_type>>(
-                [](node_pointer) { return false; }, __range.root(), __func, __proj);
-            return std::make_pair(__range.end(), std::move(__func));
+                [](node_pointer) { return false; },
+                __range.root(),
+                __func,
+                __proj
+            );
+        }
+        return std::make_pair(__range.end(), std::move(__func));
     }
 };
 
 template <class _Tp, class _Compare, class _Allocator>
-Tree<_Tp, _Compare, _Allocator>& Tree<_Tp, _Compare, _Allocator>::operator=(const Tree& other) {
-    if (this == std::addressof(other))
-        return *this;
-
-    value_comp() = other.value_comp();
-    copyAssignAlloc(other);
-
-    if (__size_ != 0) {
-        *root_ptr() = static_cast<node_base_pointer>(copyAssignTree(root(), other.root()));
-    } else {
-        *root_ptr() = static_cast<node_base_pointer>(copy_construct_tree(other.root()));
-        if (root()) {
-            root()->__parent_ = endNode();
-        }
-    }
-    __begin_node_
-        = endNode()->__left_
-        ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_))
-        : endNode();
-    __size_ = other.size();
-
-    return *this;
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-Tree<_Tp, _Compare, _Allocator>::Tree(const Tree& other)
-: __begin_node_(endNode())
-, __node_alloc_(node_traits::select_on_container_copy_construction(other.nodeAlloc()))
-, __size_(0)
-, __value_comp_(other.value_comp()) {
-    if (other.size() == 0)
-        return;
-
-    *root_ptr()       = static_cast<node_base_pointer>(copy_construct_tree(other.root()));
-    root()->__parent_ = endNode();
-    __begin_node_       = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
-    __size_             = other.size();
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-Tree<_Tp, _Compare, _Allocator>::Tree(Tree&& other) noexcept(
-    std::is_nothrow_move_constructible<node_allocator>::value
- && std::is_nothrow_move_constructible<value_compare>::value
-)
-: __begin_node_(std::move(other.__begin_node_))
-, __end_node_(std::move(other.__end_node_))
-, __node_alloc_(std::move(other.__node_alloc_))
-, __size_(other.__size_)
-, __value_comp_(std::move(other.__value_comp_)) {
-    if (__size_ == 0) {
-        __begin_node_ = endNode();
-    } else {
-        endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
-        other.__begin_node_                = other.endNode();
-        other.endNode()->__left_        = nullptr;
-        other.__size_                      = 0;
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-Tree<_Tp, _Compare, _Allocator>::Tree(Tree&& other, const allocator_type& alloc)
-: __begin_node_(endNode())
-, __node_alloc_(node_allocator(alloc))
-, __size_(0)
-, __value_comp_(std::move(other.value_comp())) {
-    if (other.size() == 0)
-        return;
-    if (alloc == other.alloc()) {
-        __begin_node_                    = other.__begin_node_;
-        endNode()->__left_            = other.endNode()->__left_;
-        endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
-        __size_                          = other.__size_;
-        other.__begin_node_                = other.endNode();
-        other.endNode()->__left_        = nullptr;
-        other.__size_                      = 0;
-    } else {
-        *root_ptr()     = static_cast<node_base_pointer>(move_construct_tree(other.root()));
-        root()->__parent_ = endNode();
-        __begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
-        __size_           = other.size();
-        other.clear(); // Ensure that other is in a valid state after moving out the keys
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-void Tree<_Tp, _Compare, _Allocator>::moveAssign(Tree& other, std::true_type)
-noexcept(
-    std::is_nothrow_move_assignable<value_compare>::value
- && std::is_nothrow_move_assignable<node_allocator>::value
-) {
-    destroy_(static_cast<node_pointer>(endNode()->__left_));
-    __begin_node_ = other.__begin_node_;
-    __end_node_   = other.__end_node_;
-    __move_assign_alloc(other);
-    __size_       = other.__size_;
-    __value_comp_ = std::move(other.__value_comp_);
-    if (__size_ == 0) {
-        __begin_node_ = endNode();
-    } else {
-        endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
-        other.__begin_node_              = other.endNode();
-        other.endNode()->__left_      = nullptr;
-        other.__size_                    = 0;
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-void Tree<_Tp, _Compare, _Allocator>::moveAssign(Tree& other, std::false_type) {
-    if (nodeAlloc() == other.nodeAlloc()) {
-        moveAssign(other, std::true_type());
-    } else {
-        value_comp() = std::move(other.value_comp());
-        if (__size_ != 0) {
-            *root_ptr() = static_cast<node_base_pointer>(moveAssignTree(root(), other.root()));
-        } else {
-            *root_ptr() = static_cast<node_base_pointer>(move_construct_tree(other.root()));
-            if (root())
-                root()->__parent_ = endNode();
-        }
-        __begin_node_
-            = endNode()->__left_
-            ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_))
-            : endNode();
-        __size_ = other.size();
-        other.clear(); // Ensure that other is in a valid state after moving out the keys
-    }
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-void Tree<_Tp, _Compare, _Allocator>::swap(Tree& other)
-noexcept(std::is_nothrow_swappable_v<value_compare>)
-{
-    using std::swap;
-    swap(__begin_node_, other.__begin_node_);
-    swap(__end_node_, other.__end_node_);
-    mstd::__swap_allocator(nodeAlloc(), other.nodeAlloc());
-    swap(__size_, other.__size_);
-    swap(__value_comp_, other.__value_comp_);
-    if (__size_ == 0) {
-        __begin_node_ = endNode();
-    } else {
-        endNode()->__left_->__parent_ = endNode();
-    } if (other.__size_ == 0) {
-        other.__begin_node_ = other.endNode();
-    } else {
-        other.endNode()->__left_->__parent_ = other.endNode();
-    }
-}
-
-// Find lower_bound place to insert
-// Set parent to parent of null leaf
-// Return reference to null leaf
-template <class _Tp, class _Compare, class _Allocator>
-typename Tree<_Tp, _Compare, _Allocator>::node_base_pointer&
-Tree<_Tp, _Compare, _Allocator>::__find_leaf_low(end_node_pointer& parent, const value_type& __v) {
-    node_pointer __nd = root();
-    if (__nd != nullptr) {
-        while (true) {
-            if (value_comp()(__nd->get_value(), __v)) {
-                if (__nd->__right_ != nullptr) {
-                    __nd = static_cast<node_pointer>(__nd->__right_);
-                } else {
-                    parent = static_cast<end_node_pointer>(__nd);
-                    return __nd->__right_;
-                }
-            } else {
-                if (__nd->__left_ != nullptr) {
-                    __nd = static_cast<node_pointer>(__nd->__left_);
-                } else {
-                    parent = static_cast<end_node_pointer>(__nd);
-                    return parent->__left_;
-                }
-            }
-        }
-    }
-    parent = endNode();
-    return parent->__left_;
-}
-
-// Find leaf place to insert closest to hint
-// First check prior to hint.
-// Next check after hint.
-// Next do O(log N) search.
-// Set parent to parent of null leaf
-// Return reference to null leaf
-template <class _Tp, class _Compare, class _Allocator>
-auto Tree<_Tp, _Compare, _Allocator>::__find_leaf(
-    const_iterator hint, end_node_pointer& parent, const value_type& __v)
-  -> node_base_pointer& {
-    if (hint == end() || !value_comp()(*hint, __v)) // check before
-    {
-        // __v <= *hint
-        const_iterator __prior = hint;
-        if (__prior == begin() || !value_comp()(__v, *--__prior)) {
-            // *prev(hint) <= __v <= *hint
-            if (hint.__ptr_->__left_ == nullptr) {
-                parent = static_cast<end_node_pointer>(hint.__ptr_);
-                return parent->__left_;
-            } else {
-                parent = static_cast<end_node_pointer>(__prior.__ptr_);
-                return static_cast<node_base_pointer>(__prior.__ptr_)->__right_;
-            }
-        }
-        // __v < *prev(hint)
-        return findLeafHigh_(parent, __v);
-    }
-    // else __v > *hint
-    return __find_leaf_low(parent, __v);
-}
-
-template <class _Tp, class _Compare, class _Allocator>
-inline void swap(Tree<_Tp, _Compare, _Allocator>& __x, Tree<_Tp, _Compare, _Allocator>& __y)
-noexcept(noexcept(__x.swap(__y))) {
-    __x.swap(__y);
+inline void swap(Tree<_Tp, _Compare, _Allocator>& lhs, Tree<_Tp, _Compare, _Allocator>& rhs)
+noexcept(noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
 }
 
 } // namespace mstd
