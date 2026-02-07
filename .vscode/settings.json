@@ -6,6 +6,7 @@
         "CPRNG",
         "CVREF",
         "DESUGARS",
+        "gogagum",
         "insertable",
         "LFTS",
         "libcxx",

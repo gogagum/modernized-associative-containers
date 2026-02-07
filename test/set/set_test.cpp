@@ -641,7 +641,7 @@ TEST(SetOperations, Test7)
 
     mstd::set<int> s;
     I i = {};
-    s.find(i);
+    [[maybe_unused]] auto iter = s.find(i);
 }
 
 TEST(SetOperations, Test8)
