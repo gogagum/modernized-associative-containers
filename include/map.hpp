@@ -314,7 +314,7 @@ public:
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
 
-    class value_compare : public std::binary_function<value_type, value_type, bool> {
+    class value_compare {
         friend class map;
 
     protected:
@@ -1038,7 +1038,7 @@ public:
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
 
-    class value_compare : public std::binary_function<value_type, value_type, bool> {
+    class value_compare {
         friend class multimap;
 
     protected:
