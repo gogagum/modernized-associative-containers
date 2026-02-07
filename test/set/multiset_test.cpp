@@ -513,7 +513,7 @@ TEST(MultisetInsertTest, TestRvalStruct2)
 
     Set::iterator i2 = s.begin();
     ++i2;
-    EXPECT_EQ(i, s.begin());
     EXPECT_EQ(i, i2);
-    EXPECT_EQ((*(s.begin())).val == 2 && (*i2).val, 2);
+    EXPECT_EQ((*(s.begin())).val , 2);
+    EXPECT_EQ((*i2).val, 2);
 }
