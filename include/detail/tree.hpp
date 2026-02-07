@@ -1530,12 +1530,12 @@ public:
 
     template <class Self, class KeyT>
     SelfIterator<Self> lowerBoundUnique(this Self& self, const KeyT& key) {
-        return SelfIterator<Self>{self.template lowerUpperBoundUniqueImpl_<true>(key)}; // TODO(gogagum): is template needed?
+        return SelfIterator<Self>{self.template lowerUpperBoundUniqueImpl_<true>(key)};
     }
 
     template <class Self, class KeyT>
     SelfIterator<Self> upperBoundUnique(this Self& self, const KeyT& key) {
-        return SelfIterator<Self>(self.template lowerUpperBoundUniqueImpl_<false>(key)); // TODO(gogagum): is template needed?
+        return SelfIterator<Self>(self.template lowerUpperBoundUniqueImpl_<false>(key));
     }
 
 private:
