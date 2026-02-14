@@ -109,13 +109,6 @@ concept __specifies_members = requires {
   requires __has_member_iterator_category<_Ip>;
 };
 
-template <class _Tp>
-concept __cpp17_iterator_missing_members = !__specifies_members<_Tp> && __iterator_traits_detail::__cpp17_iterator<_Tp>;
-
-template <class _Tp>
-concept __cpp17_input_iterator_missing_members =
-    __cpp17_iterator_missing_members<_Tp> && __iterator_traits_detail::__cpp17_input_iterator<_Tp>;
-
 // Otherwise, `pointer` names `void`.
 template <class>
 struct __iterator_traits_member_pointer_or_arrow_or_void {
@@ -221,29 +214,6 @@ struct __iterator_traits<_Ip> {
   using difference_type   = typename _Ip::difference_type;
   using pointer           = __detected_or_t<void, __pointer_member, _Ip>;
   using reference         = typename _Ip::reference;
-};
-
-// [iterator.traits]/3.2
-// Otherwise, if `I` satisfies the exposition-only concept `cpp17-input-iterator`,
-// `iterator-traits<I>` has the following publicly accessible members:
-template <__cpp17_input_iterator_missing_members _Ip>
-struct __iterator_traits<_Ip> {
-  using iterator_category = typename __iterator_traits_iterator_category<_Ip>::type;
-  using value_type        = typename std::indirectly_readable_traits<_Ip>::value_type;
-  using difference_type   = typename std::incrementable_traits<_Ip>::difference_type;
-  using pointer           = typename __iterator_traits_member_pointer_or_arrow_or_void<_Ip>::type;
-  using reference         = typename __iterator_traits_member_reference<_Ip>::type;
-};
-
-// Otherwise, if `I` satisfies the exposition-only concept `cpp17-iterator`, then
-// `iterator_traits<I>` has the following publicly accessible members:
-template <__cpp17_iterator_missing_members _Ip>
-struct __iterator_traits<_Ip> {
-  using iterator_category = output_iterator_tag;
-  using value_type        = void;
-  using difference_type   = typename __iterator_traits_difference_type<_Ip>::type;
-  using pointer           = void;
-  using reference         = void;
 };
 
 template <class _Ip>

@@ -957,7 +957,7 @@ public:
 
 private:
     typedef Tree<value_type, value_compare, allocator_type> __base;
-    typedef allocator_traits<allocator_type> __alloc_traits;
+    typedef std::allocator_traits<allocator_type> __alloc_traits;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
 
