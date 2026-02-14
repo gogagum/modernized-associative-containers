@@ -230,7 +230,7 @@ class MapConstIterator {
     TreeIteratorT i_;
 
 public:
-    using iterator_category = bidirectional_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using value_type        = typename TreeIteratorT::value_type;
     using difference_type   = typename TreeIteratorT::difference_type;
     using reference         = const value_type&;
