@@ -9,6 +9,8 @@
 #ifndef MSTD_TYPE_TRAITS_MAKE_TRANSPARENT_HPP
 #define MSTD_TYPE_TRAITS_MAKE_TRANSPARENT_HPP
 
+#include <type_traits>
+
 #include <detail/config.hpp>
 
 namespace mstd {
@@ -25,14 +27,14 @@ struct __make_transparent {
 template <class CompT>
 using __make_transparent_t = typename __make_transparent<CompT>::type;
 
-template <class CompT, std::enable_if_t<std::is_same<CompT, __make_transparent_t<CompT> >::value, int> = 0>
+template <class CompT> requires std::same_as<CompT, __make_transparent_t<CompT>>
 CompT& __as_transparent(CompT& __comp) {
   return __comp;
 }
 
-template <class CompT, std::enable_if_t<!std::is_same<CompT, __make_transparent_t<CompT> >::value, int> = 0>
+template <class CompT> requires (!std::same_as<CompT, __make_transparent_t<CompT>>)
 __make_transparent_t<CompT> __as_transparent(CompT&) {
-  static_assert(std::is_empty<CompT>::value);
+  static_assert(std::is_empty_v<CompT>);
   return __make_transparent_t<CompT>();
 }
 
