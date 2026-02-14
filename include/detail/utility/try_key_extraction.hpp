@@ -29,84 +29,79 @@ inline const bool __is_tuple_v = false;
 template <class... _Tp>
 inline const bool __is_tuple_v<std::tuple<_Tp...>> = true;
 
-template <class _KeyT, class _Ret, class _WithKey, class _WithoutKey, class... _Args>
-_Ret
-__try_key_extraction_impl(__priority_tag<0>, _WithKey, _WithoutKey __without_key, _Args&&... __args) {
-  return __without_key(std::forward<_Args>(__args)...);
+template <class KeyT, class Ret, class WithKeyT, class WithoutKeyT, class... ArgsT>
+Ret __try_key_extraction_impl(__priority_tag<0>, WithKeyT, WithoutKeyT without_key, ArgsT&&... args) {
+  return without_key(std::forward<ArgsT>(args)...);
 }
 
-template <class _KeyT,
-          class _Ret,
-          class _WithKey,
-          class _WithoutKey,
-          class _Arg,
-          std::enable_if_t<std::is_same<_KeyT, __remove_const_ref_t<_Arg> >::value, int> = 0>
-_Ret
-__try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg&& __arg) {
-  return __with_key(__arg, std::forward<_Arg>(__arg));
+template <class KeyT,
+          class Ret,
+          class WithKeyT,
+          class WithoutKeyT,
+          class ArgT>
+requires std::same_as<KeyT, __remove_const_ref_t<ArgT>>
+Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
+  return with_key(arg, std::forward<ArgT>(arg));
 }
 
-template <class _KeyT,
-          class _Ret,
-          class _WithKey,
-          class _WithoutKey,
-          class _Arg,
-          std::enable_if_t<__is_pair_v<__remove_const_ref_t<_Arg> > &&
-                            std::is_same<std::remove_const_t<typename __remove_const_ref_t<_Arg>::first_type>, _KeyT>::value,
-                        int> = 0>
-_Ret
-__try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg&& __arg) {
-  return __with_key(__arg.first, std::forward<_Arg>(__arg));
+template <class KeyT,
+          class Ret,
+          class WithKeyT,
+          class WithoutKeyT,
+          class ArgT>
+requires __is_pair_v<__remove_const_ref_t<ArgT> >
+         && std::same_as<std::remove_const_t<typename __remove_const_ref_t<ArgT>::first_type>, KeyT>
+Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
+  return with_key(arg.first, std::forward<ArgT>(arg));
 }
 
-template <class _KeyT,
-          class _Ret,
-          class _WithKey,
-          class _WithoutKey,
-          class _Arg1,
-          class _Arg2,
-          std::enable_if_t<std::is_same<_KeyT, __remove_const_ref_t<_Arg1> >::value, int> = 0>
-_Ret
-__try_key_extraction_impl(__priority_tag<1>, _WithKey __with_key, _WithoutKey, _Arg1&& __arg1, _Arg2&& __arg2) {
-  return __with_key(__arg1, std::forward<_Arg1>(__arg1), std::forward<_Arg2>(__arg2));
+template <class KeyT,
+          class Ret,
+          class WithKeyT,
+          class WithoutKeyT,
+          class ArgT1,
+          class ArgT2>
+requires std::same_as<KeyT, __remove_const_ref_t<ArgT1> >
+Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT1&& arg1, ArgT2&& arg2) {
+  return with_key(arg1, std::forward<ArgT1>(arg1), std::forward<ArgT2>(arg2));
 }
 
-template <class _KeyT,
-          class _Ret,
-          class _WithKey,
-          class _WithoutKey,
-          class _PiecewiseConstruct,
-          class _Tuple1,
-          class _Tuple2,
-          std::enable_if_t<std::is_same<__remove_const_ref_t<_PiecewiseConstruct>, std::piecewise_construct_t>::value &&
-                            __is_tuple_v<_Tuple1> && std::tuple_size<_Tuple1>::value == 1 &&
-                            std::is_same<__remove_const_ref_t<typename std::tuple_element<0, _Tuple1>::type>, _KeyT>::value,
-                        int> = 0>
-_Ret __try_key_extraction_impl(
+template <class KeyT,
+          class Ret,
+          class WithKeyT,
+          class WithoutKeyT,
+          class PiecewiseConstructT,
+          class TupleT1,
+          class TupleT2>
+requires std::same_as<__remove_const_ref_t<PiecewiseConstructT>, std::piecewise_construct_t>
+          && __is_tuple_v<TupleT1>
+          && (std::tuple_size<TupleT1>::value == 1)
+          && std::same_as<__remove_const_ref_t<typename std::tuple_element<0, TupleT1>::type>, KeyT>
+Ret __try_key_extraction_impl(
     __priority_tag<1>,
-    _WithKey __with_key,
-    _WithoutKey,
-    _PiecewiseConstruct&& __pc,
-    _Tuple1&& __tuple1,
-    _Tuple2&& __tuple2) {
-  return __with_key(
-      std::get<0>(__tuple1),
-      std::forward<_PiecewiseConstruct>(__pc),
-      std::forward<_Tuple1>(__tuple1),
-      std::forward<_Tuple2>(__tuple2));
+    WithKeyT with_key,
+    WithoutKeyT,
+    PiecewiseConstructT&& pc,
+    TupleT1&& tuple1,
+    TupleT2&& tuple2) {
+  return with_key(
+      std::get<0>(tuple1),
+      std::forward<PiecewiseConstructT>(pc),
+      std::forward<TupleT1>(tuple1),
+      std::forward<TupleT2>(tuple2));
 }
 
-// This function tries extracting the given _KeyT from _Args...
-// If it succeeds to extract the key, it calls the `__with_key` function with the extracted key and all of the
-// arguments. Otherwise it calls the `__without_key` function with all of the arguments.
+// This function tries extracting the given KeyT from ArgsT...
+// If it succeeds to extract the key, it calls the `with_key` function with the extracted key and all of the
+// arguments. Otherwise it calls the `without_key` function with all of the arguments.
 //
-// Both `__with_key` and `__without_key` must take all arguments by reference.
-template <class _KeyT, class _WithKey, class _WithoutKey, class... _Args>
-decltype(std::declval<_WithoutKey>()(std::declval<_Args>()...))
-__try_key_extraction(_WithKey __with_key, _WithoutKey __without_key, _Args&&... __args) {
-  using _Ret = decltype(__without_key(std::forward<_Args>(__args)...));
-  return mstd::__try_key_extraction_impl<_KeyT, _Ret>(
-      __priority_tag<1>(), __with_key, __without_key, std::forward<_Args>(__args)...);
+// Both `with_key` and `without_key` must take all arguments by reference.
+template <class KeyT, class WithKeyT, class WithoutKeyT, class... ArgsT>
+decltype(std::declval<WithoutKeyT>()(std::declval<ArgsT>()...))
+__try_key_extraction(WithKeyT with_key, WithoutKeyT without_key, ArgsT&&... args) {
+  using Ret = decltype(without_key(std::forward<ArgsT>(args)...));
+  return mstd::__try_key_extraction_impl<KeyT, Ret>(
+      __priority_tag<1>(), with_key, without_key, std::forward<ArgsT>(args)...);
 }
 
 } // namespace mstd

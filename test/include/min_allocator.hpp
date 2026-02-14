@@ -195,7 +195,7 @@ class min_pointer<void, ID> {
 public:
   min_pointer() noexcept = default;
   constexpr min_pointer(std::nullptr_t) noexcept : ptr_(nullptr) {}
-  template <class T, class = typename std::enable_if< !std::is_const<T>::value >::type >
+  template <class T> requires (!std::is_const_v<T>)
   constexpr min_pointer(min_pointer<T, ID> p) noexcept : ptr_(p.ptr_) {}
 
   constexpr explicit operator bool() const { return ptr_ != nullptr; }

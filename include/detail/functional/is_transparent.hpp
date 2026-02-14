@@ -27,7 +27,7 @@ inline const bool __is_transparent_v<_Tp, KeyT, std::void_t<typename _Tp::is_tra
 //
 // This is different from `__is_transparent_v`, which is only a property of the comparator and doesn't provide
 // additional semantic guarantees.
-template <class CompT, class _KeyT, class _Arg, class = void>
+template <class CompT, class _KeyT, class ArgT, class = void>
 inline const bool __is_transparently_comparable_v = false;
 
 } // namespace mstd
