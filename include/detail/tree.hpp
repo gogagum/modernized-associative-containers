@@ -1164,7 +1164,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> emplaceUnique(ArgsT&&... args) {
-        return mstd::__try_key_extraction<key_type>(
+        return mstd::try_key_extraction<key_type>(
             [this](const key_type& key, ArgsT&&... args2) {
                 auto [parent, child] = find_equal(key);
                 auto ret             = static_cast<node_pointer>(child);
@@ -1194,7 +1194,7 @@ public:
 
     template <class... ArgsT>
     std::pair<iterator, bool> emplaceHintUnique(const_iterator pos, ArgsT&&... args) {
-        return mstd::__try_key_extraction<key_type>(
+        return mstd::try_key_extraction<key_type>(
             [this, pos](const key_type& key, ArgsT&&... args2) {
                 node_base_pointer dummy;
                 auto [parent, child] = find_equal(pos, dummy, key);
@@ -1279,7 +1279,7 @@ public:
         using Reference = decltype(*begin);
 
         for (; begin != end; ++begin) {
-            mstd::__try_key_extraction<key_type>(
+            mstd::try_key_extraction<key_type>(
                 [this, &max_node](const key_type& key, Reference&& val) {
                     if (value_comp()(max_node->get_value(), key)) { // key > max_node
                         auto holder = constructNode_(std::forward<Reference>(val));
