@@ -113,7 +113,7 @@ noexcept(noexcept(x.swap(y))) {
 template <class AllocatorT>
 class MapNodeDestructor {
     using AllocatorType_ = AllocatorT;
-    using AllocTraits_ = allocator_traits<AllocatorType_>;
+    using AllocTraits_   = std::allocator_traits<AllocatorType_>;
 
 public:
     typedef typename AllocTraits_::pointer pointer;
@@ -332,7 +332,7 @@ private:
     using ValueType_    = ValueType<key_type, mapped_type>;
     using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
     using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
-    using AllocTraits_ = allocator_traits<allocator_type>;
+    using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
 
@@ -1056,7 +1056,7 @@ private:
     using ValueType_    = ValueType<key_type, mapped_type>;
     using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
     using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
-    using AllocTraits_  = allocator_traits<allocator_type>;
+    using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
 
