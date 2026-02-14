@@ -53,18 +53,15 @@ decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, W
   return with_key(arg1, std::forward<ArgT1>(arg1), std::forward<ArgT2>(arg2));
 }
 
-template <class KeyT, class WithKeyT, class WithoutKeyT, class PiecewiseConstructT, class TupleT1, class TupleT2>
+template <class KeyT, class WithKeyT, class WithoutKeyT, class PiecewiseConstructT, template <class> class TupleT1, class Tuple1Arg, class TupleT2>
 requires std::same_as<__remove_const_ref_t<PiecewiseConstructT>, std::piecewise_construct_t>
-          && __is_tuple_v<TupleT1>
-          && (std::tuple_size<TupleT1>::value == 1)
-          && std::same_as<__remove_const_ref_t<typename std::tuple_element<0, TupleT1>::type>, KeyT>
-decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key,
-                                         WithoutKeyT, PiecewiseConstructT&& pc,
-                                         TupleT1&& tuple1, TupleT2&& tuple2) {
+          && __is_tuple_v<TupleT1<Tuple1Arg>>
+          && std::same_as<__remove_const_ref_t<Tuple1Arg>, KeyT>
+decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, PiecewiseConstructT&& pc, TupleT1<Tuple1Arg>&& tuple1, TupleT2&& tuple2) {
   return with_key(
       std::get<0>(tuple1),
       std::forward<PiecewiseConstructT>(pc),
-      std::forward<TupleT1>(tuple1),
+      std::forward<TupleT1<Tuple1Arg>>(tuple1),
       std::forward<TupleT2>(tuple2));
 }
 
