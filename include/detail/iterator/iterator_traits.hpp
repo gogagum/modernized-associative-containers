@@ -14,7 +14,6 @@
 #include <detail/config.hpp>
 #include <detail/type_traits/is_referencable.hpp>
 #include <detail/type_traits/disjunction.hpp>
-#include <detail/type_traits/is_primary_template.hpp>
 #include <detail/type_traits/nat.hpp>
 #include <detail/type_traits/detected_or.hpp>
 #include <cstddef>
@@ -354,18 +353,6 @@ using __iterator_difference_type = typename iterator_traits<_Iter>::difference_t
 
 template <class _Iter>
 using __iterator_reference = typename iterator_traits<_Iter>::reference;
-
-// [readable.traits]
-
-// Let `RI` be `remove_cvref_t<I>`. The type `iter_value_t<I>` denotes
-// `indirectly_readable_traits<RI>::value_type` if `iterator_traits<RI>` names a specialization
-// generated from the primary template, and `iterator_traits<RI>::value_type` otherwise.
-// This has to be in this file and not readable_traits.h to break the include cycle between the two.
-template <class _Ip>
-using iter_value_t =
-    typename std::conditional_t<__is_primary_template<std::iterator_traits<std::remove_cvref_t<_Ip> > >::value,
-                           std::indirectly_readable_traits<std::remove_cvref_t<_Ip> >,
-                           std::iterator_traits<std::remove_cvref_t<_Ip> > >::value_type;
 
 } // namespace mstd
 
