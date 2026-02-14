@@ -1494,9 +1494,9 @@ public:
         Comp comp(value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 root_node = static_cast<node_pointer>(root_node->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {
                 return 1;
@@ -1513,10 +1513,10 @@ public:
         Comp comp(value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 result = static_cast<end_node_pointer>(root_node);
                 root_node   = static_cast<node_pointer>(root_node->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {
                 return std::distance(
@@ -1547,10 +1547,10 @@ private:
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
 
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else if constexpr (lower_bound) {
                 return static_cast<end_node_pointer>(root_node);
@@ -1568,7 +1568,7 @@ private:
         auto comp = LazySynthThreeWayComparator<_Compare, KeyT, value_type>(value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
-            if (lower_bound ? (!comp_res.__greater()) : comp_res.__less()) {
+            if (lower_bound ? (!comp_res.greater()) : comp_res.less()) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->__left_);
             } else {
@@ -1597,10 +1597,10 @@ public:
         auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(self.value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {
                 return {
@@ -1626,10 +1626,10 @@ public:
         auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(self.value_comp());
         while (root_node != nullptr) {
             const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 root_node = static_cast<node_pointer>(root_node->__right_);
             } else {  // Equal
                 auto begin = self.template lowerUpperBoundMultiImpl_<true>(
@@ -1693,7 +1693,7 @@ public:
     
         while (true) {
             const auto comp_res = comp(key, node_ptr->get_value());
-            if (comp_res.__less()) {
+            if (comp_res.less()) {
                 if (node_ptr->__left_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
@@ -1702,7 +1702,7 @@ public:
                 }
                 node_base_ptr = std::addressof(node_ptr->__left_);
                 node_ptr      = static_cast<node_pointer>(node_ptr->__left_);
-            } else if (comp_res.__greater()) {
+            } else if (comp_res.greater()) {
                 if (node_ptr->__right_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),

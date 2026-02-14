@@ -12,7 +12,6 @@
 #include <detail/config.hpp>
 #include <type_traits>
 #include <detail/type_traits/desugars_to.hpp>
-#include <detail/type_traits/conjunction.hpp>
 #include <detail/utility/default_three_way_comparator.hpp>
 
 // This file implements a LazySynthThreeWayComparator, which tries to build an efficient three way comparison from
@@ -24,77 +23,68 @@
 
 namespace mstd {
 
-template <class _Comparator, class _LHS, class _RHS>
+template <class CompT, class LhsT, class RhsT>
 struct __lazy_compare_result {
-  const _Comparator& __comp_;
-  const _LHS& __lhs_;
-  const _RHS& __rhs_;
+  const CompT& __comp_;
+  const LhsT& __lhs_;
+  const RhsT& __rhs_;
 
-  __lazy_compare_result(const _Comparator& __comp,
-                        const _LHS& __lhs,
-                        const _RHS& __rhs)
-      : __comp_(__comp), __lhs_(__lhs), __rhs_(__rhs) {}
+  __lazy_compare_result(const CompT& comp, const LhsT& lhs, const RhsT& rhs)
+  : __comp_(comp)
+  , __lhs_(lhs)
+  , __rhs_(rhs)
+  {}
 
-  bool __less() const { return __comp_(__lhs_, __rhs_); }
-  bool __greater() const { return __comp_(__rhs_, __lhs_); }
+  bool less() const { return __comp_(__lhs_, __rhs_); }
+  bool greater() const { return __comp_(__rhs_, __lhs_); }
 };
 
-// This class provides three way comparison between _LHS and _RHS as efficiently as possible. This can be specialized if
+// This class provides three way comparison between LhsT and RhsT as efficiently as possible. This can be specialized if
 // a comparator only compares part of the object, potentially allowing an efficient three way comparison between the
 // subobjects. The specialization should use the LazySynthThreeWayComparator for the subobjects to achieve this.
-template <class _Comparator, class _LHS, class _RHS, class = void>
+template <class CompT, class LhsT, class RhsT>
 struct LazySynthThreeWayComparator {
-  const _Comparator& __comp_;
+  const CompT& comp_;
 
-  LazySynthThreeWayComparator(const _Comparator& __comp)
-      : __comp_(__comp) {}
+  LazySynthThreeWayComparator(const CompT& comp)
+  : comp_(comp) {}
 
-  __lazy_compare_result<_Comparator, _LHS, _RHS>
-  operator()(const _LHS& __lhs, const _RHS& __rhs) const {
-    return __lazy_compare_result<_Comparator, _LHS, _RHS>(__comp_, __lhs, __rhs);
+  __lazy_compare_result<CompT, LhsT, RhsT>
+  operator()(const LhsT& lhs, const RhsT& rhs) const {
+    return {comp_, lhs, rhs};
   }
 };
 
 struct __eager_compare_result {
   int __res_;
 
-  explicit __eager_compare_result(int __res) : __res_(__res) {}
+  explicit __eager_compare_result(int res) : __res_(res) {}
 
-  bool __less() const { return __res_ < 0; }
-  bool __greater() const { return __res_ > 0; }
+  bool less() const { return __res_ < 0; }
+  bool greater() const { return __res_ > 0; }
 };
 
-template <class _Comparator, class _LHS, class _RHS>
-struct LazySynthThreeWayComparator<_Comparator,
-                                         _LHS,
-                                         _RHS,
-                                         std::enable_if_t<_And<__desugars_to<__less_tag, _Comparator, _LHS, _RHS>,
-                                                            __has_default_three_way_comparator<_LHS, _RHS> >::value> > {
-  // This lifetimebound annotation is technically incorrect, but other specializations actually capture the lifetime of
-  // the comparator.
-  LazySynthThreeWayComparator(const _Comparator&) {}
+template <class CompT, class LhsT, class RhsT>
+requires (desugars_to_v<__less_tag, CompT, LhsT, RhsT> && __has_default_three_way_comparator<LhsT, RhsT>::value)
+struct LazySynthThreeWayComparator<CompT, LhsT, RhsT> {
+  LazySynthThreeWayComparator(const CompT&) {}
 
   // Same comment as above.
   static __eager_compare_result
-  operator()(const _LHS& __lhs, const _RHS& __rhs) {
-    return __eager_compare_result(__default_three_way_comparator<_LHS, _RHS>()(__lhs, __rhs));
+  operator()(const LhsT& lhs, const RhsT& rhs) {
+    return __eager_compare_result(__default_three_way_comparator<LhsT, RhsT>()(lhs, rhs));
   }
 };
 
-template <class _Comparator, class _LHS, class _RHS>
-struct LazySynthThreeWayComparator<_Comparator,
-                                         _LHS,
-                                         _RHS,
-                                         std::enable_if_t<_And<__desugars_to<__greater_tag, _Comparator, _LHS, _RHS>,
-                                                            __has_default_three_way_comparator<_LHS, _RHS> >::value> > {
-  // This lifetimebound annotation is technically incorrect, but other specializations actually capture the lifetime of
-  // the comparator.
-  LazySynthThreeWayComparator(const _Comparator&) {}
+template <class CompT, class LhsT, class RhsT>
+requires (desugars_to_v<__greater_tag, CompT, LhsT, RhsT> && __has_default_three_way_comparator<LhsT, RhsT>::value)
+struct LazySynthThreeWayComparator<CompT, LhsT, RhsT> {
+  LazySynthThreeWayComparator(const CompT&) {}
 
   // Same comment as above.
   static __eager_compare_result
-  operator()(const _LHS& __lhs, const _RHS& __rhs) {
-    return __eager_compare_result(-__default_three_way_comparator<_LHS, _RHS>()(__lhs, __rhs));
+  operator()(const LhsT& lhs, const RhsT& rhs) {
+    return __eager_compare_result(-__default_three_way_comparator<LhsT, RhsT>()(lhs, rhs));
   }
 };
 

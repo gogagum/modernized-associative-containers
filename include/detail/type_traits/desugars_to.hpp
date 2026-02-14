@@ -45,23 +45,35 @@ struct __totally_ordered_less_tag {};
 // This is useful to optimize some functions in cases where we know e.g. the
 // predicate being passed is actually going to call a builtin operator, or has
 // some specific semantics.
-template <class _CanonicalTag, class _Operation, class... _Args>
-inline const bool __desugars_to_v = false;
+template <class CanonicalTag, class OperationT, class... ArgsT>
+inline const bool desugars_to_v = false;
+
+template <class Tp>
+inline const bool desugars_to_v<__less_tag, std::less<>, Tp, Tp> = true;
+
+template <class Tp, class Up>
+inline const bool desugars_to_v<__less_tag, std::ranges::less, Tp, Up> = true;
+
+template <class Tp>
+inline const bool desugars_to_v<__greater_tag, std::greater<>, Tp, Tp> = true;
+
+template <class Tp, class Up>
+inline const bool desugars_to_v<__greater_tag, std::ranges::greater, Tp, Up> = true;
 
 // For the purpose of determining whether something desugars to something else,
 // we disregard const and ref qualifiers on the operation itself.
-template <class _CanonicalTag, class _Operation, class... _Args>
-inline const bool __desugars_to_v<_CanonicalTag, _Operation const, _Args...> =
-    __desugars_to_v<_CanonicalTag, _Operation, _Args...>;
-template <class _CanonicalTag, class _Operation, class... _Args>
-inline const bool __desugars_to_v<_CanonicalTag, _Operation&, _Args...> =
-    __desugars_to_v<_CanonicalTag, _Operation, _Args...>;
-template <class _CanonicalTag, class _Operation, class... _Args>
-inline const bool __desugars_to_v<_CanonicalTag, _Operation&&, _Args...> =
-    __desugars_to_v<_CanonicalTag, _Operation, _Args...>;
+template <class CanonicalTag, class OperationT, class... ArgsT>
+inline const bool desugars_to_v<CanonicalTag, OperationT const, ArgsT...> =
+    desugars_to_v<CanonicalTag, OperationT, ArgsT...>;
+template <class CanonicalTag, class OperationT, class... ArgsT>
+inline const bool desugars_to_v<CanonicalTag, OperationT&, ArgsT...> =
+    desugars_to_v<CanonicalTag, OperationT, ArgsT...>;
+template <class CanonicalTag, class OperationT, class... ArgsT>
+inline const bool desugars_to_v<CanonicalTag, OperationT&&, ArgsT...> =
+    desugars_to_v<CanonicalTag, OperationT, ArgsT...>;
 
-template <class _CanonicalTag, class _Operation, class... _Args>
-struct __desugars_to : std::integral_constant<bool, __desugars_to_v<_CanonicalTag, _Operation, _Args...> > {};
+template <class CanonicalTag, class OperationT, class... ArgsT>
+struct __desugars_to : std::integral_constant<bool, desugars_to_v<CanonicalTag, OperationT, ArgsT...> > {};
 
 } // namespace mstd
 

@@ -17,23 +17,23 @@ namespace mstd {
 // `less<>` from `less<T>`. This is useful in cases where conversions can be avoided (e.g. a string literal to a
 // std::string).
 
-template <class _Comparator>
+template <class CompT>
 struct __make_transparent {
-  using type = _Comparator;
+  using type = CompT;
 };
 
-template <class _Comparator>
-using __make_transparent_t = typename __make_transparent<_Comparator>::type;
+template <class CompT>
+using __make_transparent_t = typename __make_transparent<CompT>::type;
 
-template <class _Comparator, std::enable_if_t<std::is_same<_Comparator, __make_transparent_t<_Comparator> >::value, int> = 0>
-_Comparator& __as_transparent(_Comparator& __comp) {
+template <class CompT, std::enable_if_t<std::is_same<CompT, __make_transparent_t<CompT> >::value, int> = 0>
+CompT& __as_transparent(CompT& __comp) {
   return __comp;
 }
 
-template <class _Comparator, std::enable_if_t<!std::is_same<_Comparator, __make_transparent_t<_Comparator> >::value, int> = 0>
-__make_transparent_t<_Comparator> __as_transparent(_Comparator&) {
-  static_assert(std::is_empty<_Comparator>::value);
-  return __make_transparent_t<_Comparator>();
+template <class CompT, std::enable_if_t<!std::is_same<CompT, __make_transparent_t<CompT> >::value, int> = 0>
+__make_transparent_t<CompT> __as_transparent(CompT&) {
+  static_assert(std::is_empty<CompT>::value);
+  return __make_transparent_t<CompT>();
 }
 
 } // namespace mstd
