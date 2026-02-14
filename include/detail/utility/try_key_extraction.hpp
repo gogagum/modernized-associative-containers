@@ -29,61 +29,38 @@ inline const bool __is_tuple_v = false;
 template <class... _Tp>
 inline const bool __is_tuple_v<std::tuple<_Tp...>> = true;
 
-template <class KeyT, class Ret, class WithKeyT, class WithoutKeyT, class... ArgsT>
-Ret __try_key_extraction_impl(__priority_tag<0>, WithKeyT, WithoutKeyT without_key, ArgsT&&... args) {
+template <class KeyT, class WithKeyT, class WithoutKeyT, class... ArgsT>
+decltype(auto) __try_key_extraction_impl(__priority_tag<0>, WithKeyT, WithoutKeyT without_key, ArgsT&&... args) {
   return without_key(std::forward<ArgsT>(args)...);
 }
 
-template <class KeyT,
-          class Ret,
-          class WithKeyT,
-          class WithoutKeyT,
-          class ArgT>
+template <class KeyT, class WithKeyT, class WithoutKeyT, class ArgT>
 requires std::same_as<KeyT, __remove_const_ref_t<ArgT>>
-Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
+decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
   return with_key(arg, std::forward<ArgT>(arg));
 }
 
-template <class KeyT,
-          class Ret,
-          class WithKeyT,
-          class WithoutKeyT,
-          class ArgT>
+template <class KeyT, class WithKeyT, class WithoutKeyT, class ArgT>
 requires __is_pair_v<__remove_const_ref_t<ArgT> >
          && std::same_as<std::remove_const_t<typename __remove_const_ref_t<ArgT>::first_type>, KeyT>
-Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
+decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT&& arg) {
   return with_key(arg.first, std::forward<ArgT>(arg));
 }
 
-template <class KeyT,
-          class Ret,
-          class WithKeyT,
-          class WithoutKeyT,
-          class ArgT1,
-          class ArgT2>
+template <class KeyT, class WithKeyT, class WithoutKeyT, class ArgT1, class ArgT2>
 requires std::same_as<KeyT, __remove_const_ref_t<ArgT1> >
-Ret __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT1&& arg1, ArgT2&& arg2) {
+decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key, WithoutKeyT, ArgT1&& arg1, ArgT2&& arg2) {
   return with_key(arg1, std::forward<ArgT1>(arg1), std::forward<ArgT2>(arg2));
 }
 
-template <class KeyT,
-          class Ret,
-          class WithKeyT,
-          class WithoutKeyT,
-          class PiecewiseConstructT,
-          class TupleT1,
-          class TupleT2>
+template <class KeyT, class WithKeyT, class WithoutKeyT, class PiecewiseConstructT, class TupleT1, class TupleT2>
 requires std::same_as<__remove_const_ref_t<PiecewiseConstructT>, std::piecewise_construct_t>
           && __is_tuple_v<TupleT1>
           && (std::tuple_size<TupleT1>::value == 1)
           && std::same_as<__remove_const_ref_t<typename std::tuple_element<0, TupleT1>::type>, KeyT>
-Ret __try_key_extraction_impl(
-    __priority_tag<1>,
-    WithKeyT with_key,
-    WithoutKeyT,
-    PiecewiseConstructT&& pc,
-    TupleT1&& tuple1,
-    TupleT2&& tuple2) {
+decltype(auto) __try_key_extraction_impl(__priority_tag<1>, WithKeyT with_key,
+                                         WithoutKeyT, PiecewiseConstructT&& pc,
+                                         TupleT1&& tuple1, TupleT2&& tuple2) {
   return with_key(
       std::get<0>(tuple1),
       std::forward<PiecewiseConstructT>(pc),
@@ -97,11 +74,8 @@ Ret __try_key_extraction_impl(
 //
 // Both `with_key` and `without_key` must take all arguments by reference.
 template <class KeyT, class WithKeyT, class WithoutKeyT, class... ArgsT>
-decltype(std::declval<WithoutKeyT>()(std::declval<ArgsT>()...))
-__try_key_extraction(WithKeyT with_key, WithoutKeyT without_key, ArgsT&&... args) {
-  using Ret = decltype(without_key(std::forward<ArgsT>(args)...));
-  return mstd::__try_key_extraction_impl<KeyT, Ret>(
-      __priority_tag<1>(), with_key, without_key, std::forward<ArgsT>(args)...);
+decltype(auto) __try_key_extraction(WithKeyT with_key, WithoutKeyT without_key, ArgsT&&... args) {
+  return mstd::__try_key_extraction_impl<KeyT>(__priority_tag<1>(), with_key, without_key, std::forward<ArgsT>(args)...);
 }
 
 } // namespace mstd
