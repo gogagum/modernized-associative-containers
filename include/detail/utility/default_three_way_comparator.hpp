@@ -14,19 +14,18 @@
 
 namespace mstd {
 
-// This struct can be specialized to provide a three way comparator between _LHS and _RHS.
+// This struct can be specialized to provide a three way comparator between LhsT and RhsT.
 // The return value should be
 // - less than zero if (lhs_val < rhs_val)
 // - greater than zero if (rhs_val < lhs_val)
 // - zero otherwise
-template <class _LHS, class _RHS, class = void>
+template <class LhsT, class RhsT>
 struct __default_three_way_comparator;
 
-template <class _LHS, class _RHS>
-struct __default_three_way_comparator<_LHS,
-                                      _RHS,
-                                      std::enable_if_t<std::is_arithmetic<_LHS>::value && std::is_arithmetic<_RHS>::value> > {
-  static int operator()(_LHS __lhs, _RHS __rhs) {
+template <class LhsT, class RhsT>
+requires (std::is_arithmetic<LhsT>::value && std::is_arithmetic<RhsT>::value)
+struct __default_three_way_comparator<LhsT, RhsT> {
+  static int operator()(LhsT __lhs, RhsT __rhs) {
     if (__lhs < __rhs)
       return -1;
     if (__lhs > __rhs)
@@ -36,28 +35,28 @@ struct __default_three_way_comparator<_LHS,
 };
 
 #if __has_builtin(__builtin_lt_synthesizes_from_spaceship)
-template <class _LHS, class _RHS>
-struct __default_three_way_comparator<
-    _LHS,
-    _RHS,
-    __enable_if_t<!(is_arithmetic<_LHS>::value && is_arithmetic<_RHS>::value) &&
-                  __builtin_lt_synthesizes_from_spaceship(const _LHS&, const _RHS&)>> {
-  static int operator()(const _LHS& __lhs, const _RHS& __rhs) {
-    auto __res = __lhs <=> __rhs;
-    if (__res < 0)
+template <class LhsT, class RhsT>
+requires (
+  !(is_arithmetic<LhsT>::value && is_arithmetic<RhsT>::value)
+  && __builtin_lt_synthesizes_from_spaceship(const LhsT&, const _RHS&)
+)
+struct __default_three_way_comparator<LhsT, RhsT> {
+  static int operator()(const LhsT& lhs, const RhsT& rhs) {
+    auto res = lhs <=> rhs;
+    if (res < 0)
       return -1;
-    if (__res > 0)
+    if (res > 0)
       return 1;
     return 0;
   }
 };
 #endif
 
-template <class _LHS, class _RHS, bool = true>
+template <class LhsT, class RhsT, bool = true>
 struct __has_default_three_way_comparator : std::false_type {};
 
-template <class _LHS, class _RHS>
-struct __has_default_three_way_comparator<_LHS, _RHS, sizeof(__default_three_way_comparator<_LHS, _RHS>) >= 0>
+template <class LhsT, class RhsT>
+struct __has_default_three_way_comparator<LhsT, RhsT, sizeof(__default_three_way_comparator<LhsT, RhsT>) >= 0>
     : std::true_type {};
 
 } // namespace mstd

@@ -19,7 +19,6 @@
 
 #include "detail/type_traits/nat.hpp"
 #include "detail/type_traits/detected_or.hpp"
-#include "detail/type_traits/conjunction.hpp"
 
 namespace mstd {
 
