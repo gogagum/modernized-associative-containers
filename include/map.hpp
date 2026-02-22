@@ -27,7 +27,6 @@
 #include <detail/node_handle.hpp>
 #include <ranges>
 #include <detail/tree.hpp>
-#include <detail/type_traits/container_traits.hpp>
 #include <detail/type_traits/is_allocator.hpp>
 #include <utility>
 #include <detail/utility/lazy_synth_three_way_comparator.hpp>
@@ -945,16 +944,6 @@ erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-struct __container_traits<map<KeyT, ValueT, CompareT, AllocatorT> > {
-    // http://eel.is/c++draft/associative.reqmts.except#2
-    // For associative containers, if an exception is thrown by any operation from within
-    // an insert or emplace function inserting a single element, the insertion has no effect.
-    static constexpr const bool __emplacement_has_strong_exception_safety_guarantee = true;
-
-    static constexpr const bool __reservable = false;
-};
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 class multimap {
 public:
     // types:
@@ -1475,15 +1464,6 @@ inline typename multimap<KeyT, ValueT, CompareT, AllocatorT>::size_type
 erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
     return mstd::_MSTD_erase_if_container(__c, pred);
 }
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-struct __container_traits<multimap<KeyT, ValueT, CompareT, AllocatorT> > {
-    // http://eel.is/c++draft/associative.reqmts.except#2
-    // For associative containers, if an exception is thrown by any operation from within
-    // an insert or emplace function inserting a single element, the insertion has no effect.
-    static constexpr const bool __emplacement_has_strong_exception_safety_guarantee = true;
-    static constexpr const bool __reservable = false;
-};
 
 } // namespace mstd
 

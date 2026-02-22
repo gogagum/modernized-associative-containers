@@ -26,7 +26,6 @@
 #include <type_traits>
 #include <detail/iterator/erase_if_container.hpp>
 #include <detail/type_traits/is_allocator.hpp>
-#include <detail/type_traits/container_traits.hpp>
 #include <detail/ranges/container_compatible_range.hpp>
 #include <memory_resource>
 #include <utility>
@@ -539,16 +538,6 @@ erase_if(set<KeyT, CompareT, AllocatorT>& __c, _Predicate __pred) {
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
-struct __container_traits<set<KeyT, CompareT, AllocatorT> > {
-    // http://eel.is/c++draft/associative.reqmts.except#2
-    // For associative containers, if an exception is thrown by any operation from within
-    // an insert or emplace function inserting a single element, the insertion has no effect.
-    static constexpr bool __emplacement_has_strong_exception_safety_guarantee = true;
-
-    static constexpr bool __reservable = false;
-};
-
-template <class KeyT, class CompareT, class AllocatorT>
 class multiset {
 public:
     // types:
@@ -1012,16 +1001,6 @@ inline typename multiset<KeyT, CompareT, AllocatorT>::size_type
 erase_if(multiset<KeyT, CompareT, AllocatorT>& __c, _Predicate __pred) {
     return mstd::_MSTD_erase_if_container(__c, __pred);
 }
-
-template <class KeyT, class CompareT, class AllocatorT>
-struct __container_traits<multiset<KeyT, CompareT, AllocatorT> > {
-    // http://eel.is/c++draft/associative.reqmts.except#2
-    // For associative containers, if an exception is thrown by any operation from within
-    // an insert or emplace function inserting a single element, the insertion has no effect.
-    static constexpr const bool __emplacement_has_strong_exception_safety_guarantee = true;
-
-    static constexpr const bool __reservable = false;
-};
 
 namespace pmr {
     template <class _KeyT, class _CompareT = std::less<_KeyT>>
