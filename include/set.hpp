@@ -11,7 +11,6 @@
 #define MSTD_SET
 
 #include <algorithm>
-#include <detail/algorithm/specialized_algorithms.hpp>
 #include <detail/functional/is_transparent.hpp>
 #include <cassert>
 #include <detail/config.hpp>
@@ -497,21 +496,6 @@ template <class KeyT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
 set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, std::less<KeyT>, AllocatorT>;
 
-template <class _Alg, class KeyT, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Alg, __single_range<set<KeyT, CompareT, AllocatorT>>> {
-    using __set = set<KeyT, CompareT, AllocatorT>;
-
-    static const bool __has_algorithm =
-    __specialized_algorithm<_Alg, __single_range<typename __set::Tree_>>::__has_algorithm;
-
-    // set's begin() and end() are identical with and without const qualification
-    template <class... ArgsT>
-    static auto operator()(const __set& __set, ArgsT&&... args) {
-        return __specialized_algorithm<_Alg, __single_range<typename __set::Tree_>>()(
-            __set.tree_, std::forward<ArgsT>(args)...);
-    }
-};
-
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
 operator==(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT, AllocatorT>& rhs) {
@@ -961,21 +945,6 @@ template <class KeyT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
 multiset(std::initializer_list<KeyT>, AllocatorT)
 -> multiset<KeyT, std::less<KeyT>, AllocatorT>;
-
-template <class _Alg, class KeyT, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Alg, __single_range<multiset<KeyT, CompareT, AllocatorT>>> {
-    using __set = multiset<KeyT, CompareT, AllocatorT>;
-
-    static const bool __has_algorithm =
-    __specialized_algorithm<_Alg, __single_range<typename __set::Tree_>>::__has_algorithm;
-
-    // set's begin() and end() are identical with and without const qualification
-    template <class... ArgsT>
-    static auto operator()(const __set& set, ArgsT&&... args) {
-        return __specialized_algorithm<_Alg, __single_range<typename __set::Tree_>>()(
-            set.tree_, std::forward<ArgsT>(args)...);
-    }
-};
 
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
