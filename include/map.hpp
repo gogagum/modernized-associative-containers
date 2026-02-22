@@ -748,7 +748,7 @@ template <
   , class CompareT   = std::less<__iter_key_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>::value
+requires __has_input_iterator_category<InputIteratorT>
       && (!__is_allocator_v<CompareT>)
       && __is_allocator_v<AllocatorT>
 map(
@@ -799,7 +799,7 @@ map(
      >;
 
 template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
+requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
 map(InputIteratorT, InputIteratorT, AllocatorT)
 -> map<
     __iter_key_type<InputIteratorT>
@@ -1308,7 +1308,7 @@ template <
   , class CompareT   = std::less<__iter_key_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>::value
+requires __has_input_iterator_category<InputIteratorT>
       && (!__is_allocator_v<CompareT>)
       && __is_allocator_v<AllocatorT>
 multimap(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -1344,7 +1344,7 @@ multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), 
 -> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 
 template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
+requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
 multimap(InputIteratorT, InputIteratorT, AllocatorT)
 -> multimap<
        __iter_key_type<InputIteratorT>

@@ -17,9 +17,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "detail/type_traits/nat.hpp"
-#include "detail/type_traits/detected_or.hpp"
-
 namespace mstd {
 
 template <class FromT, class ToT>

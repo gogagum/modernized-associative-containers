@@ -13,7 +13,6 @@
 #include <detail/config.hpp>
 #include <cstddef>
 #include <memory>
-#include <detail/type_traits/detected_or.hpp>
 #include <utility>
 #include <limits>
 
