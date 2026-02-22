@@ -122,11 +122,11 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
         return 0;
     }
     // If this is red, neither child can be red
-    if (!node_ptr->__is_black_) {
-        if (node_ptr->__left_ && !node_ptr->__left_->__is_black_) {
+    if (!node_ptr->is_black_) {
+        if (node_ptr->__left_ && !node_ptr->__left_->is_black_) {
             return 0;
         }
-        if (node_ptr->__right_ && !node_ptr->__right_->__is_black_) {
+        if (node_ptr->__right_ && !node_ptr->__right_->is_black_) {
             return 0;
         }
     }
@@ -137,7 +137,7 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
     if (h != mstd::tree_sub_invariant(node_ptr->__right_)) {
         return 0;                    // invalid or different height right subtree
     }
-    return h + node_ptr->__is_black_; // return black height of this node
+    return h + node_ptr->is_black_; // return black height of this node
 }
 
 // Determines if the red black tree rooted at root is a proper red black tree.
@@ -156,7 +156,7 @@ bool tree_invariant(NodePtrT root) {
         return false;
     }
     // root must be black
-    if (!root->__is_black_) {
+    if (!root->is_black_) {
         return false;
     }
     // do normal node checks
@@ -281,46 +281,46 @@ template <class NodePtrT>
 void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(root != nullptr, "Root of the tree shouldn't be null");
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "Can't attach null node to a leaf");
-    node_ptr->__is_black_ = node_ptr == root;
-    while (node_ptr != root && !node_ptr->parent_unsafe()->__is_black_) {
+    node_ptr->is_black_ = node_ptr == root;
+    while (node_ptr != root && !node_ptr->parent_unsafe()->is_black_) {
         // node_ptr->__parent_ != root because node_ptr->__parent_->__is_black == false
         if (mstd::tree_is_left_child(node_ptr->parent_unsafe())) {
             NodePtrT y = node_ptr->parent_unsafe()->parent_unsafe()->__right_;
-            if (y != nullptr && !y->__is_black_) {
+            if (y != nullptr && !y->is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = true;
+                node_ptr->is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = node_ptr == root;
-                y->__is_black_ = true;
+                node_ptr->is_black_ = node_ptr == root;
+                y->is_black_ = true;
             } else {
                 if (!mstd::tree_is_left_child(node_ptr)) {
                     node_ptr = node_ptr->parent_unsafe();
                     mstd::tree_left_rotate(node_ptr);
                 }
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = true;
+                node_ptr->is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = false;
+                node_ptr->is_black_ = false;
                 mstd::tree_right_rotate(node_ptr);
                 break;
             }
         } else {
             NodePtrT y = node_ptr->parent_unsafe()->__parent_->__left_;
-            if (y != nullptr && !y->__is_black_) {
+            if (y != nullptr && !y->is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = true;
+                node_ptr->is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = node_ptr == root;
-                y->__is_black_ = true;
+                node_ptr->is_black_ = node_ptr == root;
+                y->is_black_ = true;
             } else {
                 if (mstd::tree_is_left_child(node_ptr)) {
                     node_ptr = node_ptr->parent_unsafe();
                     mstd::tree_right_rotate(node_ptr);
                 }
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = true;
+                node_ptr->is_black_ = true;
                 node_ptr              = node_ptr->parent_unsafe();
-                node_ptr->__is_black_ = false;
+                node_ptr->is_black_ = false;
                 mstd::tree_left_rotate(node_ptr);
                 break;
             }
@@ -369,7 +369,7 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
         // y can't be root if it is a right child
         w = y->__parent_->__left_;
     }
-    const bool removed_black = y->__is_black_;
+    const bool removed_black = y->is_black_;
     // If we didn't remove node_ptr, do so now by splicing in y for node_ptr,
     //    but copy node_ptr's color.  This does not impact x or w.
     if (y != node_ptr) {
@@ -386,7 +386,7 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
         if (y->__right_ != nullptr) {
             y->__right_->set_parent(y);
         }
-        y->__is_black_ = node_ptr->__is_black_;
+        y->is_black_ = node_ptr->is_black_;
         if (root == node_ptr) {
             root = y;
         }
@@ -405,9 +405,9 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
         // Since y was black and only had one child (which x points to), x
         //   is either red with no children, else null, otherwise y would have
         //   different black heights under left and right pointers.
-        // if (x == root || x != nullptr && !x->__is_black_)
+        // if (x == root || x != nullptr && !x->is_black_)
         if (x != nullptr) {
-            x->__is_black_ = true;
+            x->is_black_ = true;
         } else {
             //  Else x isn't root, and is "doubly black", even though it may
             //     be null.  w can not be null here, else the parent would
@@ -416,9 +416,9 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
             //     with a non-null black child).
             while (true) {
                 if (!mstd::tree_is_left_child(w)) { // if node_ptr is left child
-                    if (!w->__is_black_) {
-                        w->__is_black_                    = true;
-                        w->parent_unsafe()->__is_black_ = false;
+                    if (!w->is_black_) {
+                        w->is_black_                    = true;
+                        w->parent_unsafe()->is_black_ = false;
                         mstd::tree_left_rotate(w->parent_unsafe());
                         // x is still valid
                         // reset root only if necessary
@@ -428,14 +428,14 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         // reset sibling, and it still can't be null
                         w = w->__left_->__right_;
                     }
-                    // w->__is_black_ is now true, w may have null children
-                    if ((w->__left_ == nullptr || w->__left_->__is_black_)
-                            && (w->__right_ == nullptr || w->__right_->__is_black_)) {
-                        w->__is_black_ = false;
+                    // w->is_black_ is now true, w may have null children
+                    if ((w->__left_ == nullptr || w->__left_->is_black_)
+                            && (w->__right_ == nullptr || w->__right_->is_black_)) {
+                        w->is_black_ = false;
                         x              = w->parent_unsafe();
                         // x can no longer be null
-                        if (x == root || !x->__is_black_) {
-                            x->__is_black_ = true;
+                        if (x == root || !x->is_black_) {
+                            x->is_black_ = true;
                             break;
                         }
                         // reset sibling, and it still can't be null
@@ -444,26 +444,26 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                             : x->__parent_->__left_;
                         // continue;
                     } else { // w has a red child
-                        if (w->__right_ == nullptr || w->__right_->__is_black_) {
+                        if (w->__right_ == nullptr || w->__right_->is_black_) {
                             // w left child is non-null and red
-                            w->__left_->__is_black_ = true;
-                            w->__is_black_          = false;
+                            w->__left_->is_black_ = true;
+                            w->is_black_          = false;
                             mstd::tree_right_rotate(w);
                             // w is known not to be root, so root hasn't changed
                             // reset sibling, and it still can't be null
                             w = w->parent_unsafe();
                         }
                         // w has a right red child, left child may be null
-                        w->__is_black_                    = w->parent_unsafe()->__is_black_;
-                        w->parent_unsafe()->__is_black_ = true;
-                        w->__right_->__is_black_          = true;
+                        w->is_black_                    = w->parent_unsafe()->is_black_;
+                        w->parent_unsafe()->is_black_ = true;
+                        w->__right_->is_black_          = true;
                         mstd::tree_left_rotate(w->parent_unsafe());
                         break;
                     }
                 } else {
-                    if (!w->__is_black_) {
-                        w->__is_black_                  = true;
-                        w->parent_unsafe()->__is_black_ = false;
+                    if (!w->is_black_) {
+                        w->is_black_                  = true;
+                        w->parent_unsafe()->is_black_ = false;
                         mstd::tree_right_rotate(w->parent_unsafe());
                         // x is still valid
                         // reset root only if necessary
@@ -473,14 +473,14 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         // reset sibling, and it still can't be null
                         w = w->__right_->__left_;
                     }
-                    // w->__is_black_ is now true, w may have null children
-                    if ((w->__left_ == nullptr || w->__left_->__is_black_)
-                            && (w->__right_ == nullptr || w->__right_->__is_black_)) {
-                        w->__is_black_ = false;
+                    // w->is_black_ is now true, w may have null children
+                    if ((w->__left_ == nullptr || w->__left_->is_black_)
+                            && (w->__right_ == nullptr || w->__right_->is_black_)) {
+                        w->is_black_ = false;
                         x              = w->parent_unsafe();
                         // x can no longer be null
-                        if (!x->__is_black_ || x == root) {
-                            x->__is_black_ = true;
+                        if (!x->is_black_ || x == root) {
+                            x->is_black_ = true;
                             break;
                         }
                         // reset sibling, and it still can't be null
@@ -489,19 +489,19 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                             : x->__parent_->__left_;
                         // continue;
                     } else { // w has a red child
-                        if (w->__left_ == nullptr || w->__left_->__is_black_) {
+                        if (w->__left_ == nullptr || w->__left_->is_black_) {
                             // w right child is non-null and red
-                            w->__right_->__is_black_ = true;
-                            w->__is_black_           = false;
+                            w->__right_->is_black_ = true;
+                            w->is_black_           = false;
                             mstd::tree_left_rotate(w);
                             // w is known not to be root, so root hasn't changed
                             // reset sibling, and it still can't be null
                             w = w->parent_unsafe();
                         }
                         // w has a left red child, right child may be null
-                        w->__is_black_                  = w->parent_unsafe()->__is_black_;
-                        w->parent_unsafe()->__is_black_ = true;
-                        w->__left_->__is_black_         = true;
+                        w->is_black_                  = w->parent_unsafe()->is_black_;
+                        w->parent_unsafe()->is_black_ = true;
+                        w->__left_->is_black_         = true;
                         mstd::tree_right_rotate(w->parent_unsafe());
                         break;
                     }
@@ -574,7 +574,7 @@ public:
 
     pointer __right_;
     end_node_pointer __parent_;
-    bool __is_black_;
+    bool is_black_;
 
     pointer parent_unsafe() const { return static_cast<pointer>(__parent_); }
 
@@ -1470,7 +1470,7 @@ public:
         new_node->__left_   = nullptr;
         new_node->__right_  = nullptr;
         new_node->__parent_ = parent;
-        // new_node->__is_black_ is initialized in tree_balance_after_insert
+        // new_node->is_black_ is initialized in tree_balance_after_insert
         child = new_node;
         if (begin_node_->__left_ != nullptr) {
             begin_node_ = static_cast<end_node_pointer>(begin_node_->__left_);
@@ -2010,7 +2010,7 @@ private:
 
         node_pointer new_node_ptr = new_node.release();
 
-        new_node_ptr->__is_black_ = src->__is_black_;
+        new_node_ptr->is_black_ = src->is_black_;
         new_node_ptr->__left_     = static_cast<node_base_pointer>(left.release());
         new_node_ptr->__right_    = static_cast<node_base_pointer>(right);
         if (new_node_ptr->__left_) {
@@ -2054,7 +2054,7 @@ private:
         }
 
         assign(dest->get_value(), src->get_value());
-        dest->__is_black_ = src->__is_black_;
+        dest->is_black_ = src->is_black_;
 
         // If we already have a left node in the destination tree, reuse it and copy-assign recursively
         if (dest->__left_) {
