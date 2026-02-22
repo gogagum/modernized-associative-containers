@@ -148,7 +148,7 @@ public:
     }
 };
 
-template <class KeyT, class _Tp>
+template <class KeyT, class ValueT>
 struct ValueType;
 
 template <class TreeIteratorT>
@@ -292,15 +292,15 @@ struct __specialized_algorithm<_Alg, __iterator_pair<MapConstIterator<TreeIterat
     }
 };
 
-template <class KeyT, class _Tp, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, _Tp> > >
+template <class KeyT, class ValueT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, ValueT> > >
 class multimap;
 
-template <class KeyT, class _Tp, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, _Tp> > >
+template <class KeyT, class ValueT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, ValueT> > >
 class map {
 public:
     // types:
     using key_type = KeyT;
-    using mapped_type = _Tp;
+    using mapped_type = ValueT;
     using value_type = std::pair<const key_type, mapped_type>;
     using key_compare = std::type_identity_t<CompareT>;
     using allocator_type = std::type_identity_t<AllocatorT>;
@@ -819,18 +819,18 @@ map(
 
 template <
     class KeyT
-  , class _Tp
+  , class ValueT
   , class CompareT   = std::less<std::remove_const_t<KeyT>>
-  , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
+  , class AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
 >
 requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 map(
-    std::initializer_list<std::pair<KeyT, _Tp>>,
+    std::initializer_list<std::pair<KeyT, ValueT>>,
     CompareT = CompareT(),
     AllocatorT = AllocatorT()
 ) -> map<
          std::remove_const_t<KeyT>
-       , _Tp
+       , ValueT
        , CompareT
        , AllocatorT
      >;
@@ -855,19 +855,19 @@ map(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template<class KeyT, class _Tp, class AllocatorT>
+template<class KeyT, class ValueT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
-map(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
+map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 -> map<
        std::remove_const_t<KeyT>
-     , _Tp
+     , ValueT
      , std::less<std::remove_const_t<KeyT>>
      , AllocatorT
    >;
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, _Tp, CompareT, AllocatorT>>> {
-    using __map = map<KeyT, _Tp, CompareT, AllocatorT>;
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, ValueT, CompareT, AllocatorT>>> {
+    using __map = map<KeyT, ValueT, CompareT, AllocatorT>;
 
     static const bool __has_algorithm = true;
 
@@ -879,8 +879,8 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, 
     }
 };
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](const key_type& key) {
     return tree_
         .emplaceUnique(
             std::piecewise_construct,
@@ -891,8 +891,8 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](const key_type& key) {
         ->second;
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& key) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](key_type&& key) {
     return tree_
         .emplaceUnique(
             std::piecewise_construct,
@@ -903,49 +903,49 @@ _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::operator[](key_type&& key) {
         ->second;
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-_Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::at(const key_type& key) {
     auto [_, child] = tree_.find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->get_value().second;
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-const _Tp& map<KeyT, _Tp, CompareT, AllocatorT>::at(const key_type& key) const {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+const ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::at(const key_type& key) const {
     auto [_, child] = tree_.find_equal(key);
     if (child == nullptr)
         std::__throw_out_of_range("map::at:  key not found");
     return static_cast<__node_pointer>(child)->get_value().second;
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
-operator==(const map<KeyT, _Tp, CompareT, AllocatorT>& x, const map<KeyT, _Tp, CompareT, AllocatorT>& y) {
+operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-__synth_three_way_result<std::pair<const KeyT, _Tp>>
-operator<=>(const map<KeyT, _Tp, CompareT, AllocatorT>& x, const map<KeyT, _Tp, CompareT, AllocatorT>& y) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+__synth_three_way_result<std::pair<const KeyT, ValueT>>
+operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), mstd::__synth_three_way);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline void
-swap(map<KeyT, _Tp, CompareT, AllocatorT>& x, map<KeyT, _Tp, CompareT, AllocatorT>& y)
+swap(map<KeyT, ValueT, CompareT, AllocatorT>& x, map<KeyT, ValueT, CompareT, AllocatorT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT, class _Predicate>
-inline typename map<KeyT, _Tp, CompareT, AllocatorT>::size_type
-erase_if(map<KeyT, _Tp, CompareT, AllocatorT>& __c, _Predicate pred) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT, class _Predicate>
+inline typename map<KeyT, ValueT, CompareT, AllocatorT>::size_type
+erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
     return mstd::_MSTD_erase_if_container(__c, pred);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-struct __container_traits<map<KeyT, _Tp, CompareT, AllocatorT> > {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+struct __container_traits<map<KeyT, ValueT, CompareT, AllocatorT> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
@@ -954,12 +954,12 @@ struct __container_traits<map<KeyT, _Tp, CompareT, AllocatorT> > {
     static constexpr const bool __reservable = false;
 };
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 class multimap {
 public:
     // types:
     using key_type        = KeyT;
-    using mapped_type     = _Tp;
+    using mapped_type     = ValueT;
     using value_type      = std::pair<const key_type, mapped_type>;
     using key_compare     = std::type_identity_t<CompareT>;
     using allocator_type  = std::type_identity_t<AllocatorT>;
@@ -1398,13 +1398,13 @@ multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = Alloca
 
 template <
     class KeyT
-  , class _Tp
+  , class ValueT
   , class CompareT   = std::less<std::remove_const_t<KeyT>>
-  , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
+  , class AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
 >
 requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
-multimap(std::initializer_list<std::pair<KeyT, _Tp>>, CompareT = CompareT(), AllocatorT = AllocatorT())
--> multimap<std::remove_const_t<KeyT>, _Tp, CompareT, AllocatorT>;
+multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 
 template <class InputIteratorT, class AllocatorT>
 requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
@@ -1426,19 +1426,19 @@ multimap(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template <class KeyT, class _Tp, class AllocatorT>
+template <class KeyT, class ValueT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
-multimap(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
+multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 -> multimap<
        std::remove_const_t<KeyT>
-     , _Tp
+     , ValueT
      , std::less<std::remove_const_t<KeyT>>
      , AllocatorT
    >;
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<KeyT, _Tp, CompareT, AllocatorT>>> {
-    using __map = multimap<KeyT, _Tp, CompareT, AllocatorT>;
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<KeyT, ValueT, CompareT, AllocatorT>>> {
+    using __map = multimap<KeyT, ValueT, CompareT, AllocatorT>;
 
     static const bool __has_algorithm = true;
 
@@ -1450,34 +1450,34 @@ struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<K
     }
 };
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
-operator==(const multimap<KeyT, _Tp, CompareT, AllocatorT>& x, const multimap<KeyT, _Tp, CompareT, AllocatorT>& y) {
+operator==(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x, const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-__synth_three_way_result<std::pair<const KeyT, _Tp>>
-operator<=>(const multimap<KeyT, _Tp, CompareT, AllocatorT>& x,
-            const multimap<KeyT, _Tp, CompareT, AllocatorT>& y) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+__synth_three_way_result<std::pair<const KeyT, ValueT>>
+operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
+            const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), __synth_three_way);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline void
-swap(multimap<KeyT, _Tp, CompareT, AllocatorT>& x, multimap<KeyT, _Tp, CompareT, AllocatorT>& y)
+swap(multimap<KeyT, ValueT, CompareT, AllocatorT>& x, multimap<KeyT, ValueT, CompareT, AllocatorT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT, class _Predicate>
-inline typename multimap<KeyT, _Tp, CompareT, AllocatorT>::size_type
-erase_if(multimap<KeyT, _Tp, CompareT, AllocatorT>& __c, _Predicate pred) {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT, class _Predicate>
+inline typename multimap<KeyT, ValueT, CompareT, AllocatorT>::size_type
+erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
     return mstd::_MSTD_erase_if_container(__c, pred);
 }
 
-template <class KeyT, class _Tp, class CompareT, class AllocatorT>
-struct __container_traits<multimap<KeyT, _Tp, CompareT, AllocatorT> > {
+template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+struct __container_traits<multimap<KeyT, ValueT, CompareT, AllocatorT> > {
     // http://eel.is/c++draft/associative.reqmts.except#2
     // For associative containers, if an exception is thrown by any operation from within
     // an insert or emplace function inserting a single element, the insertion has no effect.
