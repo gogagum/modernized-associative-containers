@@ -90,9 +90,9 @@ public:
     tracker_allocator &operator=(tracker_allocator &&) = default;
 
     // Perfect forwarding constructor.
-    template <typename... _Args>
-    tracker_allocator(_Args &&...__args)
-        : Alloc(std::forward<_Args>(__args)...)
+    template <typename... ArgsT>
+    tracker_allocator(ArgsT &&...__args)
+        : Alloc(std::forward<ArgsT>(__args)...)
     {
     }
 #else

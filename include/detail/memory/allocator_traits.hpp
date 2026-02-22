@@ -34,13 +34,13 @@ struct __allocator_traits_rebind {
   static_assert(__has_rebind_other_v<_Tp, _Up>, "This allocator has to implement rebind");
   using type = typename _Tp::template rebind<_Up>::other;
 };
-template <template <class, class...> class _Alloc, class _Tp, class... _Args, class _Up>
-struct __allocator_traits_rebind<_Alloc<_Tp, _Args...>, _Up, true> {
-  using type = typename _Alloc<_Tp, _Args...>::template rebind<_Up>::other;
+template <template <class, class...> class _Alloc, class _Tp, class... ArgsT, class _Up>
+struct __allocator_traits_rebind<_Alloc<_Tp, ArgsT...>, _Up, true> {
+  using type = typename _Alloc<_Tp, ArgsT...>::template rebind<_Up>::other;
 };
-template <template <class, class...> class _Alloc, class _Tp, class... _Args, class _Up>
-struct __allocator_traits_rebind<_Alloc<_Tp, _Args...>, _Up, false> {
-  using type = _Alloc<_Up, _Args...>;
+template <template <class, class...> class _Alloc, class _Tp, class... ArgsT, class _Up>
+struct __allocator_traits_rebind<_Alloc<_Tp, ArgsT...>, _Up, false> {
+  using type = _Alloc<_Up, ArgsT...>;
 };
 
 template <class _Traits, class _Tp>
