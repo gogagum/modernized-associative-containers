@@ -21,7 +21,6 @@
 #include <limits>
 #include <functional>
 
-#include <detail/algorithm/specialized_algorithms.hpp>
 #include <detail/config.hpp>
 #include <detail/utility/try_key_extraction.hpp>
 #include <detail/type_traits/is_specialization.hpp>
@@ -770,21 +769,6 @@ private:
     friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
 };
 
-// This also handles {multi,}set::iterator, since they're just aliases to Tree::iterator
-template <class _Tp, class NodePtrT, class DiffTypeT>
-struct __specialized_algorithm<
-_Algorithm::__for_each,
-__iterator_pair<TreeIterator<_Tp, NodePtrT, DiffTypeT>, TreeIterator<_Tp, NodePtrT, DiffTypeT>>> {
-    static const bool __has_algorithm = true;
-
-    using Iterator = TreeIterator<_Tp, NodePtrT, DiffTypeT>;
-
-    template <class FuncT, class ProjT>
-    static void operator()(Iterator __first, Iterator __last, FuncT& __func, ProjT& __proj) {
-        mstd::tree_iterate_subrange(__first, __last, __func, __proj);
-    }
-};
-
 template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeConstIterator {
     using NodeTypes_       = __tree_node_types<NodePtrT>;
@@ -851,25 +835,6 @@ private:
 
     template <class NodeIterT, class FuncT, class ProjT>
     friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
-};
-
-// This also handles {multi,}set::const_iterator, since they're just aliases to Tree::iterator
-template <class Tp, class NodePtrT, class DiffTypeT>
-struct __specialized_algorithm<
-    _Algorithm::__for_each
-  , __iterator_pair<
-        TreeConstIterator<Tp, NodePtrT, DiffTypeT>
-      , TreeConstIterator<Tp, NodePtrT, DiffTypeT>
-    >
-> {
-    static const bool __has_algorithm = true;
-
-    using Iterator = TreeConstIterator<Tp, NodePtrT, DiffTypeT>;
-
-    template <class FuncT, class ProjT>
-    static void operator()(Iterator begin, Iterator end, FuncT& func, ProjT& proj) {
-        mstd::tree_iterate_subrange(begin, end, func, proj);
-    }
 };
 
 template <class _Tp, class CompareT>
@@ -2109,28 +2074,6 @@ private:
             [](value_type& lhs, value_type& rhs) { assignValue_(lhs, std::move(rhs)); },
             [this](node_pointer node_ptr) { return moveConstructTree_(node_ptr); }
         );
-    }
-
-    friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<Tree> >;
-};
-
-template <class _Tp, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<Tree<_Tp, CompareT, AllocatorT> > > {
-    static const bool __has_algorithm = true;
-
-    using node_pointer = typename Tree<_Tp, CompareT, AllocatorT>::node_pointer;
-
-    template <class _Tree, class FuncT, class ProjT>
-    static auto operator()(_Tree&& __range, FuncT __func, ProjT __proj) {
-        if (__range.size() != 0) {
-            mstd::tree_iterate_from_root<__copy_cvref_t<_Tree, typename std::remove_cvref_t<_Tree>::value_type>>(
-                [](node_pointer) { return false; },
-                __range.root(),
-                __func,
-                __proj
-            );
-        }
-        return std::make_pair(__range.end(), std::move(__func));
     }
 };
 

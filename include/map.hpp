@@ -201,23 +201,6 @@ public:
     friend class multimap;
     template <class>
     friend class MapConstIterator;
-
-    template <class, class...>
-    friend struct __specialized_algorithm;
-};
-
-template <class _Alg, class TreeIteratorT>
-struct __specialized_algorithm<_Alg, __iterator_pair<MapIterator<TreeIteratorT>, MapIterator<TreeIteratorT>>> {
-    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<TreeIteratorT, TreeIteratorT>>;
-
-    static const bool __has_algorithm = Tree_::__has_algorithm;
-
-    using Iterator_ = MapIterator<TreeIteratorT>;
-
-    template <class... ArgsT>
-    static void operator()(Iterator_ first, Iterator_ last, ArgsT&&... args) {
-        Tree_()(first.i_, last.i_, std::forward<ArgsT>(args)...);
-    }
 };
 
 template <class TreeIteratorT>
@@ -272,23 +255,6 @@ public:
     friend class multimap;
     template <class, class, class>
     friend class TreeConstIterator;
-
-    template <class, class...>
-    friend struct __specialized_algorithm;
-};
-
-template <class _Alg, class TreeIteratorT>
-struct __specialized_algorithm<_Alg, __iterator_pair<MapConstIterator<TreeIteratorT>, MapConstIterator<TreeIteratorT>>> {
-    using Tree_ = __specialized_algorithm<_Alg, __iterator_pair<TreeIteratorT, TreeIteratorT>>;
-
-    static const bool __has_algorithm = Tree_::__has_algorithm;
-
-    using Iterator_ = MapConstIterator<TreeIteratorT>;
-
-    template <class... ArgsT>
-    static void operator()(Iterator_ first, Iterator_ last, ArgsT&&... args) {
-        Tree_()(first.i_, last.i_, std::forward<ArgsT>(args)...);
-    }
 };
 
 template <class KeyT, class ValueT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<std::pair<const KeyT, ValueT> > >
@@ -775,8 +741,6 @@ private:
 
     using _Dp = MapNodeDestructor<node_allocator>;
     using __node_holder = std::unique_ptr<node, _Dp>;
-
-    friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map> >;
 };
 
 template <
@@ -863,20 +827,6 @@ map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
      , std::less<std::remove_const_t<KeyT>>
      , AllocatorT
    >;
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map<KeyT, ValueT, CompareT, AllocatorT>>> {
-    using __map = map<KeyT, ValueT, CompareT, AllocatorT>;
-
-    static const bool __has_algorithm = true;
-
-    template <class _Map, class FuncT, class ProjT>
-    static auto operator()(_Map&& __map, FuncT __func, ProjT __proj) {
-        auto [_, __func2] = __specialized_algorithm<_Algorithm::__for_each, __single_range<typename __map::Tree_>>()(
-            __map.tree_, std::move(__func), std::move(__proj));
-        return std::make_pair(__map.end(), std::move(__func2));
-    }
-};
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](const key_type& key) {
@@ -1351,8 +1301,6 @@ private:
 
     using _Dp = MapNodeDestructor<node_allocator>;
     using __node_holder = std::unique_ptr<node, _Dp>;
-
-    friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap> >;
 };
 
 template <
@@ -1424,20 +1372,6 @@ multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
      , std::less<std::remove_const_t<KeyT>>
      , AllocatorT
    >;
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap<KeyT, ValueT, CompareT, AllocatorT>>> {
-    using __map = multimap<KeyT, ValueT, CompareT, AllocatorT>;
-
-    static const bool __has_algorithm = true;
-
-    template <class _Map, class FuncT, class ProjT>
-    static auto operator()(_Map&& __map, FuncT __func, ProjT __proj) {
-        auto [_, __func2] = __specialized_algorithm<_Algorithm::__for_each, __single_range<typename __map::Tree_>>()(
-            __map.tree_, std::move(__func), std::move(__proj));
-        return std::make_pair(__map.end(), std::move(__func2));
-    }
-};
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
