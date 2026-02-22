@@ -458,7 +458,7 @@ template <
   , class CompareT   = std::less<__iterator_value_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iterator_value_type<InputIteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>::value
+requires __has_input_iterator_category<InputIteratorT>
       && __is_allocator_v<AllocatorT>
       && (!__is_allocator_v<CompareT>)
 set(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -483,7 +483,7 @@ set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT(
 -> set<KeyT, CompareT, AllocatorT>;
 
 template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
+requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
 set(InputIteratorT, InputIteratorT, AllocatorT)
 -> set<__iterator_value_type<InputIteratorT>, std::less<__iterator_value_type<InputIteratorT>>, AllocatorT>;
 
@@ -903,7 +903,7 @@ template <
   , class CompareT   = std::less<__iterator_value_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iterator_value_type<InputIteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>::value
+requires __has_input_iterator_category<InputIteratorT>
       && __is_allocator_v<AllocatorT>
       && (!__is_allocator_v<CompareT>)
 multiset(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -924,7 +924,7 @@ multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = Alloca
 -> multiset<KeyT, CompareT, AllocatorT>;
 
 template <class InputIteratorT, class AllocatorT>
-requires (__has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>)
+requires (__has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>)
 multiset(InputIteratorT, InputIteratorT, AllocatorT)
 -> multiset<
        __iterator_value_type<InputIteratorT>

@@ -12,24 +12,17 @@
 
 #include <concepts>
 #include <detail/config.hpp>
-#include <detail/type_traits/nat.hpp>
-#include <detail/type_traits/detected_or.hpp>
 #include <cstddef>
 #include <utility>
 #include <tuple>
 #include <type_traits>
+#include <concepts>
 
 namespace mstd {
 
 template <class _Tp>
-using __iterator_category = typename _Tp::iterator_category;
-
-template <class _Tp, class _Up>
-using __has_iterator_category_convertible_to =
-    std::is_convertible<__detected_or_t<__nat, __iterator_category, std::iterator_traits<_Tp> >, _Up>;
-
-template <class _Tp>
-using __has_input_iterator_category = __has_iterator_category_convertible_to<_Tp, std::input_iterator_tag>;
+concept __has_input_iterator_category
+    = std::convertible_to<typename std::iterator_traits<_Tp>::iterator_category, std::input_iterator_tag>;
 
 template <class InputIteratorT>
 using __iterator_value_type = typename std::iterator_traits<InputIteratorT>::value_type;
