@@ -670,26 +670,26 @@ public:
     [[nodiscard]] node_type extract(const_iterator __it) {
         return tree_.template nodeHandleExtract<node_type>(__it.i_);
     }
-    template <class _Compare2>
-    void merge(map<key_type, mapped_type, _Compare2, allocator_type>& source) {
+    template <class CompareT2>
+    void merge(map<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         tree_.nodeHandleMergeUnique(source.tree_);
     }
-    template <class _Compare2>
-    void merge(map<key_type, mapped_type, _Compare2, allocator_type>&& source) {
+    template <class CompareT2>
+    void merge(map<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         tree_.nodeHandleMergeUnique(source.tree_);
     }
-    template <class _Compare2>
-    void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>& source) {
+    template <class CompareT2>
+    void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         tree_.nodeHandleMergeUnique(source.tree_);
     }
-    template <class _Compare2>
-    void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>&& source) {
+    template <class CompareT2>
+    void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
         tree_.nodeHandleMergeUnique(source.tree_);
@@ -1026,13 +1026,13 @@ template <class KeyT, class _Tp, class CompareT, class AllocatorT>
 class multimap {
 public:
     // types:
-    typedef KeyT key_type;
-    typedef _Tp mapped_type;
-    typedef std::pair<const key_type, mapped_type> value_type;
-    typedef std::type_identity_t<CompareT> key_compare;
-    typedef std::type_identity_t<AllocatorT> allocator_type;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    using key_type        = KeyT;
+    using mapped_type     = _Tp;
+    using value_type      = std::pair<const key_type, mapped_type>;
+    using key_compare     = std::type_identity_t<CompareT>;
+    using allocator_type  = std::type_identity_t<AllocatorT>;
+    using reference       = value_type& ;
+    using const_reference = const value_type&;
 
     static_assert(__check_valid_allocator<allocator_type>::value, "");
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
@@ -1072,9 +1072,9 @@ public:
 
     typedef MapNodeHandle<typename Tree_::node, allocator_type> node_type;
 
-    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
+    template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
     friend class map;
-    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
+    template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
     friend class multimap;
 
     multimap() noexcept(
@@ -1122,14 +1122,14 @@ public:
     multimap(std::from_range_t, RangeT&& range, const allocator_type& alloc)
     : multimap(std::from_range, std::forward<RangeT>(range), key_compare(), alloc) {}
     
-    multimap(const multimap& __m) = default;
+    multimap(const multimap& other) = default;
 
-    multimap& operator=(const multimap& __m) = default;
+    multimap& operator=(const multimap& other) = default;
 
-    multimap(multimap&& __m) = default;
+    multimap(multimap&& other) = default;
 
-    multimap(multimap&& __m, const allocator_type& alloc)
-    : tree_(std::move(__m.tree_), alloc) {}
+    multimap(multimap&& other, const allocator_type& alloc)
+    : tree_(std::move(other.tree_), alloc) {}
 
     multimap& operator=(multimap&& other) = default;
 
@@ -1155,8 +1155,8 @@ public:
     explicit multimap(const allocator_type& allocator)
     : tree_(typename Tree_::allocator_type(allocator)) {}
 
-    multimap(const multimap& __m, const allocator_type& alloc)
-    : tree_(__m.tree_, alloc) {}
+    multimap(const multimap& other, const allocator_type& alloc)
+    : tree_(other.tree_, alloc) {}
 
     ~multimap() {
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), "");
@@ -1285,32 +1285,32 @@ public:
     [[nodiscard]] node_type extract(const_iterator __it) {
         return tree_.template nodeHandleExtract<node_type>(__it.i_);
     }
-    template <class _Compare2>
-    void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>& source) {
+    template <class CompareT2>
+    void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
         return tree_.nodeHandleMergeMulti(source.tree_);
     }
-    template <class _Compare2>
-    void merge(multimap<key_type, mapped_type, _Compare2, allocator_type>&& source) {
+    template <class CompareT2>
+    void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
         return tree_.nodeHandleMergeMulti(source.tree_);
     }
-    template <class _Compare2>
-    void merge(map<key_type, mapped_type, _Compare2, allocator_type>& source) {
+    template <class CompareT2>
+    void merge(map<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
         );
         return tree_.nodeHandleMergeMulti(source.tree_);
     }
-    template <class _Compare2>
-    void merge(map<key_type, mapped_type, _Compare2, allocator_type>&& source) {
+    template <class CompareT2>
+    void merge(map<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             source.get_allocator() == get_allocator(),
             "merging container with incompatible allocator"
