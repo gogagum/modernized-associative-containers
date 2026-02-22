@@ -569,7 +569,7 @@ public:
 template <class VoidPtrT>
 class TreeNodeBase : public TreeEndNode<__rebind_pointer_t<VoidPtrT, TreeNodeBase<VoidPtrT>>> {
 public:
-    using pointer            = __rebind_pointer_t<VoidPtrT, TreeNodeBase>;
+    using pointer          = __rebind_pointer_t<VoidPtrT, TreeNodeBase>;
     using end_node_pointer = __rebind_pointer_t<VoidPtrT, TreeEndNode<pointer> >;
 
     pointer right_;
@@ -588,39 +588,39 @@ public:
 template <class _Tp, class VoidPtrT>
 class TreeNode : public TreeNodeBase<VoidPtrT> {
 public:
-    using __node_value_type = __get_node_value_type_t<_Tp>;
+    using node_value_type = __get_node_value_type_t<_Tp>;
 
     // We use a union to avoid initialization during member initialization, which allows us
-    // to use the allocator from the container to construct the `__node_value_type` in the
+    // to use the allocator from the container to construct the `node_value_type` in the
     // memory provided by the union member
 
 private:
     union {
-        __node_value_type __value_;
+        node_value_type value_;
     };
 
 public:
-    __node_value_type& get_value() { return __value_; }
+    node_value_type& get_value() { return value_; }
 
     template <class AllocT, class... ArgsT>
     explicit TreeNode(AllocT& node_alloc, ArgsT&&... args) {
         std::allocator_traits<AllocT>::construct(node_alloc, std::addressof(get_value()), std::forward<ArgsT>(args)...);
     }
-    ~TreeNode()                             = delete;
+    ~TreeNode()                          = delete;
     TreeNode(TreeNode const&)            = delete;
     TreeNode& operator=(TreeNode const&) = delete;
 };
 
 template <class AllocatorT>
 class TreeNodeDestructor {
-    using allocator_type_ = AllocatorT;
-    using alloc_traits_   = std::allocator_traits<allocator_type_>;
+    using AllocatorType_ = AllocatorT;
+    using AllocTraits_   = std::allocator_traits<AllocatorType_>;
 
 public:
-    using pointer = typename alloc_traits_::pointer;
+    using pointer = typename AllocTraits_::pointer;
 
 private:
-    allocator_type_& na_;
+    AllocatorType_& na_;
 
 public:
     bool value_constructed;
@@ -628,16 +628,16 @@ public:
     TreeNodeDestructor(const TreeNodeDestructor&)            = default;
     TreeNodeDestructor& operator=(const TreeNodeDestructor&) = delete;
 
-    explicit TreeNodeDestructor(allocator_type_& na, bool val = false) noexcept
+    explicit TreeNodeDestructor(AllocatorType_& na, bool val = false) noexcept
     : na_(na)
     , value_constructed(val) {}
 
     void operator()(pointer ptr) noexcept {
         if (value_constructed) {
-            alloc_traits_::destroy(na_, std::addressof(ptr->get_value()));
+            AllocTraits_::destroy(na_, std::addressof(ptr->get_value()));
         }
         if (ptr) {
-            alloc_traits_::deallocate(na_, ptr, 1);
+            AllocTraits_::deallocate(na_, ptr, 1);
         }
     }
 
@@ -703,12 +703,12 @@ void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& p
 
 template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeIterator {
-    using NodeTypes_        = __tree_node_types<NodePtrT>;
-    using node_pointer      = NodePtrT;
-    using node_base_pointer = typename NodeTypes_::node_base_pointer;
-    using end_node_pointer  = typename NodeTypes_::end_node_pointer;
+    using NodeTypes_       = __tree_node_types<NodePtrT>;
+    using NodePointer_     = NodePtrT;
+    using NodeBasePointer_ = typename NodeTypes_::node_base_pointer;
+    using EndNodePointer_  = typename NodeTypes_::end_node_pointer;
 
-    end_node_pointer ptr_;
+    EndNodePointer_ ptr_;
 
 public:
     using iterator_category = std::bidirectional_iterator_tag;
@@ -728,7 +728,7 @@ public:
     }
 
     TreeIterator& operator++() {
-        ptr_ = mstd::tree_next_iter<end_node_pointer>(static_cast<node_base_pointer>(ptr_));
+        ptr_ = mstd::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
         return *this;
     }
 
@@ -739,7 +739,7 @@ public:
     }
 
     TreeIterator& operator--() {
-        ptr_ = static_cast<end_node_pointer>(mstd::tree_prev_iter<node_base_pointer>(ptr_));
+        ptr_ = static_cast<EndNodePointer_>(mstd::tree_prev_iter<NodeBasePointer_>(ptr_));
         return *this;
     }
 
@@ -758,9 +758,9 @@ public:
     }
 
 private:
-    explicit TreeIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
-    explicit TreeIterator(end_node_pointer ptr) noexcept : ptr_(ptr) {}
-    node_pointer __get_np() const { return static_cast<node_pointer>(ptr_); }
+    explicit TreeIterator(NodePointer_ ptr) noexcept : ptr_(ptr) {}
+    explicit TreeIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
+    NodePointer_ __get_np() const { return static_cast<NodePointer_>(ptr_); }
     template <class, class, class>
     friend class Tree;
     template <class, class, class>
@@ -777,22 +777,22 @@ _Algorithm::__for_each,
 __iterator_pair<TreeIterator<_Tp, NodePtrT, DiffTypeT>, TreeIterator<_Tp, NodePtrT, DiffTypeT>>> {
     static const bool __has_algorithm = true;
 
-    using __iterator = TreeIterator<_Tp, NodePtrT, DiffTypeT>;
+    using Iterator = TreeIterator<_Tp, NodePtrT, DiffTypeT>;
 
     template <class FuncT, class ProjT>
-    static void operator()(__iterator __first, __iterator __last, FuncT& __func, ProjT& __proj) {
+    static void operator()(Iterator __first, Iterator __last, FuncT& __func, ProjT& __proj) {
         mstd::tree_iterate_subrange(__first, __last, __func, __proj);
     }
 };
 
 template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeConstIterator {
-    using NodeTypes_        = __tree_node_types<NodePtrT>;
-    using node_pointer      = NodePtrT;
-    using node_base_pointer = typename NodeTypes_::node_base_pointer;
-    using end_node_pointer  = typename NodeTypes_::end_node_pointer;
+    using NodeTypes_       = __tree_node_types<NodePtrT>;
+    using NodePointer_     = NodePtrT;
+    using NodeBasePointer_ = typename NodeTypes_::node_base_pointer;
+    using EndNodePointer_  = typename NodeTypes_::end_node_pointer;
 
-    end_node_pointer ptr_;
+    EndNodePointer_ ptr_;
 
 public:
     using iterator_category  = std::bidirectional_iterator_tag;
@@ -800,7 +800,7 @@ public:
     using difference_type    = DiffTypeT;
     using reference          = const value_type&;
     using pointer            = __rebind_pointer_t<NodePtrT, const value_type>;
-    using non_const_iterator = TreeIterator<_Tp, node_pointer, difference_type>;
+    using non_const_iterator = TreeIterator<_Tp, NodePointer_, difference_type>;
 
     TreeConstIterator() noexcept : ptr_(nullptr) {}
 
@@ -812,7 +812,7 @@ public:
     }
 
     TreeConstIterator& operator++() {
-        ptr_ = mstd::tree_next_iter<end_node_pointer>(static_cast<node_base_pointer>(ptr_));
+        ptr_ = mstd::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
         return *this;
     }
 
@@ -823,7 +823,7 @@ public:
     }
 
     TreeConstIterator& operator--() {
-        ptr_ = static_cast<end_node_pointer>(mstd::tree_prev_iter<node_base_pointer>(ptr_));
+        ptr_ = static_cast<EndNodePointer_>(mstd::tree_prev_iter<NodeBasePointer_>(ptr_));
         return *this;
     }
 
@@ -842,9 +842,9 @@ public:
     }
 
 private:
-    explicit TreeConstIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
-    explicit TreeConstIterator(end_node_pointer ptr) noexcept : ptr_(ptr) {}
-    node_pointer __get_np() const { return static_cast<node_pointer>(ptr_); }
+    explicit TreeConstIterator(NodePointer_ ptr) noexcept : ptr_(ptr) {}
+    explicit TreeConstIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
+    NodePointer_ __get_np() const { return static_cast<NodePointer_>(ptr_); }
 
     template <class, class, class>
     friend class Tree;
@@ -864,10 +864,10 @@ struct __specialized_algorithm<
 > {
     static const bool __has_algorithm = true;
 
-    using __iterator = TreeConstIterator<Tp, NodePtrT, DiffTypeT>;
+    using Iterator = TreeConstIterator<Tp, NodePtrT, DiffTypeT>;
 
     template <class FuncT, class ProjT>
-    static void operator()(__iterator begin, __iterator end, FuncT& func, ProjT& proj) {
+    static void operator()(Iterator begin, Iterator end, FuncT& func, ProjT& proj) {
         mstd::tree_iterate_subrange(begin, end, func, proj);
     }
 };
@@ -887,12 +887,12 @@ private:
     using KeyType_     = __get_tree_key_type_t<_Tp>;
 
 public:
-    using pointer         = typename AllocTraits_::pointer;
-    using const_pointer   = typename AllocTraits_::const_pointer;
-    using size_type       = typename AllocTraits_::size_type;
-    using difference_type = typename AllocTraits_::difference_type;
+    using pointer         = AllocTraits_::pointer;
+    using const_pointer   = AllocTraits_::const_pointer;
+    using size_type       = AllocTraits_::size_type;
+    using difference_type = AllocTraits_::difference_type;
 
-    using void_pointer = typename AllocTraits_::void_pointer;
+    using void_pointer = AllocTraits_::void_pointer;
 
     using node         = TreeNode<_Tp, void_pointer>;
     using node_pointer = __rebind_pointer_t<void_pointer, node>;
@@ -903,7 +903,7 @@ public:
     using end_node_t       = TreeEndNode<node_base_pointer>;
     using end_node_pointer = __rebind_pointer_t<void_pointer, end_node_t>;
 
-    using node_allocator = __rebind_alloc<AllocTraits_, node>;
+    using node_allocator = AllocTraits_::template rebind_alloc<node>;
     using node_traits    = std::allocator_traits<node_allocator>;
 
 private:
@@ -912,7 +912,7 @@ private:
     // the pointer using 'pointer_traits'.
     static_assert(std::is_same_v<node_pointer, typename node_traits::pointer>,
                   "Allocator does not rebind pointers in a sane manner.");
-    using NodeBaseAllocator_ = __rebind_alloc<node_traits, node_base>;
+    using NodeBaseAllocator_ = node_traits::template rebind_alloc <node_base>;
     using NodeBaseTraits_    = std::allocator_traits<NodeBaseAllocator_>;
     static_assert(std::is_same_v<node_base_pointer, typename NodeBaseTraits_::pointer>,
                   "Allocator does not rebind pointers in a sane manner.");
@@ -990,7 +990,7 @@ public:
         if (other.size() == 0) {
             return;
         }
-        *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
+        *root_ptr()     = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
         root()->parent_ = endNode();
         begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->left_));
         size_           = other.size();
@@ -1005,7 +1005,7 @@ public:
             return;
         }
 
-        *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
+        *root_ptr()     = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
         root()->parent_ = endNode();
         begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->left_));
         size_           = other.size();
@@ -1066,15 +1066,15 @@ public:
             return;
         }
         if (alloc == other.alloc()) {
-            begin_node_                 = other.begin_node_;
-            endNode()->left_            = other.endNode()->left_;
+            begin_node_               = other.begin_node_;
+            endNode()->left_          = other.endNode()->left_;
             endNode()->left_->parent_ = static_cast<end_node_pointer>(endNode());
-            size_                       = other.size_;
-            other.begin_node_           = other.endNode();
-            other.endNode()->left_      = nullptr;
-            other.size_                 = 0;
+            size_                     = other.size_;
+            other.begin_node_         = other.endNode();
+            other.endNode()->left_    = nullptr;
+            other.size_               = 0;
         } else {
-            *root_ptr()       = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
+            *root_ptr()     = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
             root()->parent_ = endNode();
             begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->left_));
             size_           = other.size();
@@ -1653,8 +1653,7 @@ public:
         };
     }
 
-    using _Dp         = TreeNodeDestructor<node_allocator>;
-    using node_holder = std::unique_ptr<node, _Dp>;
+    using node_holder = std::unique_ptr<node, TreeNodeDestructor<node_allocator>>;
 
     node_holder remove(const_iterator pos) noexcept {
         auto node_ptr = pos.__get_np();
@@ -1667,18 +1666,21 @@ public:
         }
         --size_;
         mstd::tree_remove(endNode()->left_, static_cast<node_base_pointer>(node_ptr));
-        return node_holder(node_ptr, _Dp(nodeAlloc(), true));
+        return node_holder{
+            node_ptr,
+            typename node_holder::deleter_type{nodeAlloc(), true},
+        };
     }
 
     // FIXME: Make this function const qualified. Unfortunately doing so
     // breaks existing code which uses non-const callable comparators.
 
-    // Find __v
-    // If __v exists, return the parent of the node of __v and a reference to the pointer to the node of __v.
-    // If __v doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
+    // Find key
+    // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
+    // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) {
-        node_pointer node_ptr = root();
+        auto node_ptr = root();
 
         if (node_ptr == nullptr) {
             auto end = endNode();
@@ -1688,9 +1690,9 @@ public:
             };
         }
 
-        node_base_pointer* node_base_ptr = root_ptr();
-        auto&& transparent = mstd::__as_transparent(value_comp());
-        auto comp          = LazySynthThreeWayComparator<__make_transparent_t<CompareT>, KeyT, value_type>(transparent);
+        auto* node_base_ptr = root_ptr();
+        auto&& transparent  = mstd::__as_transparent(value_comp());
+        auto comp           = LazySynthThreeWayComparator<__make_transparent_t<CompareT>, KeyT, value_type>(transparent);
     
         while (true) {
             const auto comp_res = comp(key, node_ptr->get_value());
@@ -1884,8 +1886,11 @@ private:
 
     template <class... ArgsT>
     node_holder constructNode_(ArgsT&&... args) {
-        node_allocator& node_alloc = nodeAlloc();
-        node_holder holder(node_traits::allocate(node_alloc, 1), _Dp(node_alloc));
+        auto& node_alloc = nodeAlloc();
+        node_holder holder{
+            node_traits::allocate(node_alloc, 1),
+            typename node_holder::deleter_type(node_alloc),
+        };
         std::construct_at(std::addressof(*holder), node_alloc, std::forward<ArgsT>(args)...);
         holder.get_deleter().value_constructed = true;
         return holder;
@@ -1968,10 +1973,10 @@ private:
     }
 
     class TreeDeleter {
-        node_allocator& __alloc_;
+        node_allocator& alloc_;
 
     public:
-        TreeDeleter(node_allocator& alloc) : __alloc_(alloc) {}
+        TreeDeleter(node_allocator& alloc) : alloc_(alloc) {}
 
         void
         operator()(node_pointer node_ptr) {
@@ -1983,8 +1988,8 @@ private:
 
             auto right = node_ptr->right_;
 
-            node_traits::destroy(__alloc_, std::addressof(node_ptr->get_value()));
-            node_traits::deallocate(__alloc_, node_ptr, 1);
+            node_traits::destroy(alloc_, std::addressof(node_ptr->get_value()));
+            node_traits::deallocate(alloc_, node_ptr, 1);
 
             (*this)(static_cast<node_pointer>(right));
         }
@@ -2066,7 +2071,7 @@ private:
                                                  construct_subtree));
             // Otherwise, we must create new nodes; copy-construct from here on
         } else if (src->left_) {
-            auto new_left       = construct_subtree(static_cast<node_pointer>(src->left_));
+            auto new_left     = construct_subtree(static_cast<node_pointer>(src->left_));
             dest->left_       = static_cast<node_base_pointer>(new_left);
             new_left->parent_ = static_cast<end_node_pointer>(dest);
         }

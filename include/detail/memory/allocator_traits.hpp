@@ -19,10 +19,6 @@
 
 namespace mstd {
 
-// __pointer
-template <class _Tp>
-using __pointer_member = typename _Tp::pointer;
-
 // __allocator_traits_rebind
 template <class _Tp, class _Up, class = void>
 inline const bool __has_rebind_other_v = false;
@@ -43,13 +39,11 @@ struct __allocator_traits_rebind<_Alloc<_Tp, ArgsT...>, _Up, false> {
   using type = _Alloc<_Up, ArgsT...>;
 };
 
-template <class _Traits, class _Tp>
-using __rebind_alloc = typename _Traits::template rebind_alloc<_Tp>;
-
 template <class _Alloc>
 struct __check_valid_allocator : std::true_type {
   using _Traits = std::allocator_traits<_Alloc>;
-  static_assert(std::is_same<_Alloc, __rebind_alloc<_Traits, typename _Traits::value_type> >::value,
+  using RebindAlloc = _Traits:: template rebind_alloc <typename _Traits::value_type>;
+  static_assert(std::is_same_v<_Alloc, RebindAlloc>,
                 "[allocator.requirements] states that rebinding an allocator to the same type should result in the "
                 "original allocator");
 };
