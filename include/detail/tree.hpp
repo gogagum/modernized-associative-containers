@@ -527,7 +527,7 @@ struct __get_tree_key_type<ValueType<KeyT, ValueT> > {
 };
 
 template <class _Tp>
-using __get_tree_key_type_t = typename __get_tree_key_type<_Tp>::type;
+using __get_tree_key_type_t = __get_tree_key_type<_Tp>::type;
 
 template <class _Tp>
 struct __get_node_value_type {
@@ -540,7 +540,7 @@ struct __get_node_value_type<ValueType<KeyT, ValueT> > {
 };
 
 template <class _Tp>
-using __get_node_value_type_t = typename __get_node_value_type<_Tp>::type;
+using __get_node_value_type_t = __get_node_value_type<_Tp>::type;
 
 template <class NodePtrT, class _NodeT = typename std::pointer_traits<NodePtrT>::element_type>
 struct __tree_node_types;
@@ -617,7 +617,7 @@ class TreeNodeDestructor {
     using AllocTraits_   = std::allocator_traits<AllocatorType_>;
 
 public:
-    using pointer = typename AllocTraits_::pointer;
+    using pointer = AllocTraits_::pointer;
 
 private:
     AllocatorType_& na_;
@@ -673,8 +673,8 @@ bool tree_iterate_from_root(BreakT brk, NodePtrT root, FuncT& func, ProjT& proj)
 // Do an in-order traversal of the tree from begin to end.
 template <class NodeIterT, class FuncT, class ProjT>
 void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& proj) {
-    using NodePtrT  = typename NodeIterT::node_pointer;
-    using Reference = typename NodeIterT::reference;
+    using NodePtrT  = NodeIterT::node_pointer;
+    using Reference = NodeIterT::reference;
 
     auto begin_node = begin.ptr_;
     auto end_node   = end.ptr_;
@@ -705,8 +705,8 @@ template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeIterator {
     using NodeTypes_       = __tree_node_types<NodePtrT>;
     using NodePointer_     = NodePtrT;
-    using NodeBasePointer_ = typename NodeTypes_::node_base_pointer;
-    using EndNodePointer_  = typename NodeTypes_::end_node_pointer;
+    using NodeBasePointer_ = NodeTypes_::node_base_pointer;
+    using EndNodePointer_  = NodeTypes_::end_node_pointer;
 
     EndNodePointer_ ptr_;
 
@@ -789,8 +789,8 @@ template <class _Tp, class NodePtrT, class DiffTypeT>
 class TreeConstIterator {
     using NodeTypes_       = __tree_node_types<NodePtrT>;
     using NodePointer_     = NodePtrT;
-    using NodeBasePointer_ = typename NodeTypes_::node_base_pointer;
-    using EndNodePointer_  = typename NodeTypes_::end_node_pointer;
+    using NodeBasePointer_ = NodeTypes_::node_base_pointer;
+    using EndNodePointer_  = NodeTypes_::end_node_pointer;
 
     EndNodePointer_ ptr_;
 
