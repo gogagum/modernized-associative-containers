@@ -55,7 +55,7 @@
 //     /  \      /   |
 //   ...  ...  ...   ...
 //
-// All nodes except end_node_ have a left_ and __right_ pointer as well as a parent_ pointer.
+// All nodes except end_node_ have a left_ and right_ pointer as well as a parent_ pointer.
 // end_node_ only contains a left_ pointer, which points to the root of the tree.
 // This layout allows for iteration through the tree without a need for special handling of the end node. See
 // tree_next_iter and tree_prev_iter for more details.
@@ -113,12 +113,12 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
     if (node_ptr->left_ != nullptr && node_ptr->left_->parent_ != node_ptr) {
         return 0;
     }
-    // check node_ptr->__right_ consistency
-    if (node_ptr->__right_ != nullptr && node_ptr->__right_->parent_ != node_ptr) {
+    // check node_ptr->right_ consistency
+    if (node_ptr->right_ != nullptr && node_ptr->right_->parent_ != node_ptr) {
         return 0;
     }
-    // check node_ptr->left_ != node_ptr->__right_ unless both are nullptr
-    if (node_ptr->left_ == node_ptr->__right_ && node_ptr->left_ != nullptr) {
+    // check node_ptr->left_ != node_ptr->right_ unless both are nullptr
+    if (node_ptr->left_ == node_ptr->right_ && node_ptr->left_ != nullptr) {
         return 0;
     }
     // If this is red, neither child can be red
@@ -126,7 +126,7 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
         if (node_ptr->left_ && !node_ptr->left_->is_black_) {
             return 0;
         }
-        if (node_ptr->__right_ && !node_ptr->__right_->is_black_) {
+        if (node_ptr->right_ && !node_ptr->right_->is_black_) {
             return 0;
         }
     }
@@ -134,7 +134,7 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
     if (h == 0) {
         return 0; // invalid left subtree
     }
-    if (h != mstd::tree_sub_invariant(node_ptr->__right_)) {
+    if (h != mstd::tree_sub_invariant(node_ptr->right_)) {
         return 0;                    // invalid or different height right subtree
     }
     return h + node_ptr->is_black_; // return black height of this node
@@ -177,8 +177,8 @@ inline NodePtrT tree_min(NodePtrT node_ptr) noexcept {
 template <class NodePtrT>
 inline NodePtrT tree_max(NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "Root node shouldn't be null");
-    while (node_ptr->__right_ != nullptr) {
-        node_ptr = node_ptr->__right_;
+    while (node_ptr->right_ != nullptr) {
+        node_ptr = node_ptr->right_;
     }
     return node_ptr;
 }
@@ -187,8 +187,8 @@ inline NodePtrT tree_max(NodePtrT node_ptr) noexcept {
 template <class NodePtrT>
 NodePtrT tree_next(NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "node shouldn't be null");
-    if (node_ptr->__right_ != nullptr) {
-        return mstd::tree_min(node_ptr->__right_);
+    if (node_ptr->right_ != nullptr) {
+        return mstd::tree_min(node_ptr->right_);
     }
     while (!mstd::tree_is_left_child(node_ptr)) {
         node_ptr = node_ptr->parent_unsafe();
@@ -204,8 +204,8 @@ NodePtrT tree_next(NodePtrT node_ptr) noexcept {
 template <class EndNodePtrT, class NodePtrT>
 inline EndNodePtrT tree_next_iter(NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "node shouldn't be null");
-    if (node_ptr->__right_ != nullptr) {
-        return static_cast<EndNodePtrT>(mstd::tree_min(node_ptr->__right_));
+    if (node_ptr->right_ != nullptr) {
+        return static_cast<EndNodePtrT>(mstd::tree_min(node_ptr->right_));
     }
     while (!mstd::tree_is_left_child(node_ptr)) {
         node_ptr = node_ptr->parent_unsafe();
@@ -228,22 +228,22 @@ inline NodePtrT tree_prev_iter(EndNodePtrT node_ptr) noexcept {
     return curr_node->parent_unsafe();
 }
 
-// Effects:  Makes node_ptr->__right_ the subtree root with node_ptr as its left child
+// Effects:  Makes node_ptr->right_ the subtree root with node_ptr as its left child
 //           while preserving in-order order.
 template <class NodePtrT>
 void tree_left_rotate(NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "node shouldn't be null");
-    MSTD_ASSERT_INTERNAL(node_ptr->__right_ != nullptr, "node should have a right child");
-    NodePtrT y  = node_ptr->__right_;
-    node_ptr->__right_ = y->left_;
-    if (node_ptr->__right_ != nullptr) {
-        node_ptr->__right_->set_parent(node_ptr);
+    MSTD_ASSERT_INTERNAL(node_ptr->right_ != nullptr, "node should have a right child");
+    NodePtrT y  = node_ptr->right_;
+    node_ptr->right_ = y->left_;
+    if (node_ptr->right_ != nullptr) {
+        node_ptr->right_->set_parent(node_ptr);
     }
     y->parent_ = node_ptr->parent_;
     if (mstd::tree_is_left_child(node_ptr)) {
         node_ptr->parent_->left_ = y;
     } else {
-        node_ptr->parent_unsafe()->__right_ = y;
+        node_ptr->parent_unsafe()->right_ = y;
     }
     y->left_ = node_ptr;
     node_ptr->set_parent(y);
@@ -256,7 +256,7 @@ void tree_right_rotate(NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "node shouldn't be null");
     MSTD_ASSERT_INTERNAL(node_ptr->left_ != nullptr, "node should have a left child");
     NodePtrT y = node_ptr->left_;
-    node_ptr->left_ = y->__right_;
+    node_ptr->left_ = y->right_;
     if (node_ptr->left_ != nullptr) {
         node_ptr->left_->set_parent(node_ptr);
     }
@@ -264,9 +264,9 @@ void tree_right_rotate(NodePtrT node_ptr) noexcept {
     if (mstd::tree_is_left_child(node_ptr)) {
         node_ptr->parent_->left_ = y;
     } else {
-        node_ptr->parent_unsafe()->__right_ = y;
+        node_ptr->parent_unsafe()->right_ = y;
     }
-    y->__right_ = node_ptr;
+    y->right_ = node_ptr;
     node_ptr->set_parent(y);
 }
 
@@ -285,7 +285,7 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
     while (node_ptr != root && !node_ptr->parent_unsafe()->is_black_) {
         // node_ptr->parent_ != root because node_ptr->parent_->__is_black == false
         if (mstd::tree_is_left_child(node_ptr->parent_unsafe())) {
-            NodePtrT y = node_ptr->parent_unsafe()->parent_unsafe()->__right_;
+            NodePtrT y = node_ptr->parent_unsafe()->parent_unsafe()->right_;
             if (y != nullptr && !y->is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->is_black_ = true;
@@ -343,14 +343,14 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     // y will have at most one child.
     // y will be the initial hole in the tree (make the hole at a leaf)
     NodePtrT y
-        = (node_ptr->left_ == nullptr || node_ptr->__right_ == nullptr)
+        = (node_ptr->left_ == nullptr || node_ptr->right_ == nullptr)
           ? node_ptr
           : mstd::tree_next(node_ptr);
     // x is y's possibly null single child
     NodePtrT x
         = (y->left_ != nullptr)
           ? y->left_
-          : y->__right_;
+          : y->right_;
     // w is x's possibly null uncle (will become x's sibling)
     NodePtrT w = nullptr;
     // link x to y's parent, and find w
@@ -360,12 +360,12 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     if (mstd::tree_is_left_child(y)) {
         y->parent_->left_ = x;
         if (y != root) {
-            w = y->parent_unsafe()->__right_;
+            w = y->parent_unsafe()->right_;
         } else {
             root = x; // w == nullptr
         }
     } else {
-        y->parent_unsafe()->__right_ = x;
+        y->parent_unsafe()->right_ = x;
         // y can't be root if it is a right child
         w = y->parent_->left_;
     }
@@ -373,18 +373,18 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     // If we didn't remove node_ptr, do so now by splicing in y for node_ptr,
     //    but copy node_ptr's color.  This does not impact x or w.
     if (y != node_ptr) {
-        // node_ptr->left_ != nullptr but node_ptr->__right_ might == x == nullptr
+        // node_ptr->left_ != nullptr but node_ptr->right_ might == x == nullptr
         y->parent_ = node_ptr->parent_;
         if (mstd::tree_is_left_child(node_ptr)) {
             y->parent_->left_ = y;
         } else {
-            y->parent_unsafe()->__right_ = y;
+            y->parent_unsafe()->right_ = y;
         }
         y->left_ = node_ptr->left_;
         y->left_->set_parent(y);
-        y->__right_ = node_ptr->__right_;
-        if (y->__right_ != nullptr) {
-            y->__right_->set_parent(y);
+        y->right_ = node_ptr->right_;
+        if (y->right_ != nullptr) {
+            y->right_->set_parent(y);
         }
         y->is_black_ = node_ptr->is_black_;
         if (root == node_ptr) {
@@ -426,11 +426,11 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                             root = w;
                         }
                         // reset sibling, and it still can't be null
-                        w = w->left_->__right_;
+                        w = w->left_->right_;
                     }
                     // w->is_black_ is now true, w may have null children
                     if ((w->left_ == nullptr || w->left_->is_black_)
-                            && (w->__right_ == nullptr || w->__right_->is_black_)) {
+                            && (w->right_ == nullptr || w->right_->is_black_)) {
                         w->is_black_ = false;
                         x              = w->parent_unsafe();
                         // x can no longer be null
@@ -440,11 +440,11 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         }
                         // reset sibling, and it still can't be null
                         w = mstd::tree_is_left_child(x)
-                            ? x->parent_unsafe()->__right_
+                            ? x->parent_unsafe()->right_
                             : x->parent_->left_;
                         // continue;
                     } else { // w has a red child
-                        if (w->__right_ == nullptr || w->__right_->is_black_) {
+                        if (w->right_ == nullptr || w->right_->is_black_) {
                             // w left child is non-null and red
                             w->left_->is_black_ = true;
                             w->is_black_          = false;
@@ -456,7 +456,7 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         // w has a right red child, left child may be null
                         w->is_black_                    = w->parent_unsafe()->is_black_;
                         w->parent_unsafe()->is_black_ = true;
-                        w->__right_->is_black_          = true;
+                        w->right_->is_black_          = true;
                         mstd::tree_left_rotate(w->parent_unsafe());
                         break;
                     }
@@ -467,15 +467,15 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         mstd::tree_right_rotate(w->parent_unsafe());
                         // x is still valid
                         // reset root only if necessary
-                        if (root == w->__right_) {
+                        if (root == w->right_) {
                             root = w;
                         }
                         // reset sibling, and it still can't be null
-                        w = w->__right_->left_;
+                        w = w->right_->left_;
                     }
                     // w->is_black_ is now true, w may have null children
                     if ((w->left_ == nullptr || w->left_->is_black_)
-                            && (w->__right_ == nullptr || w->__right_->is_black_)) {
+                            && (w->right_ == nullptr || w->right_->is_black_)) {
                         w->is_black_ = false;
                         x              = w->parent_unsafe();
                         // x can no longer be null
@@ -485,13 +485,13 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         }
                         // reset sibling, and it still can't be null
                         w = mstd::tree_is_left_child(x)
-                            ? x->parent_unsafe()->__right_
+                            ? x->parent_unsafe()->right_
                             : x->parent_->left_;
                         // continue;
                     } else { // w has a red child
                         if (w->left_ == nullptr || w->left_->is_black_) {
                             // w right child is non-null and red
-                            w->__right_->is_black_ = true;
+                            w->right_->is_black_ = true;
                             w->is_black_           = false;
                             mstd::tree_left_rotate(w);
                             // w is known not to be root, so root hasn't changed
@@ -572,7 +572,7 @@ public:
     using pointer            = __rebind_pointer_t<VoidPtrT, TreeNodeBase>;
     using end_node_pointer = __rebind_pointer_t<VoidPtrT, TreeEndNode<pointer> >;
 
-    pointer __right_;
+    pointer right_;
     end_node_pointer parent_;
     bool is_black_;
 
@@ -664,8 +664,8 @@ bool tree_iterate_from_root(BreakT brk, NodePtrT root, FuncT& func, ProjT& proj)
         return true;
     }
     std::invoke(func, std::invoke(proj, static_cast<ReferenceT>(root->get_value())));
-    if (root->__right_) {
-        return mstd::tree_iterate_from_root<ReferenceT>(brk, static_cast<NodePtrT>(root->__right_), func, proj);
+    if (root->right_) {
+        return mstd::tree_iterate_from_root<ReferenceT>(brk, static_cast<NodePtrT>(root->right_), func, proj);
     }
     return false;
 }
@@ -685,10 +685,10 @@ void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& p
         }
         const auto nfirst = static_cast<NodePtrT>(begin_node);
         std::invoke(func, std::invoke(proj, static_cast<Reference>(nfirst->get_value())));
-        if (nfirst->__right_) {
+        if (nfirst->right_) {
             if (mstd::tree_iterate_from_root<Reference>(
                     [&](NodePtrT node) -> bool { return node == end_node; },
-                    static_cast<NodePtrT>(nfirst->__right_),
+                    static_cast<NodePtrT>(nfirst->right_),
                     func,
                     proj)) {
                 return;
@@ -1250,7 +1250,7 @@ public:
             // Always check the max node first. This optimizes for sorted ranges inserted at the end.
             if (!value_comp()(holder->get_value(), max_node->get_value())) { // node >= __max_val
                 insertNodeAt(static_cast<end_node_pointer>(max_node),
-                             max_node->__right_,
+                             max_node->right_,
                              static_cast<node_base_pointer>(holder.get()));
                 max_node = holder.release();
             } else {
@@ -1284,7 +1284,7 @@ public:
                     if (value_comp()(max_node->get_value(), key)) { // key > max_node
                         auto holder = constructNode_(std::forward<Reference>(val));
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
-                                     max_node->__right_,
+                                     max_node->right_,
                                      static_cast<node_base_pointer>(holder.get()));
                         max_node = holder.release();
                     } else {
@@ -1299,7 +1299,7 @@ public:
                     auto holder = constructNode_(std::forward<Reference>(val));
                     if (value_comp()(max_node->get_value(), holder->get_value())) { // node > max_node
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
-                                     max_node->__right_,
+                                     max_node->right_,
                                      static_cast<node_base_pointer>(holder.get()));
                         max_node = holder.release();
                     } else {
@@ -1468,7 +1468,7 @@ public:
 
     void insertNodeAt(end_node_pointer parent, node_base_pointer& child, node_base_pointer new_node) noexcept {
         new_node->left_   = nullptr;
-        new_node->__right_  = nullptr;
+        new_node->right_  = nullptr;
         new_node->parent_ = parent;
         // new_node->is_black_ is initialized in tree_balance_after_insert
         child = new_node;
@@ -1498,7 +1498,7 @@ public:
             if (comp_res.less()) {
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res.greater()) {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return 1;
             }
@@ -1518,11 +1518,11 @@ public:
                 result = static_cast<end_node_pointer>(root_node);
                 root_node   = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res.greater()) {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return std::distance(
                     const_iterator{lowerUpperBoundMultiImpl_<true>(key, static_cast<node_pointer>(root_node->left_), static_cast<end_node_pointer>(root_node))},
-                    const_iterator{lowerUpperBoundMultiImpl_<false>(key, static_cast<node_pointer>(root_node->__right_), result)}
+                    const_iterator{lowerUpperBoundMultiImpl_<false>(key, static_cast<node_pointer>(root_node->right_), result)}
                 );
             }
         }
@@ -1552,12 +1552,12 @@ private:
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res.greater()) {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             } else if constexpr (lower_bound) {
                 return static_cast<end_node_pointer>(root_node);
             } else {
-                return root_node->__right_
-                    ? static_cast<end_node_pointer>(mstd::tree_min(root_node->__right_))
+                return root_node->right_
+                    ? static_cast<end_node_pointer>(mstd::tree_min(root_node->right_))
                     : result;
             }
         }
@@ -1573,7 +1573,7 @@ private:
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             }
         }
         return result;
@@ -1602,13 +1602,13 @@ public:
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res.greater()) {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return {
                     SelfIterator<Self>(root_node),
                     SelfIterator<Self>(
-                        (root_node->__right_ != nullptr)
-                        ? static_cast<end_node_pointer>(mstd::tree_min(root_node->__right_))
+                        (root_node->right_ != nullptr)
+                        ? static_cast<end_node_pointer>(mstd::tree_min(root_node->right_))
                         : result
                     ),
                 };
@@ -1631,7 +1631,7 @@ public:
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res.greater()) {
-                root_node = static_cast<node_pointer>(root_node->__right_);
+                root_node = static_cast<node_pointer>(root_node->right_);
             } else {  // Equal
                 auto begin = self.template lowerUpperBoundMultiImpl_<true>(
                                  key,
@@ -1639,7 +1639,7 @@ public:
                                  static_cast<end_node_pointer>(root_node));
                 auto end = self.template lowerUpperBoundMultiImpl_<false>(
                                key,
-                               static_cast<node_pointer>(root_node->__right_),
+                               static_cast<node_pointer>(root_node->right_),
                                result);
                 return {
                     SelfIterator<Self>{begin},
@@ -1659,8 +1659,8 @@ public:
     node_holder remove(const_iterator pos) noexcept {
         auto node_ptr = pos.__get_np();
         if (begin_node_ == pos.ptr_) {
-            if (node_ptr->__right_ != nullptr) {
-                begin_node_ = static_cast<end_node_pointer>(node_ptr->__right_);
+            if (node_ptr->right_ != nullptr) {
+                begin_node_ = static_cast<end_node_pointer>(node_ptr->right_);
             } else {
                 begin_node_ = static_cast<end_node_pointer>(node_ptr->parent_);
             }
@@ -1704,14 +1704,14 @@ public:
                 node_base_ptr = std::addressof(node_ptr->left_);
                 node_ptr      = static_cast<node_pointer>(node_ptr->left_);
             } else if (comp_res.greater()) {
-                if (node_ptr->__right_ == nullptr) {
+                if (node_ptr->right_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
-                        node_ptr->__right_,
+                        node_ptr->right_,
                     };
                 }
-                node_base_ptr = std::addressof(node_ptr->__right_);
-                node_ptr      = static_cast<node_pointer>(node_ptr->__right_);
+                node_base_ptr = std::addressof(node_ptr->right_);
+                node_ptr      = static_cast<node_pointer>(node_ptr->right_);
             } else {
                 return {
                     static_cast<end_node_pointer>(node_ptr),
@@ -1748,7 +1748,7 @@ public:
                 }
                 return {
                     prior.ptr_,
-                    static_cast<node_pointer>(prior.ptr_)->__right_,
+                    static_cast<node_pointer>(prior.ptr_)->right_,
                 };
             }
             // key <= *prev(hint)
@@ -1760,10 +1760,10 @@ public:
             const_iterator next = std::next(hint);
             if (next == end() || value_comp()(key, *next)) {
                 // *hint < key < *std::next(hint)
-                if (hint.__get_np()->__right_ == nullptr) {
+                if (hint.__get_np()->right_ == nullptr) {
                     return {
                         hint.ptr_,
-                        static_cast<node_pointer>(hint.ptr_)->__right_,
+                        static_cast<node_pointer>(hint.ptr_)->right_,
                     };
                 }
                 return {
@@ -1805,11 +1805,11 @@ private:
         if (node_ptr != nullptr) {
             while (true) {
                 if (value_comp()(node_ptr->get_value(), value)) {
-                    if (node_ptr->__right_ != nullptr) {
-                        node_ptr = static_cast<node_pointer>(node_ptr->__right_);
+                    if (node_ptr->right_ != nullptr) {
+                        node_ptr = static_cast<node_pointer>(node_ptr->right_);
                     } else {
                         parent = static_cast<end_node_pointer>(node_ptr);
-                        return node_ptr->__right_;
+                        return node_ptr->right_;
                     }
                 } else {
                     if (node_ptr->left_ != nullptr) {
@@ -1840,11 +1840,11 @@ private:
                         return parent->left_;
                     }
                 } else {
-                    if (node_ptr->__right_ != nullptr) {
-                        node_ptr = static_cast<node_pointer>(node_ptr->__right_);
+                    if (node_ptr->right_ != nullptr) {
+                        node_ptr = static_cast<node_pointer>(node_ptr->right_);
                     } else {
                         parent = static_cast<end_node_pointer>(node_ptr);
-                        return node_ptr->__right_;
+                        return node_ptr->right_;
                     }
                 }
             }
@@ -1872,7 +1872,7 @@ private:
                     return parent->left_;
                 } else {
                     parent = static_cast<end_node_pointer>(prior.ptr_);
-                    return static_cast<node_base_pointer>(prior.ptr_)->__right_;
+                    return static_cast<node_base_pointer>(prior.ptr_)->right_;
                 }
             }
             // value < *prev(hint)
@@ -1981,7 +1981,7 @@ private:
 
             (*this)(static_cast<node_pointer>(node_ptr->left_));
 
-            auto right = node_ptr->__right_;
+            auto right = node_ptr->right_;
 
             node_traits::destroy(__alloc_, std::addressof(node_ptr->get_value()));
             node_traits::deallocate(__alloc_, node_ptr, 1);
@@ -2006,18 +2006,18 @@ private:
             constructFromTree_(static_cast<node_pointer>(src->left_), construct),
             node_alloc_,
         };
-        node_pointer right = constructFromTree_(static_cast<node_pointer>(src->__right_), construct);
+        node_pointer right = constructFromTree_(static_cast<node_pointer>(src->right_), construct);
 
         node_pointer new_node_ptr = new_node.release();
 
         new_node_ptr->is_black_ = src->is_black_;
         new_node_ptr->left_     = static_cast<node_base_pointer>(left.release());
-        new_node_ptr->__right_    = static_cast<node_base_pointer>(right);
+        new_node_ptr->right_    = static_cast<node_base_pointer>(right);
         if (new_node_ptr->left_) {
             new_node_ptr->left_->parent_ = static_cast<end_node_pointer>(new_node_ptr);
         }
-        if (new_node_ptr->__right_) {
-            new_node_ptr->__right_->parent_ = static_cast<end_node_pointer>(new_node_ptr);
+        if (new_node_ptr->right_) {
+            new_node_ptr->right_->parent_ = static_cast<end_node_pointer>(new_node_ptr);
         }
         return new_node_ptr;
     }
@@ -2072,16 +2072,16 @@ private:
         }
 
         // Identical to the left case above, just for the right nodes
-        if (dest->__right_) {
-            dest->__right_
+        if (dest->right_) {
+            dest->right_
                 = static_cast<node_base_pointer>(assignFromTree(
-                                                 static_cast<node_pointer>(dest->__right_),
-                                                 static_cast<node_pointer>(src->__right_),
+                                                 static_cast<node_pointer>(dest->right_),
+                                                 static_cast<node_pointer>(src->right_),
                                                  assign,
                                                  construct_subtree));
-        } else if (src->__right_) {
-            auto new_right       = construct_subtree(static_cast<node_pointer>(src->__right_));
-            dest->__right_       = static_cast<node_base_pointer>(new_right);
+        } else if (src->right_) {
+            auto new_right       = construct_subtree(static_cast<node_pointer>(src->right_));
+            dest->right_       = static_cast<node_base_pointer>(new_right);
             new_right->parent_ = static_cast<end_node_pointer>(dest);
         }
 
