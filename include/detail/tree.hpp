@@ -645,7 +645,7 @@ public:
     friend class MapNodeDestructor;
 };
 
-template <class _NodeType, class _Alloc>
+template <class NodeT, class _Alloc>
 struct __generic_container_node_destructor;
 template <class _Tp, class VoidPtrT, class _Alloc>
 struct __generic_container_node_destructor<TreeNode<_Tp, VoidPtrT>, _Alloc> : TreeNodeDestructor<_Alloc> {
