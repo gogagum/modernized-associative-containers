@@ -29,8 +29,8 @@ namespace mstd {
 template <class _Tp, template <class...> class _Template>
 inline const bool __is_specialization_v = false; // true if and only if _Tp is a specialization of _Template
 
-template <template <class...> class _Template, class... _Args>
-inline const bool __is_specialization_v<_Template<_Args...>, _Template> = true;
+template <template <class...> class _Template, class... ArgsT>
+inline const bool __is_specialization_v<_Template<ArgsT...>, _Template> = true;
 
 } // namespace mstd
 
