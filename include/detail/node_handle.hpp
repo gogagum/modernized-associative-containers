@@ -161,15 +161,15 @@ public:
 
 template <class _NodeType, class _Derived>
 struct __set_node_handle_specifics {
-  typedef typename _NodeType::__node_value_type value_type;
+  typedef typename _NodeType::node_value_type value_type;
 
   value_type& value() const { return static_cast<_Derived const*>(this)->__ptr_->get_value(); }
 };
 
 template <class _NodeType, class _Derived>
 struct __map_node_handle_specifics {
-  using key_type    = std::remove_const_t<typename _NodeType::__node_value_type::first_type>;
-  using mapped_type = typename _NodeType::__node_value_type::second_type;
+  using key_type    = std::remove_const_t<typename _NodeType::node_value_type::first_type>;
+  using mapped_type = typename _NodeType::node_value_type::second_type;
 
   key_type& key() const {
     return const_cast<key_type&>(static_cast<_Derived const*>(this)->__ptr_->get_value().first);
