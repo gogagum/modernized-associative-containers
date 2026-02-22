@@ -7,56 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MSTD___NODE_HANDLE
-#define MSTD___NODE_HANDLE
-
-/*
-
-template<unspecified>
-class node-handle {
-public:
-  using value_type     = see below;     // not present for map containers
-  using key_type       = see below;     // not present for set containers
-  using mapped_type    = see below;     // not present for set containers
-  using allocator_type = see below;
-
-private:
-  using container_node_type = unspecified;                  // exposition only
-  using iterator_traits = allocator_traits<allocator_type>;     // exposition only
-
-  typename iterator_traits::template
-    rebind_traits<container_node_type>::pointer ptr_;       // exposition only
-  optional<allocator_type> alloc_;                          // exposition only
-
-public:
-  // [container.node.cons], constructors, copy, and assignment
-  constexpr node-handle() noexcept : ptr_(), alloc_() {}
-  node-handle(node-handle&&) noexcept;
-  node-handle& operator=(node-handle&&);
-
-  // [container.node.dtor], destructor
-  ~node-handle();
-
-  // [container.node.observers], observers
-  value_type& value() const;            // not present for map containers
-  key_type& key() const;                // not present for set containers
-  mapped_type& mapped() const;          // not present for set containers
-
-  allocator_type get_allocator() const;
-  explicit operator bool() const noexcept;
-  [[nodiscard]] bool empty() const noexcept; // nodiscard since C++20
-
-  // [container.node.modifiers], modifiers
-  void swap(node-handle&)
-    noexcept(iterator_traits::propagate_on_container_swap::value ||
-             iterator_traits::is_always_equal::value);
-
-  friend void swap(node-handle& x, node-handle& y) noexcept(noexcept(x.swap(y))) {
-    x.swap(y);
-  }
-};
-
-*/
+#ifndef MSTD_NODE_HANDLE
+#define MSTD_NODE_HANDLE
 
 #include <cassert>
 #include "config.hpp"
@@ -69,131 +21,143 @@ public:
 namespace mstd {
 
 // Specialized in Tree & __hash_table for their _NodeType.
-template <class _NodeType, class _Alloc>
+template <class NodeT, class AllocT>
 struct __generic_container_node_destructor;
 
-template <class _NodeType, class _Alloc, template <class, class> class _MapOrSetSpecifics>
-class __basic_node_handle
-    : public _MapOrSetSpecifics< _NodeType, __basic_node_handle<_NodeType, _Alloc, _MapOrSetSpecifics>> {
-  template <class _Tp, class _Compare, class _Allocator>
+template <class NodeT, class AllocT, template <class, class> class MapOrSetSpecificsT>
+class BasicNodeHandle
+    : public MapOrSetSpecificsT< NodeT, BasicNodeHandle<NodeT, AllocT, MapOrSetSpecificsT>> {
+  
+  template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
   friend class Tree;
-  template <class _Tp, class _Hash, class _Equal, class _Allocator>
-  friend class __hash_table;
-  friend struct _MapOrSetSpecifics< _NodeType, __basic_node_handle<_NodeType, _Alloc, _MapOrSetSpecifics>>;
+  // template <class _Tp, class _Hash, class _Equal, class _Allocator>
+  // friend class __hash_table;
+  friend struct MapOrSetSpecificsT<NodeT, BasicNodeHandle<NodeT, AllocT, MapOrSetSpecificsT>>;
 
-  typedef std::allocator_traits<_Alloc> __alloc_traits;
-  typedef __rebind_pointer_t<typename __alloc_traits::void_pointer, _NodeType> __node_pointer_type;
+  using AllocTraits_ = std::allocator_traits<AllocT>;
+  using NodePointerType_ = __rebind_pointer_t<typename AllocTraits_::void_pointer, NodeT>;
 
 public:
-  typedef _Alloc allocator_type;
+  using allocator_type = AllocT;
 
 private:
-  __node_pointer_type __ptr_ = nullptr;
-  std::optional<allocator_type> __alloc_;
+  NodePointerType_ ptr_ = nullptr;
+  std::optional<allocator_type> alloc_;
 
-  void __release_ptr() {
-    __ptr_   = nullptr;
-    __alloc_ = std::nullopt;
+  void releasePtr_() {
+    ptr_   = nullptr;
+    alloc_ = std::nullopt;
   }
 
-  void __destroy_node_pointer() {
-    if (__ptr_ != nullptr) {
-      typedef typename __allocator_traits_rebind< allocator_type, _NodeType>::type __node_alloc_type;
-      __node_alloc_type __alloc(*__alloc_);
-      __generic_container_node_destructor<_NodeType, __node_alloc_type>(__alloc, true)(__ptr_);
-      __ptr_ = nullptr;
+  void destroyNodePointer_() {
+    if (ptr_ != nullptr) {
+      using NodeAllocType = __allocator_traits_rebind< allocator_type, NodeT>::type;
+      NodeAllocType alloc(*alloc_);
+      __generic_container_node_destructor<NodeT, NodeAllocType>(alloc, true)(ptr_);
+      ptr_ = nullptr;
     }
   }
 
-  __basic_node_handle(__node_pointer_type __ptr, allocator_type const& __alloc)
-      : __ptr_(__ptr), __alloc_(__alloc) {}
+  BasicNodeHandle(NodePointerType_ ptr, allocator_type const& alloc)
+      : ptr_(ptr)
+      , alloc_(alloc) {}
 
 public:
-  __basic_node_handle() = default;
+  BasicNodeHandle() = default;
 
-  __basic_node_handle(__basic_node_handle&& __other) noexcept
-      : __ptr_(__other.__ptr_), __alloc_(std::move(__other.__alloc_)) {
-    __other.__ptr_   = nullptr;
-    __other.__alloc_ = std::nullopt;
+  BasicNodeHandle(BasicNodeHandle&& other) noexcept
+      : ptr_(other.ptr_)
+      , alloc_(std::move(other.alloc_)) {
+    other.ptr_   = nullptr;
+    other.alloc_ = std::nullopt;
   }
 
-  __basic_node_handle& operator=(__basic_node_handle&& __other) {
+  BasicNodeHandle& operator=(BasicNodeHandle&& other) {
     MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-        __alloc_ == std::nullopt || __alloc_traits::propagate_on_container_move_assignment::value ||
-            __alloc_ == __other.__alloc_,
+        alloc_ == std::nullopt || AllocTraits_::propagate_on_container_move_assignment::value ||
+            alloc_ == other.alloc_,
         "node_type with incompatible allocator passed to "
         "node_type::operator=(node_type&&)");
 
-    __destroy_node_pointer();
-    __ptr_ = __other.__ptr_;
+    destroyNodePointer_();
+    ptr_ = other.ptr_;
 
-    if (__alloc_traits::propagate_on_container_move_assignment::value || __alloc_ == std::nullopt)
-      __alloc_ = std::move(__other.__alloc_);
+    if (AllocTraits_::propagate_on_container_move_assignment::value || alloc_ == std::nullopt) {
+      alloc_ = std::move(other.alloc_);
+    }
 
-    __other.__ptr_   = nullptr;
-    __other.__alloc_ = std::nullopt;
+    other.ptr_   = nullptr;
+    other.alloc_ = std::nullopt;
 
     return *this;
   }
 
-  allocator_type get_allocator() const { return *__alloc_; }
+  allocator_type get_allocator() const { return *alloc_; }
 
-  explicit operator bool() const { return __ptr_ != nullptr; }
+  explicit operator bool() const { return ptr_ != nullptr; }
 
-  [[nodiscard]] bool empty() const { return __ptr_ == nullptr; }
+  [[nodiscard]] bool empty() const { return ptr_ == nullptr; }
 
-  void swap(__basic_node_handle& __other) noexcept(
-      __alloc_traits::propagate_on_container_swap::value || __alloc_traits::is_always_equal::value) {
+  void swap(BasicNodeHandle& other) noexcept(
+      AllocTraits_::propagate_on_container_swap::value || AllocTraits_::is_always_equal::value) {
     using std::swap;
-    swap(__ptr_, __other.__ptr_);
-    if (__alloc_traits::propagate_on_container_swap::value || __alloc_ == std::nullopt ||
-        __other.__alloc_ == std::nullopt)
-      swap(__alloc_, __other.__alloc_);
+    swap(ptr_, other.ptr_);
+    if (AllocTraits_::propagate_on_container_swap::value 
+        || alloc_ == std::nullopt
+        || other.alloc_ == std::nullopt) {
+      swap(alloc_, other.alloc_);
+    }
   }
 
   friend void
-  swap(__basic_node_handle& __a, __basic_node_handle& __b) noexcept(noexcept(__a.swap(__b))) {
-    __a.swap(__b);
+  swap(BasicNodeHandle& lhs, BasicNodeHandle& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+    lhs.swap(rhs);
   }
 
-  ~__basic_node_handle() { __destroy_node_pointer(); }
+  ~BasicNodeHandle() { destroyNodePointer_(); }
 };
 
-template <class _NodeType, class _Derived>
-struct __set_node_handle_specifics {
-  typedef typename _NodeType::node_value_type value_type;
+namespace detail {
 
-  value_type& value() const { return static_cast<_Derived const*>(this)->__ptr_->get_value(); }
+template <class NodeT, class DerivedT>
+struct SetNodeHandleSpecifics {
+  using value_type = NodeT::node_value_type;
+
+  value_type& value() const {
+    return static_cast<DerivedT const*>(this)->ptr_->get_value();
+  }
 };
 
-template <class _NodeType, class _Derived>
-struct __map_node_handle_specifics {
-  using key_type    = std::remove_const_t<typename _NodeType::node_value_type::first_type>;
-  using mapped_type = typename _NodeType::node_value_type::second_type;
+template <class NodeT, class DerivedT>
+struct MapNodeHandleSpecifics {
+  using key_type    = std::remove_const_t<typename NodeT::node_value_type::first_type>;
+  using mapped_type = NodeT::node_value_type::second_type;
 
   key_type& key() const {
-    return const_cast<key_type&>(static_cast<_Derived const*>(this)->__ptr_->get_value().first);
+    return const_cast<key_type&>(static_cast<DerivedT const*>(this)->ptr_->get_value().first);
   }
 
   mapped_type& mapped() const {
-    return static_cast<_Derived const*>(this)->__ptr_->get_value().second;
+    return static_cast<DerivedT const*>(this)->ptr_->get_value().second;
   }
 };
 
-template <class _NodeType, class _Alloc>
-using __set_node_handle = __basic_node_handle< _NodeType, _Alloc, __set_node_handle_specifics>;
+}  // namespace detail
 
-template <class _NodeType, class _Alloc>
-using MapNodeHandle = __basic_node_handle< _NodeType, _Alloc, __map_node_handle_specifics>;
+template <class NodeT, class AllocT>
+using SetNodeHandle = BasicNodeHandle< NodeT, AllocT, detail::SetNodeHandleSpecifics>;
 
-template <class _Iterator, class _NodeType>
+template <class NodeT, class AllocT>
+using MapNodeHandle = BasicNodeHandle< NodeT, AllocT, detail::MapNodeHandleSpecifics>;
+
+template <class _Iterator, class NodeT>
 struct __insert_return_type {
   _Iterator position;
   bool inserted;
-  _NodeType node;
+  NodeT node;
 };
 
 } // namespace mstd
 
 
-#endif // MSTD___NODE_HANDLE
+#endif // MSTD_NODE_HANDLE
