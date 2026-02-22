@@ -55,7 +55,7 @@
 //     /  \      /   |
 //   ...  ...  ...   ...
 //
-// All nodes except end_node_ have a __left_ and __right_ pointer as well as a __parent_ pointer.
+// All nodes except end_node_ have a __left_ and __right_ pointer as well as a parent_ pointer.
 // end_node_ only contains a __left_ pointer, which points to the root of the tree.
 // This layout allows for iteration through the tree without a need for special handling of the end node. See
 // tree_next_iter and tree_prev_iter for more details.
@@ -80,24 +80,24 @@ struct ValueType;
  * algorithms taking a parameter named root should assume that root
  * points to a proper red black tree (unless otherwise specified).
  *
- * Each algorithm herein assumes that root->__parent_ points to a non-null
+ * Each algorithm herein assumes that root->parent_ points to a non-null
  * structure which has a member __left_ which points back to root.  No other
- * member is read or written to at root->__parent_.
+ * member is read or written to at root->parent_.
  *
- * root->__parent_ will be referred to below (in comments only) as endNode.
+ * root->parent_ will be referred to below (in comments only) as endNode.
  * endNode->__left_ is an externally accessible lvalue for root, and can be
  * changed by node insertion and removal (without explicit reference to endNode).
  *
  * All nodes (with the exception of endNode), even the node referred to as
- * root, have a non-null __parent_ field.
+ * root, have a non-null parent_ field.
  *
  */
 
-// Returns:  true if __x is a left child of its parent, else false
-// Precondition:  __x != nullptr.
+// Returns:  true if x is a left child of its parent, else false
+// Precondition:  x != nullptr.
 template <class NodePtrT>
-inline bool tree_is_left_child(NodePtrT __x) noexcept {
-    return __x == __x->__parent_->__left_;
+inline bool tree_is_left_child(NodePtrT x) noexcept {
+    return x == x->parent_->__left_;
 }
 
 // Determines if the subtree rooted at node_ptr is a proper red black subtree.  If
@@ -110,11 +110,11 @@ unsigned tree_sub_invariant(NodePtrT node_ptr) {
     }
     // parent consistency checked by caller
     // check node_ptr->__left_ consistency
-    if (node_ptr->__left_ != nullptr && node_ptr->__left_->__parent_ != node_ptr) {
+    if (node_ptr->__left_ != nullptr && node_ptr->__left_->parent_ != node_ptr) {
         return 0;
     }
     // check node_ptr->__right_ consistency
-    if (node_ptr->__right_ != nullptr && node_ptr->__right_->__parent_ != node_ptr) {
+    if (node_ptr->__right_ != nullptr && node_ptr->__right_->parent_ != node_ptr) {
         return 0;
     }
     // check node_ptr->__left_ != node_ptr->__right_ unless both are nullptr
@@ -148,8 +148,8 @@ bool tree_invariant(NodePtrT root) {
     if (root == nullptr) {
         return true;
     }
-    // check node_ptr->__parent_ consistency
-    if (root->__parent_ == nullptr) {
+    // check node_ptr->parent_ consistency
+    if (root->parent_ == nullptr) {
         return false;
     }
     if (!mstd::tree_is_left_child(root)) {
@@ -210,7 +210,7 @@ inline EndNodePtrT tree_next_iter(NodePtrT node_ptr) noexcept {
     while (!mstd::tree_is_left_child(node_ptr)) {
         node_ptr = node_ptr->parent_unsafe();
     }
-    return static_cast<EndNodePtrT>(node_ptr->__parent_);
+    return static_cast<EndNodePtrT>(node_ptr->parent_);
 }
 
 // Returns:  pointer to the previous in-order node before x.
@@ -239,9 +239,9 @@ void tree_left_rotate(NodePtrT node_ptr) noexcept {
     if (node_ptr->__right_ != nullptr) {
         node_ptr->__right_->set_parent(node_ptr);
     }
-    y->__parent_ = node_ptr->__parent_;
+    y->parent_ = node_ptr->parent_;
     if (mstd::tree_is_left_child(node_ptr)) {
-        node_ptr->__parent_->__left_ = y;
+        node_ptr->parent_->__left_ = y;
     } else {
         node_ptr->parent_unsafe()->__right_ = y;
     }
@@ -260,9 +260,9 @@ void tree_right_rotate(NodePtrT node_ptr) noexcept {
     if (node_ptr->__left_ != nullptr) {
         node_ptr->__left_->set_parent(node_ptr);
     }
-    y->__parent_ = node_ptr->__parent_;
+    y->parent_ = node_ptr->parent_;
     if (mstd::tree_is_left_child(node_ptr)) {
-        node_ptr->__parent_->__left_ = y;
+        node_ptr->parent_->__left_ = y;
     } else {
         node_ptr->parent_unsafe()->__right_ = y;
     }
@@ -283,7 +283,7 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
     MSTD_ASSERT_INTERNAL(node_ptr != nullptr, "Can't attach null node to a leaf");
     node_ptr->is_black_ = node_ptr == root;
     while (node_ptr != root && !node_ptr->parent_unsafe()->is_black_) {
-        // node_ptr->__parent_ != root because node_ptr->__parent_->__is_black == false
+        // node_ptr->parent_ != root because node_ptr->parent_->__is_black == false
         if (mstd::tree_is_left_child(node_ptr->parent_unsafe())) {
             NodePtrT y = node_ptr->parent_unsafe()->parent_unsafe()->__right_;
             if (y != nullptr && !y->is_black_) {
@@ -305,7 +305,7 @@ void tree_balance_after_insert(NodePtrT root, NodePtrT node_ptr) noexcept {
                 break;
             }
         } else {
-            NodePtrT y = node_ptr->parent_unsafe()->__parent_->__left_;
+            NodePtrT y = node_ptr->parent_unsafe()->parent_->__left_;
             if (y != nullptr && !y->is_black_) {
                 node_ptr              = node_ptr->parent_unsafe();
                 node_ptr->is_black_ = true;
@@ -355,10 +355,10 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     NodePtrT w = nullptr;
     // link x to y's parent, and find w
     if (x != nullptr) {
-        x->__parent_ = y->__parent_;
+        x->parent_ = y->parent_;
     }
     if (mstd::tree_is_left_child(y)) {
-        y->__parent_->__left_ = x;
+        y->parent_->__left_ = x;
         if (y != root) {
             w = y->parent_unsafe()->__right_;
         } else {
@@ -367,16 +367,16 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
     } else {
         y->parent_unsafe()->__right_ = x;
         // y can't be root if it is a right child
-        w = y->__parent_->__left_;
+        w = y->parent_->__left_;
     }
     const bool removed_black = y->is_black_;
     // If we didn't remove node_ptr, do so now by splicing in y for node_ptr,
     //    but copy node_ptr's color.  This does not impact x or w.
     if (y != node_ptr) {
         // node_ptr->__left_ != nullptr but node_ptr->__right_ might == x == nullptr
-        y->__parent_ = node_ptr->__parent_;
+        y->parent_ = node_ptr->parent_;
         if (mstd::tree_is_left_child(node_ptr)) {
-            y->__parent_->__left_ = y;
+            y->parent_->__left_ = y;
         } else {
             y->parent_unsafe()->__right_ = y;
         }
@@ -441,7 +441,7 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         // reset sibling, and it still can't be null
                         w = mstd::tree_is_left_child(x)
                             ? x->parent_unsafe()->__right_
-                            : x->__parent_->__left_;
+                            : x->parent_->__left_;
                         // continue;
                     } else { // w has a red child
                         if (w->__right_ == nullptr || w->__right_->is_black_) {
@@ -486,7 +486,7 @@ void tree_remove(NodePtrT root, NodePtrT node_ptr) noexcept {
                         // reset sibling, and it still can't be null
                         w = mstd::tree_is_left_child(x)
                             ? x->parent_unsafe()->__right_
-                            : x->__parent_->__left_;
+                            : x->parent_->__left_;
                         // continue;
                     } else { // w has a red child
                         if (w->__left_ == nullptr || w->__left_->is_black_) {
@@ -573,12 +573,12 @@ public:
     using end_node_pointer = __rebind_pointer_t<VoidPtrT, TreeEndNode<pointer> >;
 
     pointer __right_;
-    end_node_pointer __parent_;
+    end_node_pointer parent_;
     bool is_black_;
 
-    pointer parent_unsafe() const { return static_cast<pointer>(__parent_); }
+    pointer parent_unsafe() const { return static_cast<pointer>(parent_); }
 
-    void set_parent(pointer parent) { __parent_ = static_cast<end_node_pointer>(parent); }
+    void set_parent(pointer parent) { parent_ = static_cast<end_node_pointer>(parent); }
 
     TreeNodeBase()             = default;
     TreeNodeBase(TreeNodeBase const&)            = delete;
@@ -695,9 +695,9 @@ void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& p
             }
         }
         while (!mstd::tree_is_left_child(static_cast<NodePtrT>(begin_node))) {
-            begin_node = static_cast<NodePtrT>(begin_node)->__parent_;
+            begin_node = static_cast<NodePtrT>(begin_node)->parent_;
         }
-        begin_node = static_cast<NodePtrT>(begin_node)->__parent_;
+        begin_node = static_cast<NodePtrT>(begin_node)->parent_;
     }
 }
 
@@ -991,7 +991,7 @@ public:
             return;
         }
         *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
-        root()->__parent_ = endNode();
+        root()->parent_ = endNode();
         begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
         size_           = other.size();
     }
@@ -1006,7 +1006,7 @@ public:
         }
 
         *root_ptr()       = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
-        root()->__parent_ = endNode();
+        root()->parent_ = endNode();
         begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
         size_           = other.size();
     }
@@ -1023,7 +1023,7 @@ public:
         } else {
             *root_ptr() = static_cast<node_base_pointer>(copyConstructTree_(other.root()));
             if (root()) {
-                root()->__parent_ = endNode();
+                root()->parent_ = endNode();
             }
         }
         begin_node_
@@ -1050,7 +1050,7 @@ public:
         if (size_ == 0) {
             begin_node_ = endNode();
         } else {
-            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            endNode()->__left_->parent_ = static_cast<end_node_pointer>(endNode());
             other.begin_node_           = other.endNode();
             other.endNode()->__left_      = nullptr;
             other.size_                 = 0;
@@ -1068,14 +1068,14 @@ public:
         if (alloc == other.alloc()) {
             begin_node_                 = other.begin_node_;
             endNode()->__left_            = other.endNode()->__left_;
-            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            endNode()->__left_->parent_ = static_cast<end_node_pointer>(endNode());
             size_                       = other.size_;
             other.begin_node_           = other.endNode();
             other.endNode()->__left_      = nullptr;
             other.size_                 = 0;
         } else {
             *root_ptr()       = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
-            root()->__parent_ = endNode();
+            root()->parent_ = endNode();
             begin_node_     = static_cast<end_node_pointer>(mstd::tree_min(endNode()->__left_));
             size_           = other.size();
             other.clear(); // Ensure that other is in a valid state after moving out the keys
@@ -1136,11 +1136,11 @@ public:
         if (size_ == 0) {
             begin_node_ = endNode();
         } else {
-            endNode()->__left_->__parent_ = endNode();
+            endNode()->__left_->parent_ = endNode();
         } if (other.size_ == 0) {
             other.begin_node_ = other.endNode();
         } else {
-            other.endNode()->__left_->__parent_ = other.endNode();
+            other.endNode()->__left_->parent_ = other.endNode();
         }
     }
 
@@ -1469,7 +1469,7 @@ public:
     void insertNodeAt(end_node_pointer parent, node_base_pointer& child, node_base_pointer new_node) noexcept {
         new_node->__left_   = nullptr;
         new_node->__right_  = nullptr;
-        new_node->__parent_ = parent;
+        new_node->parent_ = parent;
         // new_node->is_black_ is initialized in tree_balance_after_insert
         child = new_node;
         if (begin_node_->__left_ != nullptr) {
@@ -1662,7 +1662,7 @@ public:
             if (node_ptr->__right_ != nullptr) {
                 begin_node_ = static_cast<end_node_pointer>(node_ptr->__right_);
             } else {
-                begin_node_ = static_cast<end_node_pointer>(node_ptr->__parent_);
+                begin_node_ = static_cast<end_node_pointer>(node_ptr->parent_);
             }
         }
         --size_;
@@ -1905,7 +1905,7 @@ private:
             } else {
                 *root_ptr() = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
                 if (root()) {
-                    root()->__parent_ = endNode();
+                    root()->parent_ = endNode();
                 }
             }
             begin_node_
@@ -1930,7 +1930,7 @@ private:
         if (size_ == 0) {
             begin_node_ = endNode();
         } else {
-            endNode()->__left_->__parent_ = static_cast<end_node_pointer>(endNode());
+            endNode()->__left_->parent_ = static_cast<end_node_pointer>(endNode());
             other.begin_node_           = other.endNode();
             other.endNode()->__left_      = nullptr;
             other.size_                 = 0;
@@ -2014,10 +2014,10 @@ private:
         new_node_ptr->__left_     = static_cast<node_base_pointer>(left.release());
         new_node_ptr->__right_    = static_cast<node_base_pointer>(right);
         if (new_node_ptr->__left_) {
-            new_node_ptr->__left_->__parent_ = static_cast<end_node_pointer>(new_node_ptr);
+            new_node_ptr->__left_->parent_ = static_cast<end_node_pointer>(new_node_ptr);
         }
         if (new_node_ptr->__right_) {
-            new_node_ptr->__right_->__parent_ = static_cast<end_node_pointer>(new_node_ptr);
+            new_node_ptr->__right_->parent_ = static_cast<end_node_pointer>(new_node_ptr);
         }
         return new_node_ptr;
     }
@@ -2068,7 +2068,7 @@ private:
         } else if (src->__left_) {
             auto new_left       = construct_subtree(static_cast<node_pointer>(src->__left_));
             dest->__left_       = static_cast<node_base_pointer>(new_left);
-            new_left->__parent_ = static_cast<end_node_pointer>(dest);
+            new_left->parent_ = static_cast<end_node_pointer>(dest);
         }
 
         // Identical to the left case above, just for the right nodes
@@ -2082,7 +2082,7 @@ private:
         } else if (src->__right_) {
             auto new_right       = construct_subtree(static_cast<node_pointer>(src->__right_));
             dest->__right_       = static_cast<node_base_pointer>(new_right);
-            new_right->__parent_ = static_cast<end_node_pointer>(dest);
+            new_right->parent_ = static_cast<end_node_pointer>(dest);
         }
 
         return dest;
