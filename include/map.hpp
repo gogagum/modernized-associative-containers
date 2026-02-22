@@ -455,17 +455,8 @@ public:
     mapped_type& operator[](const key_type& key);
     mapped_type& operator[](key_type&& key);
 
-    template <
-        class ArgT
-      , std::enable_if_t<
-            __is_transparently_comparable_v<
-                CompareT
-              , key_type
-              , std::remove_cvref_t<ArgT>
-            >
-          , int
-        > = 0
-    >
+    template <class ArgT>
+    requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
     [[nodiscard]] mapped_type& at(ArgT&& arg) {
         auto [_, child] = tree_.find_equal(arg);
         if (child == nullptr) {
@@ -474,17 +465,8 @@ public:
         return static_cast<__node_pointer>(child)->get_value().second;
     }
 
-    template <
-        class ArgT
-      , std::enable_if_t<
-            __is_transparently_comparable_v<
-                CompareT
-              , key_type
-              , std::remove_cvref_t<ArgT>
-            >
-          , int
-        > = 0
-    >
+    template <class ArgT>
+    requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
     [[nodiscard]] const mapped_type& at(ArgT&& arg) const {
         auto [_, child] = tree_.find_equal(arg);
         if (child == nullptr) {
@@ -516,38 +498,34 @@ public:
             .first;
     }
 
-    template <
-        class _Pp
-      , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
-    >
-    std::pair<iterator, bool> insert(_Pp&& pos) {
-        return tree_.emplaceUnique(std::forward<_Pp>(pos));
+    template <class _Pp>
+    requires std::is_constructible_v<value_type, _Pp>
+    std::pair<iterator, bool> insert(_Pp&& value) {
+        return tree_.emplaceUnique(std::forward<_Pp>(value));
     }
 
-    template <
-        class _Pp
-      , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
-    >
-    iterator insert(const_iterator __pos, _Pp&& pos) {
+    template <class _Pp>
+    requires std::is_constructible_v<value_type, _Pp>
+    iterator insert(const_iterator pos, _Pp&& value) {
         return tree_
-            .emplaceHintUnique(__pos.i_, std::forward<_Pp>(pos))
+            .emplaceHintUnique(pos.i_, std::forward<_Pp>(value))
             .first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& __v) {
-        return tree_.emplaceUnique(__v);
+    std::pair<iterator, bool> insert(const value_type& value) {
+        return tree_.emplaceUnique(value);
     }
 
-    iterator insert(const_iterator pos, const value_type& __v) {
-        return tree_.emplaceHintUnique(pos.i_, __v).first;
+    iterator insert(const_iterator pos, const value_type& value) {
+        return tree_.emplaceHintUnique(pos.i_, value).first;
     }
 
-    std::pair<iterator, bool> insert(value_type&& __v) {
-        return tree_.emplaceUnique(std::move(__v));
+    std::pair<iterator, bool> insert(value_type&& value) {
+        return tree_.emplaceUnique(std::move(value));
     }
 
-    iterator insert(const_iterator pos, value_type&& __v) {
-        return tree_.emplaceHintUnique(pos.i_, std::move(__v)).first;
+    iterator insert(const_iterator pos, value_type&& value) {
+        return tree_.emplaceHintUnique(pos.i_, std::move(value)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -696,24 +674,16 @@ public:
     [[nodiscard]] iterator find(const key_type& key) { return tree_.find(key); }
     [[nodiscard]] const_iterator find(const key_type& key) const { return tree_.find(key); }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey> || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-          , int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] iterator find(const TransparentKey& key) {
         return tree_.find(key);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey> || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-          , int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] const_iterator find(const TransparentKey& k) const {
         return tree_.find(k);
     }
@@ -722,20 +692,17 @@ public:
         return tree_.countUnique(k);
     }
 
-    template <typename TransparentKey, std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0>
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& key) const {
         return tree_.countMulti(key);
     }
 
     [[nodiscard]] bool contains(const key_type& key) const { return find(key) != end(); }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey> || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-          , int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& k) const {
         return find(k) != end();
     }
@@ -750,26 +717,16 @@ public:
 
     // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
     // match multiple elements.
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey>
-         || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-         ,  int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] iterator lower_bound(const TransparentKey& k) {
         return tree_.lowerBoundMulti(k);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey>
-         || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-         , int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] const_iterator lower_bound(const TransparentKey& k) const {
         return tree_.lowerBoundMulti(k);
     }
@@ -782,25 +739,15 @@ public:
         return tree_.upperBoundUnique(k);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey>
-         || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-         ,  int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] iterator upper_bound(const TransparentKey& k) {
         return tree_.upperBoundMulti(k);
     }
-    template <
-        typename TransparentKey
-      , std::enable_if_t<
-            __is_transparent_v<CompareT, TransparentKey>
-         || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-         ,  int
-        > = 0
-    >
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
+          || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] const_iterator upper_bound(const TransparentKey& k) const {
         return tree_.upperBoundMulti(k);
     }
@@ -810,11 +757,13 @@ public:
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const {
         return tree_.equalRangeUnique(k);
     }
-    template <typename TransparentKey, std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0>
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const TransparentKey& k) {
         return tree_.equalRangeMulti(k);
     }
-    template <typename TransparentKey, std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0>
+    template <typename TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const TransparentKey& k) const {
         return tree_.equalRangeMulti(k);
     }
@@ -835,10 +784,10 @@ template <
     class InputIteratorT
   , class CompareT   = std::less<__iter_key_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
-  , class            = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires __has_input_iterator_category<InputIteratorT>::value
+      && (!__is_allocator_v<CompareT>)
+      && __is_allocator_v<AllocatorT>
 map(
     InputIteratorT,
     InputIteratorT,
@@ -854,9 +803,8 @@ template <
     std::ranges::input_range RangeT
   , class CompareT   = std::less<__range_key_type<RangeT>>
   , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 map(
     std::from_range_t,
     RangeT&&,
@@ -874,9 +822,8 @@ template <
   , class _Tp
   , class CompareT   = std::less<std::remove_const_t<KeyT>>
   , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 map(
     std::initializer_list<std::pair<KeyT, _Tp>>,
     CompareT = CompareT(),
@@ -888,12 +835,8 @@ map(
        , AllocatorT
      >;
 
-template <
-    class InputIteratorT
-  , class AllocatorT
-  , class = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>
-  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template <class InputIteratorT, class AllocatorT>
+requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
 map(InputIteratorT, InputIteratorT, AllocatorT)
 -> map<
     __iter_key_type<InputIteratorT>
@@ -902,11 +845,8 @@ map(InputIteratorT, InputIteratorT, AllocatorT)
   , AllocatorT
 >;
 
-template<
-    std::ranges::input_range RangeT
-  , class AllocatorT
-  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template<std::ranges::input_range RangeT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
 map(std::from_range_t, RangeT&&, AllocatorT)
 -> map<
        __range_key_type<RangeT>
@@ -915,12 +855,8 @@ map(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template<
-    class KeyT,
-    class _Tp,
-    class AllocatorT,
-    class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template<class KeyT, class _Tp, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
 map(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
 -> map<
        std::remove_const_t<KeyT>
@@ -1199,18 +1135,14 @@ public:
         return tree_.emplaceHintMulti(pos.i_, std::forward<ArgsT>(args)...);
     }
 
-    template <
-        class _Pp
-      , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
-    >
+    template <class _Pp>
+    requires std::is_constructible_v<value_type, _Pp>
     iterator insert(_Pp&& pos) {
         return tree_.emplaceMulti(std::forward<_Pp>(pos));
     }
 
-    template <
-        class _Pp
-      , std::enable_if_t<std::is_constructible_v<value_type, _Pp>, int> = 0
-    >
+    template <class _Pp>
+    requires std::is_constructible_v<value_type, _Pp>
     iterator insert(const_iterator pos, _Pp&& val) {
         return tree_.emplaceHintMulti(pos.i_, std::forward<_Pp>(val));
     }
@@ -1327,18 +1259,15 @@ public:
     [[nodiscard]] const_iterator find(const key_type& key) const {
         return tree_.find(key);
     }
-    
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator find(const TransparentKey& key) {
         return tree_.find(key);
     }
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator find(const TransparentKey& key) const {
         return tree_.find(key);
     }
@@ -1346,10 +1275,9 @@ public:
     [[nodiscard]] size_type count(const key_type& key) const {
         return tree_.countMulti(key);
     }
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& key) const {
         return tree_.countMulti(key);
     }
@@ -1358,10 +1286,8 @@ public:
         return find(key) != end();
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& key) const {
         return find(key) != end();
     }
@@ -1374,18 +1300,14 @@ public:
         return tree_.lowerBoundMulti(key);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator lower_bound(const TransparentKey& key) {
         return tree_.lowerBoundMulti(key);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator lower_bound(const TransparentKey& key) const {
         return tree_.lowerBoundMulti(key);
     }
@@ -1398,17 +1320,14 @@ public:
         return tree_.upperBoundMulti(key);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator upper_bound(const TransparentKey& key) {
         return tree_.upperBoundMulti(key);
     }
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator upper_bound(const TransparentKey& key) const {
         return tree_.upperBoundMulti(key);
     }
@@ -1417,22 +1336,20 @@ public:
     equal_range(const key_type& key) {
         return tree_.equalRangeMulti(key);
     }
+
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const key_type& key) const {
         return tree_.equalRangeMulti(key);
     }
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<iterator, iterator> equal_range(const TransparentKey& key) {
         return tree_.equalRangeMulti(key);
     }
 
-    template <
-        typename TransparentKey
-      , std::enable_if_t<__is_transparent_v<CompareT, TransparentKey>, int> = 0
-    >
+    template <class TransparentKey>
+    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const TransparentKey& key) const {
         return tree_.equalRangeMulti(key);
@@ -1453,10 +1370,10 @@ template <
     class InputIteratorT
   , class CompareT   = std::less<__iter_key_type<InputIteratorT>>
   , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
-  , class            = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires __has_input_iterator_category<InputIteratorT>::value
+      && (!__is_allocator_v<CompareT>)
+      && __is_allocator_v<AllocatorT>
 multimap(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __iter_key_type<InputIteratorT>
@@ -1469,9 +1386,8 @@ template <
     std::ranges::input_range RangeT
   , class CompareT   = std::less<__range_key_type<RangeT>>
   , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __range_key_type<RangeT>
@@ -1485,18 +1401,13 @@ template <
   , class _Tp
   , class CompareT   = std::less<std::remove_const_t<KeyT>>
   , class AllocatorT = std::allocator<std::pair<const KeyT, _Tp>>
-  , class            = std::enable_if_t<!__is_allocator_v<CompareT>>
-  , class            = std::enable_if_t<__is_allocator_v<AllocatorT>>
 >
+requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 multimap(std::initializer_list<std::pair<KeyT, _Tp>>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<std::remove_const_t<KeyT>, _Tp, CompareT, AllocatorT>;
 
-template <
-    class InputIteratorT
-  , class AllocatorT
-  , class = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>
-  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template <class InputIteratorT, class AllocatorT>
+requires __has_input_iterator_category<InputIteratorT>::value && __is_allocator_v<AllocatorT>
 multimap(InputIteratorT, InputIteratorT, AllocatorT)
 -> multimap<
        __iter_key_type<InputIteratorT>
@@ -1505,11 +1416,8 @@ multimap(InputIteratorT, InputIteratorT, AllocatorT)
      , AllocatorT
    >;
 
-template <
-    std::ranges::input_range RangeT
-  , class AllocatorT
-  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template <std::ranges::input_range RangeT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
 multimap(std::from_range_t, RangeT&&, AllocatorT)
 -> multimap<
        __range_key_type<RangeT>
@@ -1518,12 +1426,8 @@ multimap(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template <
-    class KeyT
-  , class _Tp
-  , class AllocatorT
-  , class = std::enable_if_t<__is_allocator_v<AllocatorT>>
->
+template <class KeyT, class _Tp, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
 multimap(std::initializer_list<std::pair<KeyT, _Tp>>, AllocatorT)
 -> multimap<
        std::remove_const_t<KeyT>
