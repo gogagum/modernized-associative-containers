@@ -35,12 +35,8 @@
 #include <stdexcept>
 #include <tuple>
 #include <version>
-
-// standard-mandated includes
-
-// [associative.map.syn]
-#  include <compare>
-#  include <initializer_list>
+#include <compare>
+#include <initializer_list>
 
 namespace mstd {
 
@@ -116,7 +112,7 @@ class MapNodeDestructor {
     using AllocTraits_   = std::allocator_traits<AllocatorType_>;
 
 public:
-    typedef typename AllocTraits_::pointer pointer;
+    using pointer = AllocTraits_::pointer;
 
 private:
     AllocatorType_& na_;
@@ -303,13 +299,13 @@ template <class KeyT, class _Tp, class CompareT = std::less<KeyT>, class Allocat
 class map {
 public:
     // types:
-    typedef KeyT key_type;
-    typedef _Tp mapped_type;
-    typedef std::pair<const key_type, mapped_type> value_type;
-    typedef std::type_identity_t<CompareT> key_compare;
-    typedef std::type_identity_t<AllocatorT> allocator_type;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    using key_type = KeyT;
+    using mapped_type = _Tp;
+    using value_type = std::pair<const key_type, mapped_type>;
+    using key_compare = std::type_identity_t<CompareT>;
+    using allocator_type = std::type_identity_t<AllocatorT>;
+    using reference = value_type&;
+    using const_reference = const value_type&;
 
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
@@ -339,17 +335,17 @@ private:
     Tree_ tree_;
 
 public:
-    typedef typename AllocTraits_::pointer pointer;
-    typedef typename AllocTraits_::const_pointer const_pointer;
-    typedef typename AllocTraits_::size_type size_type;
-    typedef typename AllocTraits_::difference_type difference_type;
+    using pointer = AllocTraits_::pointer;
+    using const_pointer = AllocTraits_::const_pointer;
+    using size_type = AllocTraits_::size_type;
+    using difference_type = AllocTraits_::difference_type;
     using iterator               = MapIterator<typename Tree_::iterator>;
     using const_iterator         = MapConstIterator<typename Tree_::const_iterator>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
-    typedef __insert_return_type<iterator, node_type> insert_return_type;
+    using insert_return_type = __insert_return_type<iterator, node_type>;
 
     template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class map;
@@ -824,13 +820,13 @@ public:
     }
 
 private:
-    typedef typename Tree_::node node;
-    typedef typename Tree_::node_allocator node_allocator;
-    typedef typename Tree_::node_pointer __node_pointer;
-    typedef typename Tree_::node_base_pointer node_base_pointer;
+    using node = Tree_::node;
+    using node_allocator = Tree_::node_allocator;
+    using __node_pointer = Tree_::node_pointer;
+    using node_base_pointer = Tree_::node_base_pointer;
 
-    typedef MapNodeDestructor<node_allocator> _Dp;
-    typedef std::unique_ptr<node, _Dp> __node_holder;
+    using _Dp = MapNodeDestructor<node_allocator>;
+    using __node_holder = std::unique_ptr<node, _Dp>;
 
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<map> >;
 };
@@ -1061,16 +1057,16 @@ private:
     Tree_ tree_;
 
 public:
-    typedef typename AllocTraits_::pointer pointer;
-    typedef typename AllocTraits_::const_pointer const_pointer;
-    typedef typename AllocTraits_::size_type size_type;
-    typedef typename AllocTraits_::difference_type difference_type;
-    typedef MapIterator<typename Tree_::iterator> iterator;
-    typedef MapConstIterator<typename Tree_::const_iterator> const_iterator;
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    using pointer = AllocTraits_::pointer;
+    using const_pointer = AllocTraits_::const_pointer;
+    using size_type = AllocTraits_::size_type;
+    using difference_type = AllocTraits_::difference_type;
+    using iterator = MapIterator<typename Tree_::iterator>;
+    using const_iterator = MapConstIterator<typename Tree_::const_iterator>;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    typedef MapNodeHandle<typename Tree_::node, allocator_type> node_type;
+    using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
 
     template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
     friend class map;
@@ -1443,12 +1439,12 @@ public:
     }
 
 private:
-    typedef typename Tree_::node node;
-    typedef typename Tree_::node_allocator node_allocator;
-    typedef typename Tree_::node_pointer __node_pointer;
+    using node = Tree_::node;
+    using node_allocator = Tree_::node_allocator;
+    using __node_pointer = Tree_::node_pointer;
 
-    typedef MapNodeDestructor<node_allocator> _Dp;
-    typedef std::unique_ptr<node, _Dp> __node_holder;
+    using _Dp = MapNodeDestructor<node_allocator>;
+    using __node_holder = std::unique_ptr<node, _Dp>;
 
     friend struct __specialized_algorithm<_Algorithm::__for_each, __single_range<multimap> >;
 };
