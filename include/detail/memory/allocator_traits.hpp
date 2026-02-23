@@ -10,7 +10,6 @@
 #ifndef MSTD_MEMORY_ALLOCATOR_TRAITS_HPP
 #define MSTD_MEMORY_ALLOCATOR_TRAITS_HPP
 
-#include <detail/config.hpp>
 #include <cstddef>
 #include <memory>
 #include <utility>

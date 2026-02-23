@@ -9,7 +9,6 @@
 #ifndef MSTD_UTILITY_LAZY_SYNTH_THREE_WAY_COMPARATOR_HPP
 #define MSTD_UTILITY_LAZY_SYNTH_THREE_WAY_COMPARATOR_HPP
 
-#include <detail/config.hpp>
 #include <type_traits>
 #include <detail/type_traits/desugars_to.hpp>
 #include <detail/utility/default_three_way_comparator.hpp>

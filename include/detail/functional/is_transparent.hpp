@@ -10,8 +10,6 @@
 #ifndef MSTD_FUNCTIONAL_IS_TRANSPARENT_HPP
 #define MSTD_FUNCTIONAL_IS_TRANSPARENT_HPP
 
-#include <detail/config.hpp>
-
 #include <type_traits>
 
 namespace mstd {

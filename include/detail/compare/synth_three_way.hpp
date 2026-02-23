@@ -14,8 +14,6 @@
 #include <concepts>
 #include <utility>
 
-#include <detail/config.hpp>
-
 namespace mstd {
 
 // [expos.only.func]

@@ -22,8 +22,6 @@
 //
 // Note a cvref qualified _Tp is never considered a specialization.
 
-#include "detail/config.hpp"
-
 namespace mstd {
 
 template <class _Tp, template <class...> class _Template>

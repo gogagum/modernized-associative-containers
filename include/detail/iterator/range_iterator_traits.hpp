@@ -10,8 +10,6 @@
 #ifndef MSTD_ITERATOR_RANGES_ITERATOR_TRAITS_HPP
 #define MSTD_ITERATOR_RANGES_ITERATOR_TRAITS_HPP
 
-#include <detail/config.hpp>
-
 #include <utility>
 #include <concepts>
 #include <type_traits>

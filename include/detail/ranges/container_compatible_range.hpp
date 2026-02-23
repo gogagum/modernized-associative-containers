@@ -12,7 +12,6 @@
 
 #include <concepts>
 #include <type_traits>
-#include <detail/config.hpp>
 
 namespace mstd {
 

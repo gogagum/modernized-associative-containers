@@ -9,7 +9,6 @@
 #ifndef MSTD_UTILITY_DEFAULT_THREE_WAY_COMPARATOR_HPP
 #define MSTD_UTILITY_DEFAULT_THREE_WAY_COMPARATOR_HPP
 
-#include <detail/config.hpp>
 #include <type_traits>
 
 namespace mstd {

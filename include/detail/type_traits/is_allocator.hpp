@@ -9,7 +9,6 @@
 #ifndef MSTD_TYPE_IS_ALLOCATOR_HPP
 #define MSTD_TYPE_IS_ALLOCATOR_HPP
 
-#include <detail/config.hpp>
 #include <cstddef>
 #include <type_traits>
 #include <utility>

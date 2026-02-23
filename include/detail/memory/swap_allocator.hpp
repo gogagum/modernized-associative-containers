@@ -9,7 +9,6 @@
 #ifndef MSTD_MEMORY_SWAP_ALLOCATOR_HPP
 #define MSTD_MEMORY_SWAP_ALLOCATOR_HPP
 
-#include <detail/config.hpp>
 #include "allocator_traits.hpp"
 #include <utility>
 
