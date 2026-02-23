@@ -28,7 +28,6 @@
 #include <detail/type_traits/make_transparent.hpp>
 #include <detail/memory/pointer_traits.hpp>
 #include <detail/memory/allocator_traits.hpp>
-#include <detail/memory/compressed_pair.hpp>
 #include <detail/memory/swap_allocator.hpp>
 #include <detail/utility/lazy_synth_three_way_comparator.hpp>
 
@@ -884,8 +883,10 @@ private:
 
 private:
     end_node_pointer begin_node_;
-    MSTD_COMPRESSED_PAIR(end_node_t, end_node_, node_allocator, node_alloc_);
-    MSTD_COMPRESSED_PAIR(size_type, size_, value_compare, value_comp_);
+    end_node_t end_node_;
+    node_allocator node_alloc_;
+    size_type size_;
+    value_compare value_comp_;
 
 public:
     end_node_pointer endNode() noexcept {
