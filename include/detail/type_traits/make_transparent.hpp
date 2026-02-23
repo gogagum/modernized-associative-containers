@@ -11,8 +11,6 @@
 
 #include <type_traits>
 
-#include <detail/config.hpp>
-
 namespace mstd {
 
 // __make_transparent tries to create a transparent comparator from its non-transparent counterpart, e.g. obtain

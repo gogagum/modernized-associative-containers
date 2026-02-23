@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <detail/functional/is_transparent.hpp>
 #include <cassert>
-#include <detail/config.hpp>
 #include <functional>
 #include <iterator>
 #include <memory>

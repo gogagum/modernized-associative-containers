@@ -9,8 +9,6 @@
 #ifndef MSTD_TYPE_TRAITS_COPY_CV_HPP
 #define MSTD_TYPE_TRAITS_COPY_CV_HPP
 
-#include <detail/config.hpp>
-
 namespace mstd {
 
 // Let COPYCV(FROM, TO) be an alias for type TO with the addition of FROM's

@@ -21,7 +21,6 @@
 #include <limits>
 #include <functional>
 
-#include <detail/config.hpp>
 #include <detail/utility/try_key_extraction.hpp>
 #include <detail/type_traits/is_specialization.hpp>
 #include <detail/type_traits/copy_cvref.hpp>

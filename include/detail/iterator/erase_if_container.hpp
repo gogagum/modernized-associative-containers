@@ -10,8 +10,6 @@
 #ifndef MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP
 #define MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP
 
-#include <detail/config.hpp>
-
 namespace mstd {
 
 template <class _Container, class _Predicate>

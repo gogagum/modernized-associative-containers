@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <detail/config.hpp>
 #include <functional>
 #include <detail/functional/is_transparent.hpp>
 #include <detail/iterator/erase_if_container.hpp>

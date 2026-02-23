@@ -11,7 +11,6 @@
 #define MSTD_ITERATOR_ITERATOR_TRAITS_HPP
 
 #include <concepts>
-#include <detail/config.hpp>
 #include <cstddef>
 #include <utility>
 #include <tuple>

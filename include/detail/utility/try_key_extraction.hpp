@@ -9,7 +9,6 @@
 #ifndef MSTD_UTILITY_TRY_EXTRACT_KEY_HPP
 #define MSTD_UTILITY_TRY_EXTRACT_KEY_HPP
 
-#include <detail/config.hpp>
 #include <utility>
 #include <type_traits>
 #include <tuple>

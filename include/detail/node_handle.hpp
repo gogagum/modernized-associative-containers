@@ -11,7 +11,6 @@
 #define MSTD_NODE_HANDLE
 
 #include <cassert>
-#include "config.hpp"
 #include <memory>
 #include <detail/type_traits/is_specialization.hpp>
 #include <detail/memory/pointer_traits.hpp>

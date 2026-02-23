@@ -9,8 +9,6 @@
 #ifndef MSTD_TYPE_TRAITS_DESUGARS_TO_HPP
 #define MSTD_TYPE_TRAITS_DESUGARS_TO_HPP
 
-#include <detail/config.hpp>
-
 namespace mstd {
 
 // Tags to represent the canonical operations.

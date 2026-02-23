@@ -9,7 +9,6 @@
 #ifndef MSTD_TYPE_TRAITS_COPY_CVREF_HPP
 #define MSTD_TYPE_TRAITS_COPY_CVREF_HPP
 
-#include <detail/config.hpp>
 #include "copy_cv.hpp"
 
 namespace mstd {
