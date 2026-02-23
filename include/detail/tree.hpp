@@ -838,16 +838,16 @@ private:
 template <class _Tp, class CompareT>
 int __diagnose_non_const_comparator();
 
-template <class _Tp, class CompareT, class AllocatorT>
+template <class ValueT, class CompareT, class AllocatorT>
 class Tree {
 public:
-    using value_type     = __get_node_value_type_t<_Tp>;
+    using value_type     = __get_node_value_type_t<ValueT>;
     using value_compare  = CompareT;
     using allocator_type = AllocatorT;
 
 private:
     using AllocTraits_ = std::allocator_traits<allocator_type>;
-    using KeyType_     = __get_tree_key_type_t<_Tp>;
+    using KeyType_     = __get_tree_key_type_t<ValueT>;
 
 public:
     using pointer         = AllocTraits_::pointer;
@@ -857,7 +857,7 @@ public:
 
     using void_pointer = AllocTraits_::void_pointer;
 
-    using node         = TreeNode<_Tp, void_pointer>;
+    using node         = TreeNode<ValueT, void_pointer>;
     using node_pointer = __rebind_pointer_t<void_pointer, node>;
 
     using node_base         = TreeNodeBase<void_pointer>;
@@ -914,8 +914,8 @@ public:
         return std::addressof(endNode()->left_);
     }
 
-    using iterator       = TreeIterator<_Tp, node_pointer, difference_type>;
-    using const_iterator = TreeConstIterator<_Tp, node_pointer, difference_type>;
+    using iterator       = TreeIterator<ValueT, node_pointer, difference_type>;
+    using const_iterator = TreeConstIterator<ValueT, node_pointer, difference_type>;
 
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
@@ -1330,7 +1330,7 @@ public:
     }
 
     template <class Comp2T>
-    void nodeHandleMergeUnique(Tree<_Tp, Comp2T, AllocatorT>& source) {
+    void nodeHandleMergeUnique(Tree<ValueT, Comp2T, AllocatorT>& source) {
         for (iterator iter = source.begin(); iter != source.end();) {
             auto src_ptr = iter.__get_np();
             auto [parent, child] = find_equal(src_ptr->get_value());
@@ -1370,7 +1370,7 @@ public:
     }
 
     template <class Comp2T>
-    void nodeHandleMergeMulti(Tree<_Tp, Comp2T, AllocatorT>& source) {
+    void nodeHandleMergeMulti(Tree<ValueT, Comp2T, AllocatorT>& source) {
         for (iterator iter = source.begin(); iter != source.end();) {
             auto src_ptr = iter.__get_np();
             end_node_pointer parent;
@@ -1920,7 +1920,7 @@ private:
     }
     void moveAssignAlloc_(Tree&, std::false_type) noexcept {}
 
-    template <class FromT , class ValueT = _Tp>
+    template <class FromT>
     requires __is_tree_value_type_v<ValueT>
     static void assignValue_(__get_node_value_type_t<value_type>& lhs, FromT&& rhs) {
         using KeyType = std::remove_const_t<typename value_type::first_type>;
@@ -1931,7 +1931,7 @@ private:
         lhs.second                      = std::forward<FromT>(rhs).second;
     }
 
-    template <class ToT, class FromT, class ValueT = _Tp>
+    template <class ToT, class FromT>
     requires (!__is_tree_value_type_v<ValueT>)
     static void assignValue_(ToT& lhs, FromT&& rhs) {
         lhs = std::forward<FromT>(rhs);
@@ -1996,17 +1996,13 @@ private:
         return constructFromTree_(src, [this](const value_type& val) { return constructNode_(val); });
     }
 
-    template <class ValueT = _Tp>
-    requires __is_tree_value_type_v<ValueT>
-    node_pointer moveConstructTree_(node_pointer src) {
+    node_pointer moveConstructTree_(node_pointer src) requires __is_tree_value_type_v<ValueT> {
         return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(const_cast<KeyType_&&>(val.first), std::move(val.second));
         });
     }
 
-    template <class ValueT = _Tp>
-    requires (!__is_tree_value_type_v<ValueT>)
-    node_pointer moveConstructTree_(node_pointer src) {
+    node_pointer moveConstructTree_(node_pointer src) requires (!__is_tree_value_type_v<ValueT>) {
         return constructFromTree_(src, [this](value_type& val) {
             return constructNode_(std::move(val));
         });
@@ -2077,8 +2073,8 @@ private:
     }
 };
 
-template <class _Tp, class CompareT, class AllocatorT>
-inline void swap(Tree<_Tp, CompareT, AllocatorT>& lhs, Tree<_Tp, CompareT, AllocatorT>& rhs)
+template <class ValueT, class CompareT, class AllocatorT>
+inline void swap(Tree<ValueT, CompareT, AllocatorT>& lhs, Tree<ValueT, CompareT, AllocatorT>& rhs)
 noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
 }
