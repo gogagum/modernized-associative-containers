@@ -18,7 +18,6 @@
 #include <detail/iterator/erase_if_container.hpp>
 #include <iterator>
 #include <memory>
-#include <detail/memory/compressed_pair.hpp>
 #include <detail/iterator/iterator_traits.hpp>
 #include <detail/iterator/range_iterator_traits.hpp>
 #include <detail/iterator/erase_if_container.hpp>
@@ -41,7 +40,7 @@ namespace mstd {
 
 template <class KeyT, class _CP, class CompareT>
 class MapValueCompare {
-    MSTD_COMPRESSED_ELEMENT(CompareT, comp_);
+    CompareT comp_;
 
 public:
     MapValueCompare() noexcept(std::is_nothrow_default_constructible<CompareT>::value)
