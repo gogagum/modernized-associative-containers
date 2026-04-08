@@ -13,25 +13,11 @@ namespace mstd {
 
 // Tags to represent the canonical operations.
 
-// syntactically, the operation is equivalent to calling `a == b`
-struct __equal_tag {};
-
-// syntactically, the operation is equivalent to calling `a + b`
-struct __plus_tag {};
-
 // syntactically, the operation is equivalent to calling `a < b`
 struct __less_tag {};
 
 // syntactically, the operation is equivalent to calling `a > b`
 struct __greater_tag {};
-
-// syntactically, the operation is equivalent to calling `a < b`, and these expressions
-// have to be true for any `a` and `b`:
-// - `(a < b) == (b > a)`
-// - `(!(a < b) && !(b < a)) == (a == b)`
-// For example, this is satisfied for std::less on integral types, but also for ranges::less on all types due to
-// additional semantic requirements on that operation.
-struct __totally_ordered_less_tag {};
 
 // This class template is used to determine whether an operation "desugars"
 // (or boils down) to a given canonical operation.
@@ -69,9 +55,6 @@ inline const bool desugars_to_v<CanonicalTag, OperationT&, ArgsT...> =
 template <class CanonicalTag, class OperationT, class... ArgsT>
 inline const bool desugars_to_v<CanonicalTag, OperationT&&, ArgsT...> =
     desugars_to_v<CanonicalTag, OperationT, ArgsT...>;
-
-template <class CanonicalTag, class OperationT, class... ArgsT>
-struct __desugars_to : std::integral_constant<bool, desugars_to_v<CanonicalTag, OperationT, ArgsT...> > {};
 
 } // namespace mstd
 
