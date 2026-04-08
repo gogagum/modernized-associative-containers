@@ -885,10 +885,10 @@ noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class KeyT, class ValueT, class CompareT, class AllocatorT, class _Predicate>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT, class PredicateT>
 inline typename map<KeyT, ValueT, CompareT, AllocatorT>::size_type
-erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
-    return mstd::_MSTD_erase_if_container(__c, pred);
+erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& container, PredicateT pred) {
+    return mstd::erase_if_container(container, pred);
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -1391,10 +1391,10 @@ noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
 
-template <class KeyT, class ValueT, class CompareT, class AllocatorT, class _Predicate>
+template <class KeyT, class ValueT, class CompareT, class AllocatorT, class PredicateT>
 inline typename multimap<KeyT, ValueT, CompareT, AllocatorT>::size_type
-erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& __c, _Predicate pred) {
-    return mstd::_MSTD_erase_if_container(__c, pred);
+erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& __c, PredicateT pred) {
+    return mstd::erase_if_container(__c, pred);
 }
 
 } // namespace mstd
