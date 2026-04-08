@@ -454,14 +454,14 @@ public:
 
 template <
     class InputIteratorT
-  , class CompareT   = std::less<__iterator_value_type<InputIteratorT>>
-  , class AllocatorT = std::allocator<__iterator_value_type<InputIteratorT>>
+  , class CompareT   = std::less<std::iter_value_t<InputIteratorT>>
+  , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
 >
 requires __has_input_iterator_category<InputIteratorT>
       && __is_allocator_v<AllocatorT>
       && (!__is_allocator_v<CompareT>)
 set(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
--> set<__iterator_value_type<InputIteratorT>, CompareT, AllocatorT>;
+-> set<std::iter_value_t<InputIteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
@@ -484,7 +484,7 @@ set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT(
 template <class InputIteratorT, class AllocatorT>
 requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
 set(InputIteratorT, InputIteratorT, AllocatorT)
--> set<__iterator_value_type<InputIteratorT>, std::less<__iterator_value_type<InputIteratorT>>, AllocatorT>;
+-> set<std::iter_value_t<InputIteratorT>, std::less<std::iter_value_t<InputIteratorT>>, AllocatorT>;
 
 template <std::ranges::input_range RangeT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
@@ -899,14 +899,14 @@ public:
 
 template <
     class InputIteratorT
-  , class CompareT   = std::less<__iterator_value_type<InputIteratorT>>
-  , class AllocatorT = std::allocator<__iterator_value_type<InputIteratorT>>
+  , class CompareT   = std::less<std::iter_value_t<InputIteratorT>>
+  , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
 >
 requires __has_input_iterator_category<InputIteratorT>
       && __is_allocator_v<AllocatorT>
       && (!__is_allocator_v<CompareT>)
 multiset(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
--> multiset<__iterator_value_type<InputIteratorT>, CompareT, AllocatorT>;
+-> multiset<std::iter_value_t<InputIteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
@@ -926,8 +926,8 @@ template <class InputIteratorT, class AllocatorT>
 requires (__has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>)
 multiset(InputIteratorT, InputIteratorT, AllocatorT)
 -> multiset<
-       __iterator_value_type<InputIteratorT>
-     , std::less<__iterator_value_type<InputIteratorT>>
+       std::iter_value_t<InputIteratorT>
+     , std::less<std::iter_value_t<InputIteratorT>>
      , AllocatorT
    >;
 

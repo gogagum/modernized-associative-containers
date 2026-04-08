@@ -24,19 +24,16 @@ concept __has_input_iterator_category
     = std::convertible_to<typename std::iterator_traits<_Tp>::iterator_category, std::input_iterator_tag>;
 
 template <class InputIteratorT>
-using __iterator_value_type = typename std::iterator_traits<InputIteratorT>::value_type;
+using __iter_key_type = std::remove_const_t<std::tuple_element_t<0, std::iter_value_t<InputIteratorT>>>;
 
 template <class InputIteratorT>
-using __iter_key_type = std::remove_const_t<std::tuple_element_t<0, __iterator_value_type<InputIteratorT>>>;
-
-template <class InputIteratorT>
-using __iter_mapped_type = std::tuple_element_t<1, __iterator_value_type<InputIteratorT>>;
+using __iter_mapped_type = std::tuple_element_t<1, std::iter_value_t<InputIteratorT>>;
 
 template <class InputIteratorT>
 using __iter_to_alloc_type
   = std::pair<
-      const std::tuple_element_t<0, __iterator_value_type<InputIteratorT>>
-    , std::tuple_element_t<1, __iterator_value_type<InputIteratorT>>
+      const std::tuple_element_t<0, std::iter_value_t<InputIteratorT>>
+    , std::tuple_element_t<1, std::iter_value_t<InputIteratorT>>
     >;
 
 } // namespace mstd

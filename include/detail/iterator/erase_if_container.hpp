@@ -19,14 +19,10 @@ namespace mstd
     typename ContainerT::size_type old_size = container.size();
 
     const typename ContainerT::iterator last = container.end();
-    for (typename ContainerT::iterator iter = container.begin(); iter != last;)
-    {
-      if (predicate(*iter))
-      {
+    for (typename ContainerT::iterator iter = container.begin(); iter != last;) {
+      if (predicate(*iter)) {
         iter = container.erase(iter);
-      }
-      else
-      {
+      } else {
         ++iter;
       }
     }
