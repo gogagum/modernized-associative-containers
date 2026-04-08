@@ -16,7 +16,7 @@ namespace mstd
   template <class ContainerT, class PredicateT>
   typename ContainerT::size_type erase_if_container(ContainerT &container, PredicateT &predicate)
   {
-    typename ContainerT::size_type __old_size = container.size();
+    typename ContainerT::size_type old_size = container.size();
 
     const typename ContainerT::iterator last = container.end();
     for (typename ContainerT::iterator iter = container.begin(); iter != last;)
@@ -31,7 +31,7 @@ namespace mstd
       }
     }
 
-    return __old_size - container.size();
+    return old_size - container.size();
   }
 
 } // namespace mstd
