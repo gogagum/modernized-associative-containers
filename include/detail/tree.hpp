@@ -1901,9 +1901,9 @@ private:
             begin_node_ = endNode();
         } else {
             endNode()->left_->parent_ = static_cast<end_node_pointer>(endNode());
-            other.begin_node_           = other.endNode();
-            other.endNode()->left_      = nullptr;
-            other.size_                 = 0;
+            other.begin_node_         = other.endNode();
+            other.endNode()->left_    = nullptr;
+            other.size_               = 0;
         }
     }
 
@@ -2046,7 +2046,7 @@ private:
                                                  assign,
                                                  construct_subtree));
         } else if (src->right_) {
-            auto new_right       = construct_subtree(static_cast<node_pointer>(src->right_));
+            auto new_right     = construct_subtree(static_cast<node_pointer>(src->right_));
             dest->right_       = static_cast<node_base_pointer>(new_right);
             new_right->parent_ = static_cast<end_node_pointer>(dest);
         }
