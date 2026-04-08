@@ -10,24 +10,30 @@
 #ifndef MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP
 #define MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP
 
-namespace mstd {
+namespace mstd
+{
 
-template <class _Container, class _Predicate>
-typename _Container::size_type _MSTD_erase_if_container(_Container& __c, _Predicate& __pred) {
-  typename _Container::size_type __old_size = __c.size();
+  template <class ContainerT, class PredicateT>
+  typename ContainerT::size_type erase_if_container(ContainerT &container, PredicateT &predicate)
+  {
+    typename ContainerT::size_type __old_size = container.size();
 
-  const typename _Container::iterator __last = __c.end();
-  for (typename _Container::iterator __iter = __c.begin(); __iter != __last;) {
-    if (__pred(*__iter))
-      __iter = __c.erase(__iter);
-    else
-      ++__iter;
+    const typename ContainerT::iterator last = container.end();
+    for (typename ContainerT::iterator iter = container.begin(); iter != last;)
+    {
+      if (predicate(*iter))
+      {
+        iter = container.erase(iter);
+      }
+      else
+      {
+        ++iter;
+      }
+    }
+
+    return __old_size - container.size();
   }
 
-  return __old_size - __c.size();
-}
-
 } // namespace mstd
-
 
 #endif // MSTD_ITERATOR_ERASE_IF_CONTAINER_HPP

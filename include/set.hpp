@@ -514,10 +514,10 @@ noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
 }
 
-template <class KeyT, class CompareT, class AllocatorT, class _Predicate>
+template <class KeyT, class CompareT, class AllocatorT, class PredicateT>
 inline typename set<KeyT, CompareT, AllocatorT>::size_type
-erase_if(set<KeyT, CompareT, AllocatorT>& __c, _Predicate __pred) {
-    return mstd::_MSTD_erase_if_container(__c, __pred);
+erase_if(set<KeyT, CompareT, AllocatorT>& container, PredicateT pred) {
+    return mstd::erase_if_container(container, pred);
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
@@ -539,7 +539,7 @@ private:
     using Tree_        = Tree<value_type, value_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type> ;
 
-    static_assert(__check_valid_allocator<allocator_type>::value, "");
+    static_assert(__check_valid_allocator<allocator_type>::value);
 
     Tree_ tree_;
 
@@ -964,10 +964,10 @@ noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
 }
 
-template <class KeyT, class CompareT, class AllocatorT, class _Predicate>
+template <class KeyT, class CompareT, class AllocatorT, class PredicateT>
 inline typename multiset<KeyT, CompareT, AllocatorT>::size_type
-erase_if(multiset<KeyT, CompareT, AllocatorT>& __c, _Predicate __pred) {
-    return mstd::_MSTD_erase_if_container(__c, __pred);
+erase_if(multiset<KeyT, CompareT, AllocatorT>& container, PredicateT pred) {
+    return mstd::erase_if_container(container, pred);
 }
 
 namespace pmr {
