@@ -266,6 +266,10 @@ public:
     using const_iterator         = MapConstIterator<typename Tree_::const_iterator>;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    template <class Self>
+    using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
+    template <class Self>
+    using SelfSubrange = std::pair<SelfIterator<Self>, SelfIterator<Self>>;
 
     using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
     using insert_return_type = __insert_return_type<iterator, node_type>;
@@ -276,13 +280,16 @@ public:
     friend class multimap;
 
     map() noexcept(
-        std::is_nothrow_default_constructible<allocator_type>::value && std::is_nothrow_default_constructible<key_compare>::value&&
-        std::is_nothrow_copy_constructible<key_compare>::value)
+       std::is_nothrow_default_constructible<allocator_type>::value
+    && std::is_nothrow_default_constructible<key_compare>::value
+    && std::is_nothrow_copy_constructible<key_compare>::value
+    )
     : tree_(ValueCompare_(key_compare())) {}
 
     explicit map(const key_compare& comp) noexcept(
-           std::is_nothrow_default_constructible<allocator_type>::value 
-        && std::is_nothrow_copy_constructible<key_compare>::value)
+       std::is_nothrow_default_constructible<allocator_type>::value 
+    && std::is_nothrow_copy_constructible<key_compare>::value
+    )
     : tree_(ValueCompare_(comp)) {}
 
     explicit map(const key_compare& comp, const allocator_type& alloc)
@@ -352,16 +359,28 @@ public:
 
     ~map() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), ""); }
 
-    [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
-    [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
-    [[nodiscard]] iterator end() noexcept { return tree_.end(); }
-    [[nodiscard]] const_iterator end() const noexcept { return tree_.end(); }
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept {
+        return self.tree_.begin();
+    }
 
-    [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
+        return self.tree_.end();
+    }
+
+    [[nodiscard]] reverse_iterator rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+
     [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[nodiscard]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+
+    [[nodiscard]] reverse_iterator rend() noexcept {
+        return reverse_iterator(begin());
+    }
+
     [[nodiscard]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
@@ -594,101 +613,49 @@ public:
 
     void swap(map& __m) noexcept(std::is_nothrow_swappable_v<Tree_>) { tree_.swap(__m.tree_); }
 
-    [[nodiscard]] iterator find(const key_type& key) { return tree_.find(key); }
-    [[nodiscard]] const_iterator find(const key_type& key) const { return tree_.find(key); }
-
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] iterator find(const TransparentKey& key) {
-        return tree_.find(key);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& key) {
+        return self.tree_.find(key);
     }
 
     template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] const_iterator find(const TransparentKey& k) const {
-        return tree_.find(k);
-    }
-
-    [[nodiscard]] size_type count(const key_type& k) const {
-        return tree_.countUnique(k);
-    }
-
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& key) const {
         return tree_.countMulti(key);
     }
 
-    [[nodiscard]] bool contains(const key_type& key) const { return find(key) != end(); }
-
     template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& k) const {
         return find(k) != end();
     }
 
-    [[nodiscard]] iterator lower_bound(const key_type& k) {
-        return tree_.lowerBoundUnique(k);
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const key_type& k) {
+        return self.tree_.lowerBoundUnique(k);
     }
 
-    [[nodiscard]] const_iterator lower_bound(const key_type& k) const {
-        return tree_.lowerBoundUnique(k);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& k) {
+        return self.tree_.lowerBoundMulti(k);
     }
 
-    // The transparent versions of the lookup functions use the _multi version, since a non-element key is allowed to
-    // match multiple elements.
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] iterator lower_bound(const TransparentKey& k) {
-        return tree_.lowerBoundMulti(k);
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> upper_bound(this Self& self, const key_type& k) {
+        return self.tree_.upperBoundUnique(k);
     }
 
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] const_iterator lower_bound(const TransparentKey& k) const {
-        return tree_.lowerBoundMulti(k);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> upper_bound(this Self& self, const TransparentKey& k) {
+        return self.tree_.upperBoundMulti(k);
     }
 
-    [[nodiscard]] iterator upper_bound(const key_type& k) {
-        return tree_.upperBoundUnique(k);
+    template <class Self>
+    [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const key_type& k) {
+        return self.tree_.equalRangeUnique(k);
     }
 
-    [[nodiscard]] const_iterator upper_bound(const key_type& k) const {
-        return tree_.upperBoundUnique(k);
-    }
-
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] iterator upper_bound(const TransparentKey& k) {
-        return tree_.upperBoundMulti(k);
-    }
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    //      || __is_transparently_comparable_v<CompareT, key_type, TransparentKey>
-    [[nodiscard]] const_iterator upper_bound(const TransparentKey& k) const {
-        return tree_.upperBoundMulti(k);
-    }
-    [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& k) {
-        return tree_.equalRangeUnique(k);
-    }
-    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const key_type& k) const {
-        return tree_.equalRangeUnique(k);
-    }
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    [[nodiscard]] std::pair<iterator, iterator> equal_range(const TransparentKey& k) {
-        return tree_.equalRangeMulti(k);
-    }
-    template <typename TransparentKey>
-    //requires __is_transparent_v<CompareT, TransparentKey>
-    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const TransparentKey& k) const {
-        return tree_.equalRangeMulti(k);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] std::pair<iterator, iterator> equal_range(this Self& self, const TransparentKey& k) {
+        return self.tree_.equalRangeMulti(k);
     }
 
 private:
@@ -899,6 +866,10 @@ public:
     using const_iterator = MapConstIterator<typename Tree_::const_iterator>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    template <class Self>
+    using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
+    template <class Self>
+    using SelfSubrange = std::pair<SelfIterator<Self>, SelfIterator<Self>>;
 
     using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
 
@@ -992,16 +963,23 @@ public:
         static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), "");
     }
 
-    [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
-    [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
-    [[nodiscard]] iterator end() noexcept { return tree_.end(); }
-    [[nodiscard]] const_iterator end() const noexcept { return tree_.end(); }
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept { return self.tree_.begin(); }
+    template <class Self>
+    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept { return self.tree_.end(); }
 
-    [[nodiscard]] reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    [[nodiscard]] reverse_iterator rbegin() noexcept {
+        return reverse_iterator(end());
+    }
+
     [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
         return const_reverse_iterator(end());
     }
-    [[nodiscard]] reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+
+    [[nodiscard]] reverse_iterator rend() noexcept {
+        return reverse_iterator(begin());
+    }
+
     [[nodiscard]] const_reverse_iterator rend() const noexcept {
         return const_reverse_iterator(begin());
     }
@@ -1150,14 +1128,9 @@ public:
         tree_.swap(other.tree_);
     }
 
-    template <class TransparentKey>
-    [[nodiscard]] iterator find(const TransparentKey& key) {
-        return tree_.find(key);
-    }
-
-    template <class TransparentKey>
-    [[nodiscard]] const_iterator find(const TransparentKey& key) const {
-        return tree_.find(key);
+    template <class Self, class TransparentKey>
+    [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& key) {
+        return self.tree_.find(key);
     }
 
     template <class TransparentKey>
@@ -1170,34 +1143,19 @@ public:
         return find(key) != end();
     }
 
-    template <class TransparentKey>
-    [[nodiscard]] iterator lower_bound(const TransparentKey& key) {
-        return tree_.lowerBoundMulti(key);
+    template <class Self, class TransparentKey>
+    [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& key) {
+        return self.tree_.lowerBoundMulti(key);
     }
 
-    template <class TransparentKey>
-    [[nodiscard]] const_iterator lower_bound(const TransparentKey& key) const {
-        return tree_.lowerBoundMulti(key);
+    template <class Self, class TransparentKey>
+    [[nodiscard]] iterator upper_bound(this Self& self, const TransparentKey& key) {
+        return self.tree_.upperBoundMulti(key);
     }
 
-    template <class TransparentKey>
-    [[nodiscard]] iterator upper_bound(const TransparentKey& key) {
-        return tree_.upperBoundMulti(key);
-    }
-
-    template <class TransparentKey>
-    [[nodiscard]] const_iterator upper_bound(const TransparentKey& key) const {
-        return tree_.upperBoundMulti(key);
-    }
-
-    template <class TransparentKey>
-    [[nodiscard]] std::pair<iterator, iterator> equal_range(const TransparentKey& key) {
-        return tree_.equalRangeMulti(key);
-    }
-
-    template <class TransparentKey>
-    [[nodiscard]] std::pair<const_iterator, const_iterator> equal_range(const TransparentKey& key) const {
-        return tree_.equalRangeMulti(key);
+    template <class Self, class TransparentKey>
+    [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& key) {
+        return self.tree_.equalRangeMulti(key);
     }
 
 private:
