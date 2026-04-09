@@ -11,32 +11,32 @@
 #define MSTD_SET
 
 #include <algorithm>
-#include <detail/functional/is_transparent.hpp>
 #include <cassert>
 #include <functional>
 #include <iterator>
 #include <memory>
 #include <detail/node_handle.hpp>
 #include <detail/iterator/iterator_traits.hpp>
-#include <detail/compare/synth_three_way.hpp>
 #include <ranges>
 #include <detail/tree.hpp>
 #include <type_traits>
 #include <detail/iterator/erase_if_container.hpp>
 #include <detail/type_traits/is_allocator.hpp>
 #include <detail/ranges/container_compatible_range.hpp>
+#include <detail/utility/compare_three_way.hpp>
 #include <memory_resource>
 #include <utility>
 #include <version>
 #include <compare>
 #include <initializer_list>
+#include <concepts>
 
 namespace mstd {
 
-template <class KeyT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<KeyT> >
+template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT> >
 class multiset;
 
-template <class KeyT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<KeyT> >
+template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT> >
 class set {
 public:
     // types:
@@ -341,41 +341,22 @@ public:
     }
 
     // set operations:
-    [[nodiscard]] iterator find(const key_type& key) {
-        return tree_.find(key);
-    }
-
-    [[nodiscard]] const_iterator find(const key_type& key) const {
-        return tree_.find(key);
-    }
-
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator find(const TransparentKey& transparent_key) {
         return tree_.find(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator find(const TransparentKey& transparent_key) const {
         return tree_.find(transparent_key);
     }
-    
-    [[nodiscard]] size_type count(const key_type& key) const {
-        return tree_.countUnique(key);
-    }
+
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& transparent_key) const {
         return tree_.countMulti(transparent_key);
     }
 
-    [[nodiscard]] bool contains(const key_type& key) const {
-        return find(key) != end();
-    }
-
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& transparent_key) const {
         return find(transparent_key) != end();
     }
@@ -391,13 +372,13 @@ public:
     // The transparent versions of the lookup functions use the _multi version,
     // since a non-element key is allowed to match multiple elements.
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    // TODO(gogagum): require order
     [[nodiscard]] iterator lower_bound(const TransparentKey& transparent_key) {
         return tree_.lowerBoundMulti(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    // TODO(gogagum): require order
     [[nodiscard]] const_iterator
     lower_bound(const TransparentKey& transparent_key) const {
         return tree_.lowerBoundMulti(transparent_key);
@@ -412,14 +393,14 @@ public:
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    // TODO(gogagum): require order
     [[nodiscard]] iterator
     upper_bound(const TransparentKey& transparent_key) {
         return tree_.upperBoundMulti(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    requires (!std::same_as<TransparentKey, value_type>)
     [[nodiscard]] const_iterator
     upper_bound(const TransparentKey& transparent_key) const {
         return tree_.upperBoundMulti(transparent_key);
@@ -435,14 +416,14 @@ public:
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    // TODO(gogagum): require order
     [[nodiscard]] std::pair<iterator, iterator>
     equal_range(const TransparentKey& transparent_key) {
         return tree_.equalRangeMulti(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
+    // TODO(gogagum): require order
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const TransparentKey& transparent_key) const {
         return tree_.equalRangeMulti(transparent_key);
@@ -454,7 +435,7 @@ public:
 
 template <
     class InputIteratorT
-  , class CompareT   = std::less<std::iter_value_t<InputIteratorT>>
+  , class CompareT   = CompareThreeWay
   , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
 >
 requires __has_input_iterator_category<InputIteratorT>
@@ -465,7 +446,7 @@ set(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = Allocato
 
 template <
     std::ranges::input_range RangeT
-  , class CompareT   = std::less<std::ranges::range_value_t<RangeT>>
+  , class CompareT   = CompareThreeWay
   , class AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
 >
 requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
@@ -474,7 +455,7 @@ set(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT(
 
 template <
     class KeyT
-  , class CompareT   = std::less<KeyT>
+  , class CompareT   = CompareThreeWay
   , class AllocatorT = std::allocator<KeyT>
 >
 requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
@@ -484,16 +465,16 @@ set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT(
 template <class InputIteratorT, class AllocatorT>
 requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
 set(InputIteratorT, InputIteratorT, AllocatorT)
--> set<std::iter_value_t<InputIteratorT>, std::less<std::iter_value_t<InputIteratorT>>, AllocatorT>;
+-> set<std::iter_value_t<InputIteratorT>, CompareThreeWay, AllocatorT>;
 
 template <std::ranges::input_range RangeT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
 set(std::from_range_t, RangeT&&, AllocatorT)
--> set<std::ranges::range_value_t<RangeT>, std::less<std::ranges::range_value_t<RangeT>>, AllocatorT>;
+-> set<std::ranges::range_value_t<RangeT>, CompareThreeWay, AllocatorT>;
 
 template <class KeyT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
-set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, std::less<KeyT>, AllocatorT>;
+set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, CompareThreeWay, AllocatorT>;
 
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
@@ -502,9 +483,9 @@ operator==(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT,
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
-__synth_three_way_result<KeyT>
+auto
 operator<=>(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT, AllocatorT>& rhs) {
-    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), mstd::__synth_three_way);
+    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), CompareT{});
 }
 
 // specialized algorithms:
@@ -796,98 +777,53 @@ public:
     [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 
     // set operations:
-    [[nodiscard]] iterator find(const key_type& key) { return tree_.find(key); }
-    [[nodiscard]] const_iterator find(const key_type& key) const { return tree_.find(key); }
-    
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator find(const TransparentKey& transparent_key) {
         return tree_.find(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator find(const TransparentKey& transparent_key) const {
         return tree_.find(transparent_key);
     }
-    
-    [[nodiscard]] size_type count(const key_type& key) const {
-        return tree_.countMulti(key);
-    }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& transparent_key) const {
         return tree_.countMulti(transparent_key);
     }
-    
-    [[nodiscard]] bool contains(const key_type& key) const {
-        return find(key) != end();
-    }
-    
+
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& transparent_key) const {
         return find(transparent_key) != end();
     }
 
-    [[nodiscard]] iterator lower_bound(const key_type& key) {
-        return tree_.lowerBoundMulti(key);
-    }
-
-    [[nodiscard]] const_iterator lower_bound(const key_type& key) const {
-        return tree_.lowerBoundMulti(key);
-    }
-
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator lower_bound(const TransparentKey& transparent_key) {
         return tree_.lowerBoundMulti(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator lower_bound(const TransparentKey& transparent_key) const {
         return tree_.lowerBoundMulti(transparent_key);
     }
-    
-    [[nodiscard]] iterator upper_bound(const key_type& key) {
-        return tree_.upperBoundMulti(key);
-    }
-
-    [[nodiscard]] const_iterator upper_bound(const key_type& key) const {
-        return tree_.upperBoundMulti(key);
-    }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] iterator upper_bound(const TransparentKey& transparent_key) {
         return tree_.upperBoundMulti(transparent_key);
     }
 
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] const_iterator
     upper_bound(const TransparentKey& transparent_key) const {
         return tree_.upperBoundMulti(transparent_key);
     }
 
-    [[nodiscard]] std::pair<iterator, iterator> equal_range(const key_type& key) {
-        return tree_.equalRangeMulti(key);
-    }
-
-    [[nodiscard]] std::pair<const_iterator, const_iterator>
-    equal_range(const key_type& key) const {
-        return tree_.equalRangeMulti(key);
-    }
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<iterator, iterator>
     equal_range(const TransparentKey& transparent_key) {
         return tree_.equalRangeMulti(transparent_key);
     }
     template <typename TransparentKey>
-    requires __is_transparent_v<CompareT, TransparentKey>
     [[nodiscard]] std::pair<const_iterator, const_iterator>
     equal_range(const TransparentKey& transparent_key) const {
         return tree_.equalRangeMulti(transparent_key);
@@ -899,7 +835,7 @@ public:
 
 template <
     class InputIteratorT
-  , class CompareT   = std::less<std::iter_value_t<InputIteratorT>>
+  , class CompareT   = CompareThreeWay
   , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
 >
 requires __has_input_iterator_category<InputIteratorT>
@@ -910,14 +846,14 @@ multiset(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = All
 
 template <
     std::ranges::input_range RangeT
-  , class CompareT   = std::less<std::ranges::range_value_t<RangeT>>
+  , class CompareT   = CompareThreeWay
   , class AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
 >
 requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
 multiset(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<std::ranges::range_value_t<RangeT>, CompareT, AllocatorT>;
 
-template <class KeyT, class CompareT = std::less<KeyT>, class AllocatorT = std::allocator<KeyT>>
+template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT>>
 requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
 multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<KeyT, CompareT, AllocatorT>;
@@ -927,7 +863,7 @@ requires (__has_input_iterator_category<InputIteratorT> && __is_allocator_v<Allo
 multiset(InputIteratorT, InputIteratorT, AllocatorT)
 -> multiset<
        std::iter_value_t<InputIteratorT>
-     , std::less<std::iter_value_t<InputIteratorT>>
+     , CompareThreeWay
      , AllocatorT
    >;
 
@@ -936,14 +872,14 @@ requires __is_allocator_v<AllocatorT>
 multiset(std::from_range_t, RangeT&&, AllocatorT)
 -> multiset<
        std::ranges::range_value_t<RangeT>
-     , std::less<std::ranges::range_value_t<RangeT>>
+     , CompareThreeWay
      , AllocatorT
    >;
 
 template <class KeyT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
 multiset(std::initializer_list<KeyT>, AllocatorT)
--> multiset<KeyT, std::less<KeyT>, AllocatorT>;
+-> multiset<KeyT, CompareThreeWay, AllocatorT>;
 
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
@@ -952,9 +888,9 @@ operator==(const multiset<KeyT, CompareT, AllocatorT>& lhs, const multiset<KeyT,
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
-__synth_three_way_result<KeyT>
+auto
 operator<=>(const multiset<KeyT, CompareT, AllocatorT>& lhs, const multiset<KeyT, CompareT, AllocatorT>& rhs) {
-    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), __synth_three_way);
+    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), CompareT{});
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
@@ -971,10 +907,10 @@ erase_if(multiset<KeyT, CompareT, AllocatorT>& container, PredicateT pred) {
 }
 
 namespace pmr {
-    template <class _KeyT, class _CompareT = std::less<_KeyT>>
+    template <class _KeyT, class _CompareT = CompareThreeWay>
     using set = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 
-    template <class _KeyT, class _CompareT = std::less<_KeyT>>
+    template <class _KeyT, class _CompareT = CompareThreeWay>
     using multiset = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 } // namespace pmr
 } // namespace mstd

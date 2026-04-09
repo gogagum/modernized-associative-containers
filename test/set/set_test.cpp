@@ -29,11 +29,11 @@ TEST(SetCompare, Test1)
     };
     struct Cmp
     {
-        bool operator()(E, E) const { return false; }
+        auto operator()(E, E) const noexcept { return std::weak_ordering::equivalent; }
     };
-    static_assert(!std::totally_ordered<mstd::set<E, Cmp>>);
+    static_assert(std::totally_ordered<mstd::set<E, Cmp>>);
     static_assert(!std::three_way_comparable<E>);
-    static_assert(!std::three_way_comparable<mstd::set<E, Cmp>>);
+    static_assert(std::three_way_comparable<mstd::set<E, Cmp>>);
 }
 
 TEST(SetCompare, Test2)
@@ -68,7 +68,9 @@ TEST(SetCompare, Test3)
     {
         int value = 0;
 
-        bool operator<(L rhs) const noexcept { return value < rhs.value; }
+        std::weak_ordering operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
+        bool operator==(const L &other) const = default;
+        // bool operator!=(const L& other) const = default;
     };
 
     static_assert(std::totally_ordered<mstd::set<L>>);
@@ -98,18 +100,18 @@ TEST(SetContains, Test1)
 struct Zero
 {
 };
-bool operator<(Zero, int i) { return 0 < i; }
-bool operator<(int i, Zero) { return i < 0; }
+auto operator<=>(Zero, int i) { return 0 <=> i; }
+auto operator<=>(int i, Zero) { return i <=> 0; }
 
 struct One
 {
 };
-bool operator<(One, int i) { return 1 < i; }
-bool operator<(int i, One) { return i < 1; }
+auto operator<=>(One, int i) { return 1 <=> i; }
+auto operator<=>(int i, One) { return i <=> 1; }
 
 TEST(SetContains, Test2)
 {
-    mstd::set<int, std::less<>> m;
+    mstd::set<int> m;
     EXPECT_FALSE(m.contains(Zero{}));
     EXPECT_FALSE(m.contains(One{}));
     m.insert(0);
@@ -195,7 +197,7 @@ TEST(SetCount, Test1)
 
 struct X
 {
-    bool operator<(const X &) const { return false; }
+    auto operator<=>(const X &) const { return std::weak_ordering::equivalent; }
 };
 
 TEST(SetEqualRange, Test1)
@@ -226,9 +228,9 @@ private:
 
 struct PathPointLess
 {
-    bool operator()(const PathPoint &__lhs, const PathPoint &__rhs) const
+    auto operator()(const PathPoint &lhs, const PathPoint &rhs) const
     {
-        return __lhs.getType() < __rhs.getType();
+        return lhs.getType() <=> rhs.getType();
     }
 };
 
@@ -465,14 +467,12 @@ TEST(SetOperations, Test1)
 
 struct Cmp
 {
-    typedef void is_transparent;
-
-    bool operator()(int i, long l) const { return i < l; }
-    bool operator()(long l, int i) const { return l < i; }
-    bool operator()(int i, int j) const
+    auto operator()(int i, long l) const { return i <=> l; }
+    auto operator()(long l, int i) const { return l <=> i; }
+    auto operator()(int i, int j) const
     {
         ++count;
-        return i < j;
+        return i <=> j;
     }
 
     static int count;
@@ -646,16 +646,28 @@ TEST(SetOperations, Test8)
 {
     struct C
     {
-        bool operator()(int l, int r) const { return l < r; }
+        auto operator()(int l, int r) const { return l <=> r; }
 
         struct Partition
         {
         };
 
-        bool operator()(int l, Partition) const { return l < 2; }
-        bool operator()(Partition, int r) const { return 4 < r; }
-
-        using is_transparent = void;
+        std::weak_ordering operator()(int l, Partition) const
+        {
+            if (l <= 4 && l >= 2)
+            {
+                return std::weak_ordering::equivalent;
+            }
+            return l <=> 3;
+        }
+        std::weak_ordering operator()(Partition, int r) const
+        {
+            if (r <= 4 && r >= 2)
+            {
+                return std::weak_ordering::equivalent;
+            }
+            return 3 <=> r;
+        }
     };
 
     mstd::set<int, C> s{1, 2, 3, 4, 5};

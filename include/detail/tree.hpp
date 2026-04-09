@@ -24,11 +24,9 @@
 #include <detail/utility/try_key_extraction.hpp>
 #include <detail/type_traits/is_specialization.hpp>
 #include <detail/type_traits/copy_cvref.hpp>
-#include <detail/type_traits/make_transparent.hpp>
 #include <detail/memory/pointer_traits.hpp>
 #include <detail/memory/allocator_traits.hpp>
 #include <detail/memory/swap_allocator.hpp>
-#include <detail/utility/lazy_synth_three_way_comparator.hpp>
 
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
@@ -598,6 +596,7 @@ private:
 
 public:
     node_value_type& get_value() { return value_; }
+    const node_value_type& get_value() const { return value_; }
 
     template <class AllocT, class... ArgsT>
     explicit TreeNode(AllocT& node_alloc, ArgsT&&... args) {
@@ -1213,7 +1212,7 @@ public:
         for (; begin != end; ++begin) {
             auto holder = constructNode_(*begin);
             // Always check the max node first. This optimizes for sorted ranges inserted at the end.
-            if (!value_comp()(holder->get_value(), max_node->get_value())) { // node >= __max_val
+            if (value_comp()(holder->get_value(), max_node->get_value()) >= 0) { // node >= __max_val
                 insertNodeAt(static_cast<end_node_pointer>(max_node),
                              max_node->right_,
                              static_cast<node_base_pointer>(holder.get()));
@@ -1246,7 +1245,7 @@ public:
         for (; begin != end; ++begin) {
             mstd::try_key_extraction<KeyType_>(
                 [this, &max_node](const KeyType_& key, Reference&& val) {
-                    if (value_comp()(max_node->get_value(), key)) { // key > max_node
+                    if (value_comp()(max_node->get_value(), key) < 0) { // key > max_node
                         auto holder = constructNode_(std::forward<Reference>(val));
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
                                      max_node->right_,
@@ -1262,7 +1261,7 @@ public:
                 },
                 [this, &max_node](Reference&& val) {
                     auto holder = constructNode_(std::forward<Reference>(val));
-                    if (value_comp()(max_node->get_value(), holder->get_value())) { // node > max_node
+                    if (value_comp()(max_node->get_value(), holder->get_value()) < 0) { // node > max_node
                         insertNodeAt(static_cast<end_node_pointer>(max_node),
                                      max_node->right_,
                                      static_cast<node_base_pointer>(holder.get()));
@@ -1455,14 +1454,12 @@ public:
 
     template <class KeyT>
     size_type countUnique(const KeyT& key) const {
-        using Comp = LazySynthThreeWayComparator<value_compare, KeyT, value_type>;
         auto root_node = root();
-        Comp comp(value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.less()) {
+            const auto comp_res = value_comp()(key, root_node->get_value());
+            if (comp_res < 0) {
                 root_node = static_cast<node_pointer>(root_node->left_);
-            } else if (comp_res.greater()) {
+            } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return 1;
@@ -1473,16 +1470,14 @@ public:
 
     template <class KeyT>
     size_type countMulti(const KeyT& key) const {
-        using Comp = LazySynthThreeWayComparator<value_compare, KeyT, value_type>;
         auto result    = endNode();
         auto root_node = root();
-        Comp comp(value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.less()) {
-                result = static_cast<end_node_pointer>(root_node);
-                root_node   = static_cast<node_pointer>(root_node->left_);
-            } else if (comp_res.greater()) {
+            const auto comp_res = value_comp()(key, root_node->get_value());
+            if (comp_res < 0) {
+                result    = static_cast<end_node_pointer>(root_node);
+                root_node = static_cast<node_pointer>(root_node->left_);
+            } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return std::distance(
@@ -1509,14 +1504,13 @@ private:
     end_node_pointer lowerUpperBoundUniqueImpl_(const KeyT& key) const {
         auto root_node = root();
         auto result    = endNode();
-        auto comp      = LazySynthThreeWayComparator<CompareT, KeyT, value_type>(value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
+            const auto comp_res = value_comp()(key, root_node->get_value());
 
-            if (comp_res.less()) {
+            if (comp_res < 0) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
-            } else if (comp_res.greater()) {
+            } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else if constexpr (lower_bound) {
                 return static_cast<end_node_pointer>(root_node);
@@ -1531,10 +1525,9 @@ private:
 
     template <bool lower_bound, class KeyT>
     end_node_pointer lowerUpperBoundMultiImpl_(const KeyT& key, node_pointer root_node, end_node_pointer result) const {
-        auto comp = LazySynthThreeWayComparator<CompareT, KeyT, value_type>(value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
-            if (lower_bound ? (!comp_res.greater()) : comp_res.less()) {
+            const auto comp_res = value_comp()(key, root_node->get_value());
+            if (lower_bound ? (comp_res <= 0) : (comp_res < 0)) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else {
@@ -1560,13 +1553,12 @@ public:
     SelfSubrange<Self> equalRangeUnique(this Self& self, const KeyT& key) {
         auto result    = self.endNode();
         auto root_node = self.root();
-        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(self.value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.less()) {
+            const auto comp_res = self.value_comp_(key, root_node->get_value());
+            if (comp_res < 0) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
-            } else if (comp_res.greater()) {
+            } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {
                 return {
@@ -1589,13 +1581,12 @@ public:
     SelfSubrange<Self> equalRangeMulti(this Self& self, const KeyT& key) {
         auto result    = self.endNode();
         auto root_node = self.root();
-        auto comp      = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(self.value_comp());
         while (root_node != nullptr) {
-            const auto comp_res = comp(key, root_node->get_value());
-            if (comp_res.less()) {
+            const auto comp_res = self.value_comp()(key, root_node->get_value());
+            if (comp_res < 0) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
-            } else if (comp_res.greater()) {
+            } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {  // Equal
                 auto begin = self.template lowerUpperBoundMultiImpl_<true>(
@@ -1644,6 +1635,7 @@ public:
     // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
     // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
+    // TODO(gogagum): requires transparency
     std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) {
         auto node_ptr = root();
 
@@ -1656,12 +1648,10 @@ public:
         }
 
         auto* node_base_ptr = root_ptr();
-        auto&& transparent  = mstd::__as_transparent(value_comp());
-        auto comp           = LazySynthThreeWayComparator<__make_transparent_t<CompareT>, KeyT, value_type>(transparent);
     
         while (true) {
-            const auto comp_res = comp(key, node_ptr->get_value());
-            if (comp_res.less()) {
+            const auto comp_res = value_comp_(key, node_ptr->get_value());
+            if (comp_res < 0) {
                 if (node_ptr->left_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
@@ -1670,7 +1660,7 @@ public:
                 }
                 node_base_ptr = std::addressof(node_ptr->left_);
                 node_ptr      = static_cast<node_pointer>(node_ptr->left_);
-            } else if (comp_res.greater()) {
+            } else if (comp_res > 0) {
                 if (node_ptr->right_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
@@ -1702,10 +1692,10 @@ public:
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&>
     find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& key) {
-        if (hint == end() || value_comp()(key, *hint)) { // check before
+        if (hint == end() || (value_comp_(key, *hint) < 0)) { // check before
             // key < *hint
             const_iterator prior = hint;
-            if (prior == begin() || value_comp()(*--prior, key)) {
+            if (prior == begin() || (value_comp_(*--prior, key) < 0)) {
                 // *prev(hint) < key < *hint
                 if (hint.ptr_->left_ == nullptr) {
                     return {
@@ -1722,10 +1712,10 @@ public:
             return find_equal(key);
         }
     
-        if (value_comp()(*hint, key)) { // check after
+        if (value_comp_(*hint, key) < 0) { // check after
             // *hint < key
             const_iterator next = std::next(hint);
-            if (next == end() || value_comp()(key, *next)) {
+            if (next == end() || (value_comp_(key, *next) < 0)) {
                 // *hint < key < *std::next(hint)
                 if (hint.__get_np()->right_ == nullptr) {
                     return {
@@ -1771,7 +1761,7 @@ private:
         node_pointer node_ptr = root();
         if (node_ptr != nullptr) {
             while (true) {
-                if (value_comp()(node_ptr->get_value(), value)) {
+                if (value_comp()(node_ptr->get_value(), value) < 0) {
                     if (node_ptr->right_ != nullptr) {
                         node_ptr = static_cast<node_pointer>(node_ptr->right_);
                     } else {
@@ -1799,7 +1789,7 @@ private:
         auto node_ptr = root();
         if (node_ptr != nullptr) {
             while (true) {
-                if (value_comp()(value, node_ptr->get_value())) {
+                if (value_comp()(value, node_ptr->get_value()) < 0) {
                     if (node_ptr->left_ != nullptr) {
                         node_ptr = static_cast<node_pointer>(node_ptr->left_);
                     } else {
@@ -1828,11 +1818,11 @@ private:
     // Return reference to null leaf
     node_base_pointer&
     findLeaf_(const_iterator hint, end_node_pointer& parent, const value_type& value) {
-        if (hint == end() || !value_comp()(*hint, value)) // check before
+        if (hint == end() || (value_comp()(*hint, value) >= 0)) // check before
         {
             // value <= *hint
             const_iterator prior = hint;
-            if (prior == begin() || !value_comp()(value, *--prior)) {
+            if (prior == begin() || (value_comp()(value, *--prior) >= 0)) {
                 // *prev(hint) <= value <= *hint
                 if (hint.ptr_->left_ == nullptr) {
                     parent = static_cast<end_node_pointer>(hint.ptr_);
