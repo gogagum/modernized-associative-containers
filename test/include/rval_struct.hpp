@@ -45,18 +45,14 @@ struct rvalstruct
         valid = true;
         return *this;
     }
+
+    inline friend bool operator==(const rvalstruct &lhs, const rvalstruct &rhs) = default;
 };
 
-inline bool
-operator==(const rvalstruct &lhs, const rvalstruct &rhs)
+inline std::weak_ordering
+operator<=>(const rvalstruct &lhs, const rvalstruct &rhs)
 {
-    return lhs.val == rhs.val;
-}
-
-inline bool
-operator<(const rvalstruct &lhs, const rvalstruct &rhs)
-{
-    return lhs.val < rhs.val;
+    return lhs.val <=> rhs.val;
 }
 
 #endif

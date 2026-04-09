@@ -25,22 +25,18 @@ TEST(MultimapTest, Compare1)
 
     static_assert(std::totally_ordered<mstd::multimap<int, int>>);
 
-    static_assert(std::three_way_comparable<mstd::multimap<int, int>,
-                                            std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<int, float>,
-                                             std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<int, float>,
-                                             std::weak_ordering>);
-    static_assert(std::three_way_comparable<mstd::multimap<int, float>,
-                                            std::partial_ordering>);
+    static_assert(std::three_way_comparable<mstd::multimap<int, int>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multimap<int, float>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multimap<int, float>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<mstd::multimap<int, float>, std::partial_ordering>);
 
     struct E
     {
-        bool operator==(E) { return true; }
+        auto operator<=>(E) const noexcept { return std::weak_ordering::equivalent; }
     };
-    static_assert(!std::totally_ordered<mstd::multimap<int, E>>);
+    static_assert(std::totally_ordered<mstd::multimap<E, int>>);
     static_assert(!std::three_way_comparable<E>);
-    static_assert(!std::three_way_comparable<mstd::multimap<int, E>>);
+    static_assert(std::three_way_comparable<mstd::multimap<E, int>>);
 }
 
 TEST(MultimapTest, Compare2)
@@ -76,7 +72,8 @@ TEST(MultimapTest, Compare3)
     {
         int value = 0;
 
-        bool operator<(L rhs) const noexcept { return value < rhs.value; }
+        std::weak_ordering operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
+        bool operator==(const L&) const = default;
     };
 
     static_assert(std::totally_ordered<mstd::multimap<int, L>>);

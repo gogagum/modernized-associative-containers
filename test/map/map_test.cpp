@@ -198,9 +198,9 @@ struct Val
     }
 };
 
-bool operator<(const Val &a, const Val &b)
+auto operator<=>(const Val &a, const Val &b)
 {
-    return a.val < b.val;
+    return a.val <=> b.val;
 }
 
 TEST(MapInsertOrAssignTest, Test1)

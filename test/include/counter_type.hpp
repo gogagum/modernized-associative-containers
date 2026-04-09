@@ -73,16 +73,13 @@ struct counter_type
         destructor_count = 0;
     }
 
-    bool operator==(const counter_type &rhs) const
+    std::weak_ordering operator<=>(const counter_type &rhs) const
     {
-        return val == rhs.val;
+        return val <=> rhs.val;
     }
 
-    bool operator<(const counter_type &rhs) const
-    {
-        ++less_compare_count;
-        return val < rhs.val;
-    }
+    bool operator==(const counter_type &rhs) const = default;
+
 };
 
 int counter_type::default_count = 0;

@@ -28,11 +28,11 @@ TEST(MultisetCompare, Test1)
     };
     struct Cmp
     {
-        bool operator()(E, E) const { return false; }
+        std::weak_ordering operator()(E, E) const { return std::weak_ordering::equivalent; }
     };
-    static_assert(!std::totally_ordered<mstd::multiset<E, Cmp>>);
+    static_assert(std::totally_ordered<mstd::multiset<E, Cmp>>);
     static_assert(!std::three_way_comparable<E>);
-    static_assert(!std::three_way_comparable<mstd::multiset<E, Cmp>>);
+    static_assert(std::three_way_comparable<mstd::multiset<E, Cmp>>);
 }
 
 TEST(MultisetCompare, Test2)
@@ -67,13 +67,13 @@ TEST(MultisetCompare, Test3)
     {
         int value = 0;
 
-        bool operator<(L rhs) const noexcept { return value < rhs.value; }
+        auto operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
     };
 
     static_assert(std::totally_ordered<mstd::multiset<L>>);
 
     mstd::multiset<L> c{{1}, {2}, {3}}, d{{1}, {2}, {3}, {4}};
-    static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
+    static_assert(std::same_as<decltype(c <=> c), std::strong_ordering>);
     EXPECT_TRUE(std::is_lt(c <=> d));
 }
 
@@ -194,18 +194,18 @@ TEST(MultisetCompareTest, Test1)
 struct Zero
 {
 };
-bool operator<(Zero, int i) { return 0 < i; }
-bool operator<(int i, Zero) { return i < 0; }
+auto operator<=>(Zero, int i) { return 0 <=> i; }
+auto operator<=>(int i, Zero) { return i <=> 0; }
 
 struct One
 {
 };
-bool operator<(One, int i) { return 1 < i; }
-bool operator<(int i, One) { return i < 1; }
+auto operator<=>(One, int i) { return 1 <=> i; }
+auto operator<=>(int i, One) { return i <=> 1; }
 
 TEST(MultisetCompareTest, Test2)
 {
-    mstd::multiset<int, std::less<>> m;
+    mstd::multiset<int> m;
     EXPECT_FALSE(m.contains(Zero{}));
     EXPECT_FALSE(m.contains(One{}));
     m.emplace(0);
@@ -352,10 +352,9 @@ struct aggressive_aggregate
     int b;
 };
 
-bool operator<(const aggressive_aggregate &a,
-               const aggressive_aggregate &b)
+auto operator<=>(const aggressive_aggregate &a, const aggressive_aggregate &b)
 {
-    return a.a < b.a;
+    return a.a <=> b.a;
 };
 
 TEST(MultisetEmplaceTest, Test2)
