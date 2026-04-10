@@ -16,7 +16,6 @@
 #include <iterator>
 #include <memory>
 #include <detail/node_handle.hpp>
-#include <detail/iterator/iterator_traits.hpp>
 #include <ranges>
 #include <detail/tree.hpp>
 #include <type_traits>
@@ -97,14 +96,14 @@ public:
     explicit set(const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <class InputIteratorT>
-    set(InputIteratorT begin, InputIteratorT end, const value_compare& comp = value_compare())
+    template <class IteratorT>
+    set(IteratorT begin, IteratorT end, const value_compare& comp = value_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <class InputIteratorT>
-    set(InputIteratorT begin, InputIteratorT end, const value_compare& comp, const allocator_type& alloc)
+    template <class IteratorT>
+    set(IteratorT begin, IteratorT end, const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -118,8 +117,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
     
-    template <class InputIteratorT>
-    set(InputIteratorT begin, InputIteratorT end, const allocator_type& alloc)
+    template <class IteratorT>
+    set(IteratorT begin, IteratorT end, const allocator_type& alloc)
     : set(begin, end, key_compare(), alloc) {}
     
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -230,8 +229,8 @@ public:
         return tree_.emplaceHintUnique(pos, val).first;
     }
 
-    template <class InputIteratorT>
-    void insert(InputIteratorT first, InputIteratorT last) {
+    template <class IteratorT>
+    void insert(IteratorT first, IteratorT last) {
         tree_.insertRangeUnique(first, last);
     }
 
@@ -395,15 +394,13 @@ public:
 };
 
 template <
-    class InputIteratorT
+    std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
+  , class AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>
-      && __is_allocator_v<AllocatorT>
-      && (!__is_allocator_v<CompareT>)
-set(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
--> set<std::iter_value_t<InputIteratorT>, CompareT, AllocatorT>;
+requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+set(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> set<std::iter_value_t<IteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
@@ -423,10 +420,10 @@ requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
 set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> set<KeyT, CompareT, AllocatorT>;
 
-template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
-set(InputIteratorT, InputIteratorT, AllocatorT)
--> set<std::iter_value_t<InputIteratorT>, CompareThreeWay, AllocatorT>;
+template <std::input_iterator IteratorT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
+set(IteratorT, IteratorT, AllocatorT)
+-> set<std::iter_value_t<IteratorT>, CompareThreeWay, AllocatorT>;
 
 template <std::ranges::input_range RangeT, class AllocatorT>
 requires __is_allocator_v<AllocatorT>
@@ -523,18 +520,18 @@ public:
     explicit multiset(const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <class InputIteratorT>
-    multiset(InputIteratorT begin, InputIteratorT end, const value_compare& comp = value_compare())
+    template <class IteratorT>
+    multiset(IteratorT begin, IteratorT end, const value_compare& comp = value_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <class InputIteratorT>
-    multiset(InputIteratorT begin, InputIteratorT end, const allocator_type& alloc)
+    template <class IteratorT>
+    multiset(IteratorT begin, IteratorT end, const allocator_type& alloc)
     : multiset(begin, end, key_compare(), alloc) {}
 
-    template <class InputIteratorT>
-    multiset(InputIteratorT begin, InputIteratorT end, const value_compare& comp, const allocator_type& alloc)
+    template <class IteratorT>
+    multiset(IteratorT begin, IteratorT end, const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -644,8 +641,8 @@ public:
         return tree_.emplaceHintMulti(pos, value);
     }
 
-    template <class InputIteratorT>
-    void insert(InputIteratorT begin, InputIteratorT end) {
+    template <class IteratorT>
+    void insert(IteratorT begin, IteratorT end) {
         tree_.insertRangeMulti(begin, end);
     }
 
@@ -778,15 +775,13 @@ public:
 };
 
 template <
-    class InputIteratorT
+    std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::iter_value_t<InputIteratorT>>
+  , class AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>
-      && __is_allocator_v<AllocatorT>
-      && (!__is_allocator_v<CompareT>)
-multiset(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
--> multiset<std::iter_value_t<InputIteratorT>, CompareT, AllocatorT>;
+requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+multiset(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
+-> multiset<std::iter_value_t<IteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
@@ -802,11 +797,11 @@ requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
 multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<KeyT, CompareT, AllocatorT>;
 
-template <class InputIteratorT, class AllocatorT>
-requires (__has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>)
-multiset(InputIteratorT, InputIteratorT, AllocatorT)
+template <std::input_iterator IteratorT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
+multiset(IteratorT, IteratorT, AllocatorT)
 -> multiset<
-       std::iter_value_t<InputIteratorT>
+       std::iter_value_t<IteratorT>
      , CompareThreeWay
      , AllocatorT
    >;
