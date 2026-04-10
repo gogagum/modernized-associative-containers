@@ -496,6 +496,11 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     using node_type              = SetNodeHandle<typename Tree_::node, allocator_type>;
 
+    template <class Self>
+    using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
+    template <class Self>
+    using SelfSubrange = std::pair<SelfIterator<Self>, SelfIterator<Self>>;
+
     template <class /*Key*/, class /*Compare*/, class /*Alloc*/>
     friend class set;
     template <class /*Key2*/, class /*Compare*/, class /*Alloc*/>
@@ -738,14 +743,9 @@ public:
     [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
 
     // set operations:
-    template <typename TransparentKey>
-    [[nodiscard]] iterator find(const TransparentKey& transparent_key) {
-        return tree_.find(transparent_key);
-    }
-
-    template <typename TransparentKey>
-    [[nodiscard]] const_iterator find(const TransparentKey& transparent_key) const {
-        return tree_.find(transparent_key);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& transparent_key) {
+        return self.tree_.find(transparent_key);
     }
 
     template <typename TransparentKey>
@@ -758,36 +758,19 @@ public:
         return find(transparent_key) != end();
     }
 
-    template <typename TransparentKey>
-    [[nodiscard]] iterator lower_bound(const TransparentKey& transparent_key) {
-        return tree_.lowerBoundMulti(transparent_key);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& transparent_key) {
+        return self.tree_.lowerBoundMulti(transparent_key);
     }
 
-    template <typename TransparentKey>
-    [[nodiscard]] const_iterator lower_bound(const TransparentKey& transparent_key) const {
-        return tree_.lowerBoundMulti(transparent_key);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfIterator<Self> upper_bound(this Self& self, const TransparentKey& transparent_key) {
+        return self.tree_.upperBoundMulti(transparent_key);
     }
 
-    template <typename TransparentKey>
-    [[nodiscard]] iterator upper_bound(const TransparentKey& transparent_key) {
-        return tree_.upperBoundMulti(transparent_key);
-    }
-
-    template <typename TransparentKey>
-    [[nodiscard]] const_iterator
-    upper_bound(const TransparentKey& transparent_key) const {
-        return tree_.upperBoundMulti(transparent_key);
-    }
-
-    template <typename TransparentKey>
-    [[nodiscard]] std::pair<iterator, iterator>
-    equal_range(const TransparentKey& transparent_key) {
-        return tree_.equalRangeMulti(transparent_key);
-    }
-    template <typename TransparentKey>
-    [[nodiscard]] std::pair<const_iterator, const_iterator>
-    equal_range(const TransparentKey& transparent_key) const {
-        return tree_.equalRangeMulti(transparent_key);
+    template <class Self, typename TransparentKey>
+    [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& transparent_key) {
+        return self.tree_.equalRangeMulti(transparent_key);
     }
     
     template <class, class...>
