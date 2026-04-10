@@ -295,14 +295,14 @@ public:
     explicit map(const key_compare& comp, const allocator_type& alloc)
     : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {}
 
-    template <class InputIteratorT>
-    map(InputIteratorT begin, InputIteratorT end, const key_compare& comp = key_compare())
+    template <class IteratorT>
+    map(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
     : tree_(ValueCompare_(comp)) {
         insert(begin, end);
     }
 
-    template <class InputIteratorT>
-    map(InputIteratorT begin, InputIteratorT end, const key_compare& comp, const allocator_type& alloc)
+    template <class IteratorT>
+    map(IteratorT begin, IteratorT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
@@ -316,8 +316,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
     
-    template <class InputIteratorT>
-    map(InputIteratorT begin, InputIteratorT end, const allocator_type& alloc)
+    template <class IteratorT>
+    map(IteratorT begin, IteratorT end, const allocator_type& alloc)
     : map(begin, end, key_compare(), alloc) {}
 
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -474,8 +474,8 @@ public:
         insert(init_list.begin(), init_list.end());
     }
 
-    template <class InputIteratorT>
-    void insert(InputIteratorT first, InputIteratorT last) {
+    template <class IteratorT>
+    void insert(IteratorT first, IteratorT last) {
         tree_.insertRangeUnique(first, last);
     }
 
@@ -669,21 +669,20 @@ private:
 };
 
 template <
-    class InputIteratorT
+    std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
+  , class AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>
-      && (!__is_allocator_v<CompareT>)
+requires (!__is_allocator_v<CompareT>)
       && __is_allocator_v<AllocatorT>
 map(
-    InputIteratorT,
-    InputIteratorT,
+    IteratorT,
+    IteratorT,
     CompareT = CompareT(),
     AllocatorT = AllocatorT()
 ) -> map<
-        __iter_key_type<InputIteratorT>
-      , __iter_mapped_type<InputIteratorT>
+        __iter_key_type<IteratorT>
+      , __iter_mapped_type<IteratorT>
       , CompareT, AllocatorT
 >;
 
@@ -723,12 +722,12 @@ map(
        , AllocatorT
      >;
 
-template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
-map(InputIteratorT, InputIteratorT, AllocatorT)
+template <std::input_iterator IteratorT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
+map(IteratorT, IteratorT, AllocatorT)
 -> map<
-    __iter_key_type<InputIteratorT>
-  , __iter_mapped_type<InputIteratorT>
+    __iter_key_type<IteratorT>
+  , __iter_mapped_type<IteratorT>
   , CompareThreeWay
   , AllocatorT
 >;
@@ -894,14 +893,14 @@ public:
     explicit multimap(const key_compare& comp, const allocator_type& alloc)
     : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {}
 
-    template <class InputIteratorT>
-    multimap(InputIteratorT begin, InputIteratorT end, const key_compare& comp = key_compare())
+    template <class IteratorT>
+    multimap(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
     : tree_(ValueCompare_(comp)) {
         insert(begin, end);
     }
 
-    template <class InputIteratorT>
-    multimap(InputIteratorT begin, InputIteratorT end, const key_compare& comp, const allocator_type& alloc)
+    template <class IteratorT>
+    multimap(IteratorT begin, IteratorT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
@@ -915,8 +914,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
 
-    template <class InputIteratorT>
-    multimap(InputIteratorT begin, InputIteratorT end, const allocator_type& alloc)
+    template <class IteratorT>
+    multimap(IteratorT begin, IteratorT end, const allocator_type& alloc)
     : multimap(begin, end, key_compare(), alloc) {}
     
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -1043,8 +1042,8 @@ public:
         return tree_.emplaceHintMulti(pos.i_, __v);
     }
 
-    template <class InputIteratorT>
-    void insert(InputIteratorT begin, InputIteratorT end) {
+    template <class IteratorT>
+    void insert(IteratorT begin, IteratorT end) {
         tree_.insertRangeMulti(begin, end);
     }
 
@@ -1168,17 +1167,15 @@ private:
 };
 
 template <
-    class InputIteratorT
+    std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__iter_to_alloc_type<InputIteratorT>>
+  , class AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires __has_input_iterator_category<InputIteratorT>
-      && (!__is_allocator_v<CompareT>)
-      && __is_allocator_v<AllocatorT>
-multimap(InputIteratorT, InputIteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
+requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+multimap(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
-       __iter_key_type<InputIteratorT>
-     , __iter_mapped_type<InputIteratorT>
+       __iter_key_type<IteratorT>
+     , __iter_mapped_type<IteratorT>
      , CompareT
      , AllocatorT
    >;
@@ -1207,12 +1204,12 @@ requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
 multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 
-template <class InputIteratorT, class AllocatorT>
-requires __has_input_iterator_category<InputIteratorT> && __is_allocator_v<AllocatorT>
-multimap(InputIteratorT, InputIteratorT, AllocatorT)
+template <std::input_iterator IteratorT, class AllocatorT>
+requires __is_allocator_v<AllocatorT>
+multimap(IteratorT, IteratorT, AllocatorT)
 -> multimap<
-       __iter_key_type<InputIteratorT>
-     , __iter_mapped_type<InputIteratorT>
+       __iter_key_type<IteratorT>
+     , __iter_mapped_type<IteratorT>
      , CompareThreeWay
      , AllocatorT
    >;

@@ -19,10 +19,6 @@
 
 namespace mstd {
 
-template <class _Tp>
-concept __has_input_iterator_category
-    = std::convertible_to<typename std::iterator_traits<_Tp>::iterator_category, std::input_iterator_tag>;
-
 template <class IteratorT>
 using __iter_key_type = std::remove_const_t<std::tuple_element_t<0, std::iter_value_t<IteratorT>>>;
 
