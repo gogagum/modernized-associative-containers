@@ -378,12 +378,11 @@ TEST(SetOperations, Test1)
     typedef mstd::set<int>::iterator iterator;
     typedef mstd::set<int>::const_iterator const_iterator;
     typedef std::pair<iterator, bool> insert_return_type;
-    std::pair<iterator, iterator> pp0;
 
-    pp0 = s0.equal_range(1);
+    std::ranges::input_range auto pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 0);
-    EXPECT_EQ(pp0.first, s0.end());
-    EXPECT_EQ(pp0.second, s0.end());
+    EXPECT_EQ(pp0.begin(), s0.end());
+    EXPECT_EQ(pp0.end(), s0.end());
 
     insert_return_type irt0 = s0.insert(1);
     insert_return_type irt1 = s0.insert(2);
@@ -391,11 +390,11 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(2);
     EXPECT_EQ(s0.count(2), 1);
-    EXPECT_EQ(*pp0.first, 2);
-    EXPECT_EQ(*pp0.second, 3);
-    EXPECT_EQ(pp0.first, irt1.first);
-    EXPECT_EQ(--pp0.first, irt0.first);
-    EXPECT_EQ(pp0.second, irt2.first);
+    EXPECT_EQ(*pp0.begin(), 2);
+    EXPECT_EQ(*pp0.end(), 3);
+    EXPECT_EQ(pp0.begin(), irt1.first);
+    EXPECT_EQ(--pp0.begin(), irt0.first);
+    EXPECT_EQ(pp0.end(), irt2.first);
 
     s0.insert(3);
     insert_return_type irt3 = s0.insert(3);
@@ -403,11 +402,11 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(3);
     EXPECT_EQ(s0.count(3), 1);
-    EXPECT_EQ(*pp0.first, 3);
-    EXPECT_EQ(*pp0.second, 4);
-    EXPECT_EQ(pp0.first, irt2.first);
-    EXPECT_EQ(--pp0.first, irt1.first);
-    EXPECT_EQ(pp0.second, irt4.first);
+    EXPECT_EQ(*pp0.begin(), 3);
+    EXPECT_EQ(*pp0.end(), 4);
+    EXPECT_EQ(pp0.begin(), irt2.first);
+    EXPECT_EQ(--pp0.begin(), irt1.first);
+    EXPECT_EQ(pp0.end(), irt4.first);
 
     insert_return_type irt5 = s0.insert(0);
     s0.insert(1);
@@ -416,11 +415,11 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 1);
-    EXPECT_EQ(*pp0.first, 1);
-    EXPECT_EQ(*pp0.second, 2);
-    EXPECT_EQ(pp0.first, irt0.first);
-    EXPECT_EQ(--pp0.first, irt5.first);
-    EXPECT_EQ(pp0.second, irt1.first);
+    EXPECT_EQ(*pp0.begin(), 1);
+    EXPECT_EQ(*pp0.end(), 2);
+    EXPECT_EQ(pp0.begin(), irt0.first);
+    EXPECT_EQ(--pp0.begin(), irt5.first);
+    EXPECT_EQ(pp0.end(), irt1.first);
 
     insert_return_type irt6 = s0.insert(5);
     s0.insert(5);
@@ -428,10 +427,10 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(5);
     EXPECT_EQ(s0.count(5), 1);
-    EXPECT_EQ(*pp0.first, 5);
-    EXPECT_EQ(pp0.first, irt6.first);
-    EXPECT_EQ(--pp0.first, irt4.first);
-    EXPECT_EQ(pp0.second, s0.end());
+    EXPECT_EQ(*pp0.begin(), 5);
+    EXPECT_EQ(pp0.begin(), irt6.first);
+    EXPECT_EQ(--pp0.begin(), irt4.first);
+    EXPECT_EQ(pp0.end(), s0.end());
 
     s0.insert(4);
     s0.insert(4);
@@ -439,11 +438,11 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(4);
     EXPECT_EQ(s0.count(4), 1);
-    EXPECT_EQ(*pp0.first, 4);
-    EXPECT_EQ(*pp0.second, 5);
-    EXPECT_EQ(pp0.first, irt4.first);
-    EXPECT_EQ(--pp0.first, irt3.first);
-    EXPECT_EQ(pp0.second, irt6.first);
+    EXPECT_EQ(*pp0.begin(), 4);
+    EXPECT_EQ(*pp0.end(), 5);
+    EXPECT_EQ(pp0.begin(), irt4.first);
+    EXPECT_EQ(--pp0.begin(), irt3.first);
+    EXPECT_EQ(pp0.end(), irt6.first);
 
     s0.insert(0);
     insert_return_type irt7 = s0.insert(0);
@@ -451,20 +450,20 @@ TEST(SetOperations, Test1)
 
     pp0 = s0.equal_range(0);
     EXPECT_EQ(s0.count(0), 1);
-    EXPECT_EQ(*pp0.first, 0);
-    EXPECT_EQ(*pp0.second, 1);
-    EXPECT_EQ(pp0.first, irt5.first);
-    EXPECT_EQ(pp0.first, s0.begin());
-    EXPECT_EQ(pp0.second, irt0.first);
+    EXPECT_EQ(*pp0.begin(), 0);
+    EXPECT_EQ(*pp0.end(), 1);
+    EXPECT_EQ(pp0.begin(), irt5.first);
+    EXPECT_EQ(pp0.begin(), s0.begin());
+    EXPECT_EQ(pp0.end(), irt0.first);
 
     const mstd::set<int> &s1 = s0;
-    std::pair<const_iterator, const_iterator> pp1 = s1.equal_range(1);
+    auto pp1 = s1.equal_range(1);
     EXPECT_EQ(s1.count(1), 1);
-    EXPECT_EQ(*pp1.first, 1);
-    EXPECT_EQ(*pp1.second, 2);
-    EXPECT_EQ(pp1.first, irt0.first);
-    EXPECT_EQ(--pp1.first, irt7.first);
-    EXPECT_EQ(pp1.second, irt1.first);
+    EXPECT_EQ(*pp1.begin(), 1);
+    EXPECT_EQ(*pp1.end(), 2);
+    EXPECT_EQ(pp1.begin(), irt0.first);
+    EXPECT_EQ(--pp1.begin(), irt7.first);
+    EXPECT_EQ(pp1.end(), irt1.first);
 }
 
 struct Cmp
@@ -607,28 +606,26 @@ TEST(SetOperations, Test6)
     test_type x{1, 3, 5};
     const test_type &cx = x;
 
-    auto it = x.equal_range(1L);
-    EXPECT_NE(it.first, it.second);
-    EXPECT_EQ(*it.first, 1);
-    it = x.equal_range(2L);
-    EXPECT_EQ(it.first, it.second);
-    EXPECT_NE(it.first, x.end());
+    auto r = x.equal_range(1L);
+    EXPECT_FALSE(r.empty());
+    EXPECT_EQ(*r.begin(), 1);
+    r = x.equal_range(2L);
+    EXPECT_TRUE(r.empty());
+    EXPECT_NE(r.begin(), x.end());
 
-    auto cit = cx.equal_range(1L);
-    EXPECT_NE(cit.first, cit.second);
-    EXPECT_EQ(*cit.first, 1);
-    cit = cx.equal_range(2L);
-    EXPECT_EQ(cit.first, cit.second);
-    EXPECT_NE(cit.first, cx.end());
+    auto cr = cx.equal_range(1L);
+    EXPECT_FALSE(cr.empty());
+    EXPECT_EQ(*cr.begin(), 1);
+    cr = cx.equal_range(2L);
+    EXPECT_TRUE(cr.empty());
+    EXPECT_NE(cr.begin(), cx.end());
 
     EXPECT_EQ(Cmp::count, 2);
 
-    using pair = std::pair<test_type::iterator, test_type::iterator>;
-    static_assert(std::is_same<decltype(it), pair>::value,
-                  "equal_range returns pair<iterator, iterator>");
-    using cpair = std::pair<test_type::const_iterator, test_type::const_iterator>;
-    static_assert(std::is_same<decltype(cit), cpair>::value,
-                  "const equal_range returns pair<const_iterator, const_iterator>");
+    static_assert(std::ranges::range<decltype(r)>,
+                  "equal_range returns a range");
+    static_assert(std::ranges::range<decltype(cr)>,
+                  "const equal_range returns a range");
 }
 
 TEST(SetOperations, Test7)

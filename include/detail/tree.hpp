@@ -920,7 +920,7 @@ public:
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
 
     template <class Self>
-    using SelfSubrange = std::pair<SelfIterator<Self>, SelfIterator<Self>>;
+    using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
     explicit Tree(const value_compare& comp) noexcept(
         std::is_nothrow_default_constructible<node_allocator>::value
