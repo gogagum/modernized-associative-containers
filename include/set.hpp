@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <iterator>
 #include <memory>
 #include <detail/node_handle.hpp>
@@ -26,9 +25,7 @@
 #include <memory_resource>
 #include <utility>
 #include <version>
-#include <compare>
 #include <initializer_list>
-#include <concepts>
 
 namespace mstd {
 
@@ -396,42 +393,39 @@ public:
 template <
     std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
+  , Allocator AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
 >
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+requires (!Allocator<CompareT>)
 set(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> set<std::iter_value_t<IteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
+  , Allocator AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
 >
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+requires (!Allocator<CompareT>)
 set(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> set<std::ranges::range_value_t<RangeT>, CompareT, AllocatorT>;
 
 template <
     class KeyT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<KeyT>
+  , Allocator AllocatorT = std::allocator<KeyT>
 >
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+requires (!Allocator<CompareT>)
 set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> set<KeyT, CompareT, AllocatorT>;
 
-template <std::input_iterator IteratorT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::input_iterator IteratorT, Allocator AllocatorT>
 set(IteratorT, IteratorT, AllocatorT)
 -> set<std::iter_value_t<IteratorT>, CompareThreeWay, AllocatorT>;
 
-template <std::ranges::input_range RangeT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::ranges::input_range RangeT, Allocator AllocatorT>
 set(std::from_range_t, RangeT&&, AllocatorT)
 -> set<std::ranges::range_value_t<RangeT>, CompareThreeWay, AllocatorT>;
 
-template <class KeyT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <class KeyT, Allocator AllocatorT>
 set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, CompareThreeWay, AllocatorT>;
 
 template <class KeyT, class CompareT, class AllocatorT>
@@ -777,28 +771,27 @@ public:
 template <
     std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
+  , Allocator AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
 >
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+requires (!Allocator<CompareT>)
 multiset(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<std::iter_value_t<IteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
+  , Allocator AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
 >
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+requires (!Allocator<CompareT>)
 multiset(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<std::ranges::range_value_t<RangeT>, CompareT, AllocatorT>;
 
-template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT>>
-requires __is_allocator_v<AllocatorT> && (!__is_allocator_v<CompareT>)
+template <class KeyT, class CompareT = CompareThreeWay, Allocator AllocatorT = std::allocator<KeyT>>
+requires (!Allocator<CompareT>)
 multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<KeyT, CompareT, AllocatorT>;
 
-template <std::input_iterator IteratorT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::input_iterator IteratorT, Allocator AllocatorT>
 multiset(IteratorT, IteratorT, AllocatorT)
 -> multiset<
        std::iter_value_t<IteratorT>
@@ -806,8 +799,7 @@ multiset(IteratorT, IteratorT, AllocatorT)
      , AllocatorT
    >;
 
-template <std::ranges::input_range RangeT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::ranges::input_range RangeT, Allocator AllocatorT>
 multiset(std::from_range_t, RangeT&&, AllocatorT)
 -> multiset<
        std::ranges::range_value_t<RangeT>
@@ -815,8 +807,7 @@ multiset(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template <class KeyT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <class KeyT, Allocator AllocatorT>
 multiset(std::initializer_list<KeyT>, AllocatorT)
 -> multiset<KeyT, CompareThreeWay, AllocatorT>;
 
