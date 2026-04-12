@@ -50,7 +50,7 @@ private:
 
   void destroyNodePointer_() {
     if (ptr_ != nullptr) {
-      using NodeAllocType = __allocator_traits_rebind< allocator_type, NodeT>::type;
+      using NodeAllocType = std::allocator_traits<allocator_type>::template rebind_alloc<NodeT>; 
       NodeAllocType alloc(*alloc_);
       __generic_container_node_destructor<NodeT, NodeAllocType>(alloc, true)(ptr_);
       ptr_ = nullptr;

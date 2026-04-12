@@ -51,7 +51,7 @@ private:
     using Tree_        = Tree<value_type, value_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type> ;
 
-    static_assert(__check_valid_allocator<allocator_type>::value, "");
+    static_assert(__check_valid_allocator<allocator_type>::value);
 
     Tree_ tree_;
 

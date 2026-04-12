@@ -10,32 +10,9 @@
 #ifndef MSTD_MEMORY_ALLOCATOR_TRAITS_HPP
 #define MSTD_MEMORY_ALLOCATOR_TRAITS_HPP
 
-#include <cstddef>
 #include <memory>
-#include <utility>
-#include <limits>
 
 namespace mstd {
-
-// __allocator_traits_rebind
-template <class _Tp, class _Up, class = void>
-inline const bool __has_rebind_other_v = false;
-template <class _Tp, class _Up>
-inline const bool __has_rebind_other_v<_Tp, _Up, std::void_t<typename _Tp::template rebind<_Up>::other> > = true;
-
-template <class _Tp, class _Up, bool = __has_rebind_other_v<_Tp, _Up> >
-struct __allocator_traits_rebind {
-  static_assert(__has_rebind_other_v<_Tp, _Up>, "This allocator has to implement rebind");
-  using type = typename _Tp::template rebind<_Up>::other;
-};
-template <template <class, class...> class _Alloc, class _Tp, class... ArgsT, class _Up>
-struct __allocator_traits_rebind<_Alloc<_Tp, ArgsT...>, _Up, true> {
-  using type = typename _Alloc<_Tp, ArgsT...>::template rebind<_Up>::other;
-};
-template <template <class, class...> class _Alloc, class _Tp, class... ArgsT, class _Up>
-struct __allocator_traits_rebind<_Alloc<_Tp, ArgsT...>, _Up, false> {
-  using type = _Alloc<_Up, ArgsT...>;
-};
 
 template <class _Alloc>
 struct __check_valid_allocator : std::true_type {
