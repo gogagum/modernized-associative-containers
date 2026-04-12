@@ -12,7 +12,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <detail/iterator/erase_if_container.hpp>
 #include <iterator>
 #include <memory>
@@ -27,10 +26,8 @@
 #include <utility>
 #include <detail/ranges/container_compatible_range.hpp>
 #include <detail/utility/compare_three_way.hpp>
-#include <stdexcept>
 #include <tuple>
 #include <version>
-#include <compare>
 #include <initializer_list>
 
 namespace mstd {
@@ -671,10 +668,9 @@ private:
 template <
     std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
+  , Allocator AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires (!__is_allocator_v<CompareT>)
-      && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 map(
     IteratorT,
     IteratorT,
@@ -689,9 +685,9 @@ map(
 template <
     std::ranges::input_range RangeT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , Allocator AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
 >
-requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 map(
     std::from_range_t,
     RangeT&&,
@@ -708,9 +704,9 @@ template <
     class KeyT
   , class ValueT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
+  , Allocator AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
 >
-requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 map(
     std::initializer_list<std::pair<KeyT, ValueT>>,
     CompareT = CompareT(),
@@ -722,8 +718,7 @@ map(
        , AllocatorT
      >;
 
-template <std::input_iterator IteratorT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::input_iterator IteratorT, Allocator AllocatorT>
 map(IteratorT, IteratorT, AllocatorT)
 -> map<
     __iter_key_type<IteratorT>
@@ -732,8 +727,7 @@ map(IteratorT, IteratorT, AllocatorT)
   , AllocatorT
 >;
 
-template<std::ranges::input_range RangeT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template<std::ranges::input_range RangeT, Allocator AllocatorT>
 map(std::from_range_t, RangeT&&, AllocatorT)
 -> map<
        __range_key_type<RangeT>
@@ -742,8 +736,7 @@ map(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template<class KeyT, class ValueT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template<class KeyT, class ValueT, Allocator AllocatorT>
 map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 -> map<
        std::remove_const_t<KeyT>
@@ -1169,9 +1162,9 @@ private:
 template <
     std::input_iterator IteratorT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
+  , Allocator AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 multimap(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __iter_key_type<IteratorT>
@@ -1183,9 +1176,9 @@ multimap(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 template <
     std::ranges::input_range RangeT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , Allocator AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
 >
-requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __range_key_type<RangeT>
@@ -1198,14 +1191,13 @@ template <
     class KeyT
   , class ValueT
   , class CompareT   = CompareThreeWay
-  , class AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
+  , Allocator AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
 >
-requires (!__is_allocator_v<CompareT>) && __is_allocator_v<AllocatorT>
+requires (!Allocator<CompareT>)
 multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 
-template <std::input_iterator IteratorT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::input_iterator IteratorT, Allocator AllocatorT>
 multimap(IteratorT, IteratorT, AllocatorT)
 -> multimap<
        __iter_key_type<IteratorT>
@@ -1214,8 +1206,7 @@ multimap(IteratorT, IteratorT, AllocatorT)
      , AllocatorT
    >;
 
-template <std::ranges::input_range RangeT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <std::ranges::input_range RangeT, Allocator AllocatorT>
 multimap(std::from_range_t, RangeT&&, AllocatorT)
 -> multimap<
        __range_key_type<RangeT>
@@ -1224,8 +1215,7 @@ multimap(std::from_range_t, RangeT&&, AllocatorT)
      , AllocatorT
    >;
 
-template <class KeyT, class ValueT, class AllocatorT>
-requires __is_allocator_v<AllocatorT>
+template <class KeyT, class ValueT, Allocator AllocatorT>
 multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 -> multimap<
        std::remove_const_t<KeyT>
