@@ -10,10 +10,7 @@
 #ifndef MSTD_MEMORY_POINTER_TRAITS_HPP
 #define MSTD_MEMORY_POINTER_TRAITS_HPP
 
-#include <cstddef>
 #include <memory>
-#include <type_traits>
-#include <utility>
 
 namespace mstd {
 

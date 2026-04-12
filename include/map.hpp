@@ -250,7 +250,7 @@ private:
     using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
-    static_assert(__check_valid_allocator<allocator_type>::value, "");
+    static_assert(__check_valid_allocator<allocator_type>::value);
 
     Tree_ tree_;
 
@@ -823,7 +823,7 @@ public:
     using reference       = value_type& ;
     using const_reference = const value_type&;
 
-    static_assert(__check_valid_allocator<allocator_type>::value, "");
+    static_assert(__check_valid_allocator<allocator_type>::value);
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
 
