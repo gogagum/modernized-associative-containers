@@ -26,7 +26,6 @@
 #include <detail/type_traits/copy_cvref.hpp>
 #include <detail/memory/pointer_traits.hpp>
 #include <detail/memory/allocator_traits.hpp>
-#include <detail/memory/swap_allocator.hpp>
 
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
@@ -980,8 +979,12 @@ public:
             return *this;
         }
         value_comp() = other.value_comp();
-        copyAssignAlloc(other);
-
+        if constexpr (node_traits::propagate_on_container_copy_assignment::value) {
+            if (nodeAlloc() != other.nodeAlloc()) {
+                clear();
+            }
+            nodeAlloc() = other.nodeAlloc();
+        }
         if (size_ != 0) {
             *root_ptr() = static_cast<node_base_pointer>(copyAssignTree(root(), other.root()));
         } else {
@@ -1054,7 +1057,7 @@ public:
                 node_traits::propagate_on_container_move_assignment::value
              && std::is_nothrow_move_assignable<node_allocator>::value
             )
-         || std::allocator_traits<node_allocator>::is_always_equal::value
+         || node_traits::is_always_equal::value
         )
     ) {
         moveAssign_(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
@@ -1091,17 +1094,19 @@ public:
     }
 
     void swap(Tree& other) noexcept(std::is_nothrow_swappable_v<value_compare>) {
-        using std::swap;
-        swap(begin_node_, other.begin_node_);
-        swap(end_node_, other.end_node_);
-        mstd::__swap_allocator(nodeAlloc(), other.nodeAlloc());
-        swap(size_, other.size_);
-        swap(value_comp_, other.value_comp_);
+        std::swap(begin_node_, other.begin_node_);
+        std::swap(end_node_, other.end_node_);
+        if constexpr (node_traits::propagate_on_container_swap::value) {
+            std::swap(nodeAlloc(), other.nodeAlloc());
+        }
+        std::swap(size_, other.size_);
+        std::swap(value_comp_, other.value_comp_);
         if (size_ == 0) {
             begin_node_ = endNode();
         } else {
             endNode()->left_->parent_ = endNode();
-        } if (other.size_ == 0) {
+        }
+        if (other.size_ == 0) {
             other.begin_node_ = other.endNode();
         } else {
             other.endNode()->left_->parent_ = other.endNode();
@@ -1740,18 +1745,6 @@ public:
         };
     }
 
-    void copyAssignAlloc(const Tree& other) {
-        copyAssignAlloc(other, std::integral_constant<bool, node_traits::propagate_on_container_copy_assignment::value>());
-    }
-
-    void copyAssignAlloc(const Tree& other, std::true_type) {
-        if (nodeAlloc() != other.nodeAlloc()) {
-            clear();
-        }
-        nodeAlloc() = other.nodeAlloc();
-    }
-    void copyAssignAlloc(const Tree&, std::false_type) {}
-
 private:
 
     // Find lower_bound place to insert
@@ -1859,7 +1852,7 @@ private:
         if (nodeAlloc() == other.nodeAlloc()) {
             moveAssign_(other, std::true_type());
         } else {
-            value_comp() = std::move(other.value_comp());
+            value_comp_ = std::move(other.value_comp_);
             if (size_ != 0) {
                 *root_ptr() = static_cast<node_base_pointer>(moveAssignTree(root(), other.root()));
             } else {
@@ -1884,7 +1877,9 @@ private:
         destroy_(static_cast<node_pointer>(endNode()->left_));
         begin_node_ = other.begin_node_;
         end_node_   = other.end_node_;
-        moveAssignAlloc_(other);
+        if constexpr (node_traits::propagate_on_container_move_assignment::value) {
+            nodeAlloc() = std::move(other.nodeAlloc());
+        }
         size_       = other.size_;
         value_comp_ = std::move(other.value_comp_);
         if (size_ == 0) {
@@ -1896,19 +1891,6 @@ private:
             other.size_               = 0;
         }
     }
-
-    void moveAssignAlloc_(Tree& other) noexcept(
-        !node_traits::propagate_on_container_move_assignment::value
-     || std::is_nothrow_move_assignable<node_allocator>::value
-    ) {
-        moveAssignAlloc_(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
-    }
-
-    void moveAssignAlloc_(Tree& other, std::true_type)
-    noexcept(std::is_nothrow_move_assignable<node_allocator>::value) {
-        nodeAlloc() = std::move(other.nodeAlloc());
-    }
-    void moveAssignAlloc_(Tree&, std::false_type) noexcept {}
 
     template <class FromT>
     requires __is_tree_value_type_v<ValueT>
