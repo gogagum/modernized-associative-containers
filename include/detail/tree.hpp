@@ -23,8 +23,6 @@
 #include <detail/utility/try_key_extraction.hpp>
 #include <detail/type_traits/is_specialization.hpp>
 #include <detail/type_traits/copy_cvref.hpp>
-#include <detail/memory/pointer_traits.hpp>
-#include <detail/memory/allocator_traits.hpp>
 
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
@@ -540,8 +538,9 @@ struct __tree_node_types;
 
 template <class NodePtrT, class _Tp, class VoidPtrT>
 struct __tree_node_types<NodePtrT, TreeNode<_Tp, VoidPtrT> > {
-    using node_base_pointer = __rebind_pointer_t<VoidPtrT, TreeNodeBase<VoidPtrT> >;
-    using end_node_pointer  = __rebind_pointer_t<VoidPtrT, TreeEndNode<node_base_pointer> >;
+    using traits = std::pointer_traits<VoidPtrT>;
+    using node_base_pointer = traits::template rebind<TreeNodeBase<VoidPtrT> >;
+    using end_node_pointer  = traits::template rebind<TreeEndNode<node_base_pointer>>;
 
 private:
     static_assert(std::is_same_v<typename std::pointer_traits<VoidPtrT>::element_type, void>,
@@ -560,10 +559,10 @@ public:
 };
 
 template <class VoidPtrT>
-class TreeNodeBase : public TreeEndNode<__rebind_pointer_t<VoidPtrT, TreeNodeBase<VoidPtrT>>> {
+class TreeNodeBase : public TreeEndNode<typename std::pointer_traits<VoidPtrT>::template rebind<TreeNodeBase<VoidPtrT>>> {
 public:
-    using pointer          = __rebind_pointer_t<VoidPtrT, TreeNodeBase>;
-    using end_node_pointer = __rebind_pointer_t<VoidPtrT, TreeEndNode<pointer> >;
+    using pointer          = std::pointer_traits<VoidPtrT>::template rebind<TreeNodeBase>;
+    using end_node_pointer = std::pointer_traits<VoidPtrT>::template rebind<TreeEndNode<pointer>>;
 
     pointer right_;
     end_node_pointer parent_;
@@ -709,7 +708,7 @@ public:
     using value_type        = __get_node_value_type_t<_Tp>;
     using difference_type   = DiffTypeT;
     using reference         = value_type&;
-    using pointer           = __rebind_pointer_t<NodePtrT, value_type>;
+    using pointer           = std::pointer_traits<NodePtrT>::template rebind<value_type>;
 
     TreeIterator() noexcept : ptr_(nullptr) {}
 
@@ -778,7 +777,7 @@ public:
     using value_type         = __get_node_value_type_t<_Tp>;
     using difference_type    = DiffTypeT;
     using reference          = const value_type&;
-    using pointer            = __rebind_pointer_t<NodePtrT, const value_type>;
+    using pointer            = std::pointer_traits<NodePtrT>::template rebind<const value_type>;
     using non_const_iterator = TreeIterator<_Tp, NodePointer_, difference_type>;
 
     TreeConstIterator() noexcept : ptr_(nullptr) {}
@@ -853,15 +852,16 @@ public:
     using difference_type = AllocTraits_::difference_type;
 
     using void_pointer = AllocTraits_::void_pointer;
+    using void_pointer_traits = std::pointer_traits<void_pointer>;
 
     using node         = TreeNode<ValueT, void_pointer>;
-    using node_pointer = __rebind_pointer_t<void_pointer, node>;
+    using node_pointer = void_pointer_traits::template rebind<node>;
 
     using node_base         = TreeNodeBase<void_pointer>;
-    using node_base_pointer = __rebind_pointer_t<void_pointer, node_base>;
+    using node_base_pointer = void_pointer_traits::template rebind<node_base>;
 
     using end_node_t       = TreeEndNode<node_base_pointer>;
-    using end_node_pointer = __rebind_pointer_t<void_pointer, end_node_t>;
+    using end_node_pointer = void_pointer_traits::template rebind<end_node_t>;
 
     using node_allocator = AllocTraits_::template rebind_alloc<node>;
     using node_traits    = std::allocator_traits<node_allocator>;

@@ -13,8 +13,6 @@
 #include <cassert>
 #include <memory>
 #include <detail/type_traits/is_specialization.hpp>
-#include <detail/memory/pointer_traits.hpp>
-#include <detail/memory/allocator_traits.hpp>
 #include <optional>
 
 namespace mstd {
@@ -29,12 +27,11 @@ class BasicNodeHandle
   
   template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
   friend class Tree;
-  // template <class _Tp, class _Hash, class _Equal, class _Allocator>
-  // friend class __hash_table;
+
   friend struct MapOrSetSpecificsT<NodeT, BasicNodeHandle<NodeT, AllocT, MapOrSetSpecificsT>>;
 
   using AllocTraits_ = std::allocator_traits<AllocT>;
-  using NodePointerType_ = __rebind_pointer_t<typename AllocTraits_::void_pointer, NodeT>;
+  using NodePointerType_ = std::pointer_traits<typename AllocTraits_::void_pointer>::template rebind<NodeT>;
 
 public:
   using allocator_type = AllocT;
