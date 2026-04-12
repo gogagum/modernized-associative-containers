@@ -11,7 +11,7 @@
 #define MSTD_RANGES_CONTAINER_COMPATIBLE_RANGE_HPP
 
 #include <concepts>
-#include <type_traits>
+#include <ranges>
 
 namespace mstd {
 
