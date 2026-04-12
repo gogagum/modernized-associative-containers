@@ -1,6 +1,8 @@
 #ifndef MSTD_UTILITY_COMPARE_THREE_WAY_HPP
 #define MSTD_UTILITY_COMPARE_THREE_WAY_HPP
 
+#include <utility>
+
 namespace mstd {
 
     struct CompareThreeWay {
