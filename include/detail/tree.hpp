@@ -17,7 +17,6 @@
 #include <iterator>
 #include <memory>
 #include <type_traits>
-#include <new>
 #include <limits>
 #include <functional>
 
@@ -1050,17 +1049,26 @@ public:
     }
 
     Tree& operator=(Tree&& other)
-    noexcept(
-        std::is_nothrow_move_assignable<value_compare>::value
-     && (
-            (
-                node_traits::propagate_on_container_move_assignment::value
-             && std::is_nothrow_move_assignable<node_allocator>::value
-            )
-         || node_traits::is_always_equal::value
-        )
-    ) {
-        moveAssign_(other, std::integral_constant<bool, node_traits::propagate_on_container_move_assignment::value>());
+    noexcept(std::is_nothrow_move_assignable<value_compare>::value)
+    requires (node_traits::is_always_equal::value) {
+        moveAssignRelinking_(other);
+        return *this;
+    }
+
+    Tree& operator=(Tree&& other) 
+    noexcept(std::is_nothrow_move_assignable<value_compare>::value && std::is_nothrow_move_assignable<node_allocator>::value)
+    requires (!node_traits::is_always_equal::value && node_traits::propagate_on_container_move_assignment::value) {
+        moveAssignRelinking_(other);
+        return *this;
+    }
+
+    Tree& operator=(Tree&& other)
+    requires (!node_traits::is_always_equal::value && !node_traits::propagate_on_container_move_assignment::value) {
+        if (nodeAlloc() == other.nodeAlloc()) {
+            moveAssignRelinking_(other);
+        } else {
+            moveAssign_(other);
+        }
         return *this;
     }
 
@@ -1848,29 +1856,25 @@ private:
         (TreeDeleter(node_alloc_))(node_ptr);
     }
 
-    void moveAssign_(Tree& other, std::false_type) {
-        if (nodeAlloc() == other.nodeAlloc()) {
-            moveAssign_(other, std::true_type());
+    void moveAssign_(Tree& other) {
+        value_comp_ = std::move(other.value_comp_);
+        if (size_ != 0) {
+            *root_ptr() = static_cast<node_base_pointer>(moveAssignTree(root(), other.root()));
         } else {
-            value_comp_ = std::move(other.value_comp_);
-            if (size_ != 0) {
-                *root_ptr() = static_cast<node_base_pointer>(moveAssignTree(root(), other.root()));
-            } else {
-                *root_ptr() = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
-                if (root()) {
-                    root()->parent_ = endNode();
-                }
+            *root_ptr() = static_cast<node_base_pointer>(moveConstructTree_(other.root()));
+            if (root()) {
+                root()->parent_ = endNode();
             }
-            begin_node_
-                = endNode()->left_
-                ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->left_))
-                : endNode();
-            size_ = other.size();
-            other.clear(); // Ensure that other is in a valid state after moving out the keys
         }
+        begin_node_
+            = endNode()->left_
+            ? static_cast<end_node_pointer>(mstd::tree_min(endNode()->left_))
+            : endNode();
+        size_ = other.size();
+        other.clear(); // Ensure that other is in a valid state after moving out the keys
     }
 
-    void moveAssign_(Tree& other, std::true_type) noexcept(
+    void moveAssignRelinking_(Tree& other) noexcept(
         std::is_nothrow_move_assignable<value_compare>::value
      && std::is_nothrow_move_assignable<node_allocator>::value
     ) {
