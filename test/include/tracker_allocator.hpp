@@ -1,5 +1,4 @@
 #include <memory>
-#include <unordered_map>
 
 #include <uneq_allocator.hpp>
 
@@ -82,7 +81,6 @@ public:
             other;
     };
 
-#if __cplusplus >= 201103L
     tracker_allocator() = default;
     tracker_allocator(const tracker_allocator &) = default;
     tracker_allocator(tracker_allocator &&) = default;
@@ -95,19 +93,6 @@ public:
         : Alloc(std::forward<ArgsT>(__args)...)
     {
     }
-#else
-    tracker_allocator()
-    {
-    }
-
-    tracker_allocator(const tracker_allocator &a) : Alloc(a)
-    {
-    }
-
-    ~tracker_allocator()
-    {
-    }
-#endif
 
     template <class U>
     tracker_allocator(const tracker_allocator<U,
@@ -125,7 +110,6 @@ public:
         return p;
     }
 
-#if __cplusplus >= 201103L
     template <typename U, typename... Args>
     void
     construct(U *p, Args &&...args)
@@ -141,21 +125,6 @@ public:
         AllocTraits::destroy(*this, p);
         counter_type::destroy();
     }
-#else
-    void
-    construct(pointer p, const T &value)
-    {
-        AllocTraits::construct(*this, p, value);
-        counter_type::construct();
-    }
-
-    void
-    destroy(pointer p)
-    {
-        AllocTraits::destroy(*this, p);
-        counter_type::destroy();
-    }
-#endif
 
     void
     deallocate(pointer p, size_type num)

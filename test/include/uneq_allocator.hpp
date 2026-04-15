@@ -53,12 +53,10 @@ public:
             other;
     };
 
-    _GLIBCXX_CONSTEXPR
-    uneq_allocator() noexcept
+    constexpr uneq_allocator() noexcept
         : personality(0) {}
 
-    _GLIBCXX_CONSTEXPR
-    uneq_allocator(int person) noexcept
+    constexpr uneq_allocator(int person) noexcept
         : personality(person) {}
 
     uneq_allocator(const uneq_allocator &) = default;
