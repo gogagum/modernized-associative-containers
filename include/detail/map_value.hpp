@@ -40,8 +40,6 @@ private:
         }
     };
 
-   
-
     MapValue& operator=(const MapValue&) = default;
     MapValue& operator=(MapValue&&) = default; // TODO(gogagum): make this noexcept when possible
 

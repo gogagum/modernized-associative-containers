@@ -33,48 +33,6 @@
 
 namespace mstd {
 
-template <class AllocatorT>
-class MapNodeDestructor {
-    using AllocatorType_ = AllocatorT;
-    using AllocTraits_   = std::allocator_traits<AllocatorType_>;
-
-public:
-    using pointer = AllocTraits_::pointer;
-
-private:
-    AllocatorType_& na_;
-
-public:
-    bool first_constructed;
-    bool second_constructed;
-
-    explicit MapNodeDestructor(AllocatorType_& na) noexcept
-    : na_{na}
-    , first_constructed{false}
-    , second_constructed{false} {}
-
-    MapNodeDestructor(TreeNodeDestructor<AllocatorType_>&& x) noexcept
-    : na_(x.na_)
-    , first_constructed(x.value_constructed)
-    , second_constructed(x.value_constructed) {
-        x.value_constructed = false;
-    }
-
-    MapNodeDestructor& operator=(const MapNodeDestructor&) = delete;
-
-    void operator()(pointer ptr) noexcept {
-        if (second_constructed) {
-            AllocTraits_::destroy(na_, std::addressof(ptr->get_value().second));
-        }
-        if (first_constructed) {
-            AllocTraits_::destroy(na_, std::addressof(ptr->get_value().first));
-        }
-        if (ptr) {
-            AllocTraits_::deallocate(na_, ptr, 1);
-        }
-    }
-};
-
 template <class TreeIteratorT>
 class MapIterator {
     TreeIteratorT i_;
@@ -368,7 +326,7 @@ public:
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
-        return static_cast<__node_pointer>(child)->get_value().second;
+        return static_cast<NodePointer_>(child)->get_value().second;
     }
 
     template <class ArgT>
@@ -378,11 +336,22 @@ public:
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
-        return static_cast<__node_pointer>(child)->get_value().second;
+        return static_cast<NodePointer_>(child)->get_value().second;
     }
 
-    [[nodiscard]] mapped_type& at(const key_type& key);
-    [[nodiscard]] const mapped_type& at(const key_type& key) const;
+    mapped_type& at(const key_type& key) {
+        auto [_, child] = tree_.find_equal(key);
+        if (child == nullptr)
+            std::__throw_out_of_range("map::at:  key not found");
+        return static_cast<NodePointer_>(child)->get_value().second;
+    }
+
+    const mapped_type& at(const key_type& key) const {
+        auto [_, child] = tree_.find_equal(key);
+        if (child == nullptr)
+            std::__throw_out_of_range("map::at:  key not found");
+        return static_cast<NodePointer_>(child)->get_value().second;
+    }
 
     [[nodiscard]] allocator_type get_allocator() const noexcept {
         return allocator_type(tree_.alloc());
@@ -623,13 +592,7 @@ public:
     }
 
 private:
-    using node = Tree_::node;
-    using node_allocator = Tree_::node_allocator;
-    using __node_pointer = Tree_::node_pointer;
-    using node_base_pointer = Tree_::node_base_pointer;
-
-    using _Dp = MapNodeDestructor<node_allocator>;
-    using __node_holder = std::unique_ptr<node, _Dp>;
+    using NodePointer_ = Tree_::node_pointer;
 };
 
 template <
@@ -734,22 +697,6 @@ ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](key_type&& key) {
         )
         .first
         ->value();
-}
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::at(const key_type& key) {
-    auto [_, child] = tree_.find_equal(key);
-    if (child == nullptr)
-        std::__throw_out_of_range("map::at:  key not found");
-    return static_cast<__node_pointer>(child)->get_value().second;
-}
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-const ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::at(const key_type& key) const {
-    auto [_, child] = tree_.find_equal(key);
-    if (child == nullptr)
-        std::__throw_out_of_range("map::at:  key not found");
-    return static_cast<__node_pointer>(child)->get_value().second;
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -1125,14 +1072,6 @@ public:
     [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& key) {
         return self.tree_.equalRangeMulti(key);
     }
-
-private:
-    using node = Tree_::node;
-    using node_allocator = Tree_::node_allocator;
-    using __node_pointer = Tree_::node_pointer;
-
-    using _Dp = MapNodeDestructor<node_allocator>;
-    using __node_holder = std::unique_ptr<node, _Dp>;
 };
 
 template <

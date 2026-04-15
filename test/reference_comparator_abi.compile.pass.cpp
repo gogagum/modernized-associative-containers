@@ -20,8 +20,6 @@
 #include <set>
 #include <map>
 
-#include "test_macros.hpp"
-
 struct alignas(16) Cmp {
   bool operator()(int, int) const;
 };
