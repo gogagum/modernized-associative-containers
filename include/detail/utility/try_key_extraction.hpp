@@ -9,9 +9,11 @@
 #ifndef MSTD_UTILITY_TRY_EXTRACT_KEY_HPP
 #define MSTD_UTILITY_TRY_EXTRACT_KEY_HPP
 
+#include <concepts>
 #include <utility>
 #include <type_traits>
 #include <tuple>
+#include <detail/map_value.hpp>
 
 namespace mstd {
 
@@ -23,14 +25,14 @@ decltype(auto) try_key_extraction_with_key(WithKeyT with_key, ArgT&& arg) {
   return with_key(arg, std::forward<ArgT>(arg));
 }
 
-template <class KeyT, class WithKeyT, reference_to<KeyT> T1, class T2>
-decltype(auto) try_key_extraction_with_key(WithKeyT with_key, std::pair<T1, T2>&& arg) {
-  return with_key(arg.first, std::move(arg));
+template <class KeyT, class WithKeyT, class T2>
+decltype(auto) try_key_extraction_with_key(WithKeyT with_key, MapValue<KeyT, T2>&& arg) {
+  return with_key(arg.key(), std::move(arg));
 }
 
-template <class KeyT, class WithKeyT, reference_to<KeyT> T1, class T2>
-decltype(auto) try_key_extraction_with_key(WithKeyT with_key, const std::pair<T1, T2>& arg) {
-  return with_key(arg.first, arg);
+template <class KeyT, class WithKeyT, class T2>
+decltype(auto) try_key_extraction_with_key(WithKeyT with_key, const MapValue<KeyT, T2>& arg) {
+  return with_key(arg.key(), arg);
 }
 
 template <class KeyT, class WithKeyT, reference_to<KeyT> ArgT1, class ArgT2>

@@ -12,7 +12,6 @@
 
 #include <cassert>
 #include <memory>
-#include <detail/type_traits/is_specialization.hpp>
 #include <optional>
 
 namespace mstd {
@@ -21,14 +20,11 @@ namespace mstd {
 template <class NodeT, class AllocT>
 struct __generic_container_node_destructor;
 
-template <class NodeT, class AllocT, template <class, class> class MapOrSetSpecificsT>
-class BasicNodeHandle
-    : public MapOrSetSpecificsT< NodeT, BasicNodeHandle<NodeT, AllocT, MapOrSetSpecificsT>> {
+template <class NodeT, class AllocT>
+class BasicNodeHandle {
   
-  template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
+  template <class /*Value*/, class /*KeyProj*/, class /*Compare*/, class /*Allocator*/>
   friend class Tree;
-
-  friend struct MapOrSetSpecificsT<NodeT, BasicNodeHandle<NodeT, AllocT, MapOrSetSpecificsT>>;
 
   using AllocTraits_ = std::allocator_traits<AllocT>;
   using NodePointerType_ = std::pointer_traits<typename AllocTraits_::void_pointer>::template rebind<NodeT>;
@@ -113,38 +109,11 @@ public:
   ~BasicNodeHandle() { destroyNodePointer_(); }
 };
 
-namespace detail {
-
-template <class NodeT, class DerivedT>
-struct SetNodeHandleSpecifics {
-  using value_type = NodeT::node_value_type;
-
-  value_type& value() const {
-    return static_cast<DerivedT const*>(this)->ptr_->get_value();
-  }
-};
-
-template <class NodeT, class DerivedT>
-struct MapNodeHandleSpecifics {
-  using key_type    = std::remove_const_t<typename NodeT::node_value_type::first_type>;
-  using mapped_type = NodeT::node_value_type::second_type;
-
-  key_type& key() const {
-    return const_cast<key_type&>(static_cast<DerivedT const*>(this)->ptr_->get_value().first);
-  }
-
-  mapped_type& mapped() const {
-    return static_cast<DerivedT const*>(this)->ptr_->get_value().second;
-  }
-};
-
-}  // namespace detail
+template <class NodeT, class AllocT>
+using SetNodeHandle = BasicNodeHandle< NodeT, AllocT>;
 
 template <class NodeT, class AllocT>
-using SetNodeHandle = BasicNodeHandle< NodeT, AllocT, detail::SetNodeHandleSpecifics>;
-
-template <class NodeT, class AllocT>
-using MapNodeHandle = BasicNodeHandle< NodeT, AllocT, detail::MapNodeHandleSpecifics>;
+using MapNodeHandle = BasicNodeHandle< NodeT, AllocT>;
 
 template <class _Iterator, class NodeT>
 struct __insert_return_type {
