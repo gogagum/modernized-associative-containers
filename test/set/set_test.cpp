@@ -202,12 +202,10 @@ struct X
 
 TEST(SetEqualRange, Test1)
 {
-    // _Rb_tree::_M_equal_range was using make_pair unqualified.
     mstd::set<X> s;
     X x;
     (void)s.equal_range(x);
     const mstd::set<X> &cs = s;
-    // Similarly for the const overload.
     (void)cs.equal_range(x);
 }
 
