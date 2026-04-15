@@ -123,34 +123,33 @@ TEST(MapEmplaceTest, Test1)
 
 TEST(MapEmplaceTest, Test2)
 {
-    typedef mstd::map<char, PathPoint> Map;
-    Map m;
+    mstd::map<char, PathPoint> m;
 
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
 
     auto ret = m.emplace(std::piecewise_construct,
-                         std::make_tuple('a'), std::make_tuple('a', coord1));
+                         std::tuple('a'), std::tuple('a', coord1));
     EXPECT_TRUE(ret.second);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(ret.first->key(), 'a');
 
     coord1[0] = 3.0;
     ret = m.emplace(std::piecewise_construct,
-                    std::make_tuple('a'), std::make_tuple('b', coord1));
+                    std::tuple('a'), std::tuple('b', coord1));
     EXPECT_TRUE(!ret.second);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(ret.first->key(), 'a');
     EXPECT_EQ(ret.first->value().getCoords()[0], 0.0);
 
     auto it = m.emplace_hint(m.begin(), std::piecewise_construct,
-                             std::make_tuple('b'), std::make_tuple('c', coord1));
+                             std::tuple('b'), std::tuple('c', coord1));
     EXPECT_NE(it, m.end());
     EXPECT_EQ(it->key(), 'b');
     EXPECT_EQ(it->value().getCoords()[0], 3.0);
 
     double *px = &coord1[0];
     ret = m.emplace(std::piecewise_construct,
-                    std::make_tuple('c'), std::make_tuple('d', std::move(coord1)));
+                    std::tuple('c'), std::tuple('d', std::move(coord1)));
     EXPECT_TRUE(ret.second);
     EXPECT_EQ(ret.first->key(), 'c');
     EXPECT_EQ(&(ret.first->value().getCoords()[0]), px);
