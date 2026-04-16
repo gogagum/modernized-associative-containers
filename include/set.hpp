@@ -93,14 +93,14 @@ public:
     explicit set(const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <class IteratorT>
-    set(IteratorT begin, IteratorT end, const value_compare& comp = value_compare())
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    set(IteratorT begin, SentinelT end, const value_compare& comp = value_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <class IteratorT>
-    set(IteratorT begin, IteratorT end, const value_compare& comp, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    set(IteratorT begin, SentinelT end, const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -114,8 +114,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
     
-    template <class IteratorT>
-    set(IteratorT begin, IteratorT end, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    set(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : set(begin, end, key_compare(), alloc) {}
     
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -510,18 +510,18 @@ public:
     explicit multiset(const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <class IteratorT>
-    multiset(IteratorT begin, IteratorT end, const value_compare& comp = value_compare())
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multiset(IteratorT begin, SentinelT end, const value_compare& comp = value_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <class IteratorT>
-    multiset(IteratorT begin, IteratorT end, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multiset(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : multiset(begin, end, key_compare(), alloc) {}
 
-    template <class IteratorT>
-    multiset(IteratorT begin, IteratorT end, const value_compare& comp, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multiset(IteratorT begin, SentinelT end, const value_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -631,8 +631,8 @@ public:
         return tree_.emplaceHintMulti(pos, value);
     }
 
-    template <class IteratorT>
-    void insert(IteratorT begin, IteratorT end) {
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    void insert(IteratorT begin, SentinelT end) {
         tree_.insertRangeMulti(begin, end);
     }
 
