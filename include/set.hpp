@@ -41,7 +41,6 @@ public:
     using key_type        = KeyT;
     using value_type      = key_type ;
     using key_compare     = std::type_identity_t<CompareT>;
-    using value_compare   = key_compare;
     using allocator_type  = std::type_identity_t<AllocatorT>;
     using reference       = value_type&;
     using const_reference = const value_type&;
@@ -50,7 +49,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_        = Tree<value_type, std::identity, value_compare, allocator_type>;
+    using Tree_        = Tree<value_type, std::identity, key_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
@@ -82,25 +81,25 @@ public:
         std::is_nothrow_default_constructible_v<allocator_type>
      && std::is_nothrow_default_constructible_v<key_compare>
      && std::is_nothrow_copy_constructible_v<key_compare>)
-    : tree_(value_compare()) {}
+    : tree_(key_compare()) {}
 
-    explicit set(const value_compare& comp) noexcept(
+    explicit set(const key_compare& comp) noexcept(
         std::is_nothrow_default_constructible_v<allocator_type>
      && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(comp) {}
 
-    explicit set(const value_compare& comp, const allocator_type& alloc)
+    explicit set(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    set(IteratorT begin, SentinelT end, const value_compare& comp = value_compare())
+    set(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    set(IteratorT begin, SentinelT end, const value_compare& comp, const allocator_type& alloc)
+    set(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -137,12 +136,12 @@ public:
     set(set&& other, const allocator_type& alloc)
     : tree_(std::move(other.tree_), alloc) {}
 
-    set(std::initializer_list<value_type> init_list, const value_compare& comp = value_compare())
+    set(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
-    set(std::initializer_list<value_type> init_list, const value_compare& comp, const allocator_type& alloc)
+    set(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(init_list.begin(), init_list.end());
     }
@@ -331,11 +330,7 @@ public:
     }
 
     [[nodiscard]] key_compare key_comp() const {
-        return tree_.value_comp();
-    }
-
-    [[nodiscard]] value_compare value_comp() const {
-        return tree_.value_comp();
+        return tree_.key_comp();
     }
 
     // set operations:
@@ -456,7 +451,6 @@ public:
     using key_type = KeyT;
     using value_type = key_type;
     using key_compare = std::type_identity_t<CompareT>;
-    using value_compare = key_compare;
     using allocator_type = std::type_identity_t<AllocatorT>;
     using reference = value_type&;
     using const_reference = const value_type&;
@@ -465,7 +459,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_        = Tree<value_type, std::identity, value_compare, allocator_type>;
+    using Tree_        = Tree<value_type, std::identity, key_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type> ;
 
     Tree_ tree_;
@@ -497,19 +491,19 @@ public:
      && std::is_nothrow_default_constructible_v<key_compare>
      && std::is_nothrow_copy_constructible_v<key_compare>
     )
-    : tree_(value_compare()) {}
+    : tree_(key_compare()) {}
 
-    explicit multiset(const value_compare& comp) noexcept(
+    explicit multiset(const key_compare& comp) noexcept(
         std::is_nothrow_default_constructible_v<allocator_type>
      && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(comp) {}
 
-    explicit multiset(const value_compare& comp, const allocator_type& alloc)
+    explicit multiset(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    multiset(IteratorT begin, SentinelT end, const value_compare& comp = value_compare())
+    multiset(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
@@ -519,7 +513,7 @@ public:
     : multiset(begin, end, key_compare(), alloc) {}
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    multiset(IteratorT begin, SentinelT end, const value_compare& comp, const allocator_type& alloc)
+    multiset(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(begin, end);
     }
@@ -550,12 +544,12 @@ public:
     multiset(const multiset& other, const allocator_type& alloc)
     : tree_(other.tree_, alloc) {}
 
-    multiset(std::initializer_list<value_type> init_list, const value_compare& comp = value_compare())
+    multiset(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
-    multiset(std::initializer_list<value_type> init_list, const value_compare& comp, const allocator_type& alloc)
+    multiset(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {
         insert(init_list.begin(), init_list.end());
     }
@@ -721,8 +715,7 @@ public:
     }
 
     [[nodiscard]] allocator_type get_allocator() const noexcept { return tree_.alloc(); }
-    [[nodiscard]] key_compare key_comp() const { return tree_.value_comp(); }
-    [[nodiscard]] value_compare value_comp() const { return tree_.value_comp(); }
+    [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
 
     // set operations:
     template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>

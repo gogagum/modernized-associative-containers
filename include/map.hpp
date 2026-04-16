@@ -159,20 +159,6 @@ public:
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
 
-    class value_compare {
-        friend class map;
-
-    protected:
-        key_compare comp;
-
-        value_compare(key_compare c) : comp(c) {}
-
-    public:
-        bool operator()(const value_type& x, const value_type& y) const {
-            return comp(x.first, y.first);
-        }
-    };
-
 private:
     using ValueType_    = MapValue<KeyT, ValueT>;
     using Tree_         = mstd::Tree<ValueType_, typename ValueType_::KeyProj, key_compare, allocator_type>;
@@ -353,9 +339,6 @@ public:
         return allocator_type(tree_.alloc());
     }
     [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
-    [[nodiscard]] value_compare value_comp() const {
-        return value_compare(tree_.key_comp());
-    }
 
     template <class... ArgsT>
     std::pair<iterator, bool> emplace(ArgsT&&... args) {
