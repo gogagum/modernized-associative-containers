@@ -600,9 +600,6 @@ public:
             AllocTraits_::deallocate(na_, ptr, 1);
         }
     }
-
-    template <class>
-    friend class MapNodeDestructor;
 };
 
 template <class NodeT, class _Alloc>
