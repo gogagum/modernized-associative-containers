@@ -11,8 +11,10 @@
 #ifndef MSTD___TREE2
 #define MSTD___TREE2
 
+#include "detail/concepts/compare_concepts.hpp"
 #include <algorithm>
 #include <cassert>
+#include <compare>
 #include <utility>
 #include <iterator>
 #include <memory>
@@ -799,7 +801,12 @@ private:
 template <class _Tp, class CompareT>
 int __diagnose_non_const_comparator();
 
-template <class ValueT, class KeyProj, class KeyCompareT, class AllocatorT>
+template <
+    class ValueT
+  , class KeyProj
+  , class KeyCompareT
+  , class AllocatorT
+>
 class Tree {
 public:
     using value_type     = ValueT;
@@ -810,6 +817,7 @@ public:
 private:
     using AllocTraits_ = std::allocator_traits<allocator_type>;
     using KeyType_     = std::remove_cvref_t<decltype(std::invoke(std::declval<const KeyProj&>(), std::declval<value_type&>()))>;
+    static_assert(OrdersAtLeastWeakly<key_compare, KeyType_>, "key_compare must be at least a weak ordering on the projected key type");
 
 public:
     using pointer         = AllocTraits_::pointer;
@@ -1111,7 +1119,7 @@ public:
     std::pair<iterator, bool> emplaceUnique(ArgsT&&... args) {
         return mstd::try_key_extraction<KeyType_>(
             [this](const KeyType_& key, ArgsT&&... args2) {
-                auto [parent, child] = find_equal(key);
+                auto [parent, child] = find_equivalent(key);
                 auto ret             = static_cast<node_pointer>(child);
                 bool inserted        = false;
                 if (child == nullptr) {
@@ -1125,7 +1133,7 @@ public:
             [this](ArgsT&&... args2) {
                 node_holder holder = constructNode_(std::forward<ArgsT>(args2)...);
                 const auto& holder_key = key_proj_(holder->get_value());
-                auto [parent, child] = find_equal(holder_key);
+                auto [parent, child] = find_equivalent(holder_key);
                 auto ret             = static_cast<node_pointer>(child);
                 bool inserted        = false;
                 if (child == nullptr) {
@@ -1143,7 +1151,7 @@ public:
         return mstd::try_key_extraction<KeyType_>(
             [this, pos](const KeyType_& key, ArgsT&&... args2) {
                 node_base_pointer dummy;
-                auto [parent, child] = find_equal(pos, dummy, key);
+                auto [parent, child] = find_equivalent(pos, dummy, key);
                 auto ret             = static_cast<node_pointer>(child);
                 bool inserted        = false;
                 if (child == nullptr) {
@@ -1161,7 +1169,7 @@ public:
                 auto holder = constructNode_(std::forward<ArgsT>(args2)...);
                 node_base_pointer dummy;
                 const auto& holder_key = key_proj_(holder->get_value());
-                auto [parent, child] = find_equal(pos, dummy, holder_key);
+                auto [parent, child] = find_equivalent(pos, dummy, holder_key);
                 auto ret             = static_cast<node_pointer>(child);
                 if (child == nullptr) {
                     insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.get()));
@@ -1238,7 +1246,7 @@ public:
                                      static_cast<node_base_pointer>(holder.get()));
                         max_node = holder.release();
                     } else {
-                        auto [parent, child] = find_equal(key);
+                        auto [parent, child] = find_equivalent(key);
                         if (child == nullptr) {
                             auto holder = constructNode_(std::forward<Reference>(val));
                             insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.release()));
@@ -1255,7 +1263,7 @@ public:
                                      static_cast<node_base_pointer>(holder.get()));
                         max_node = holder.release();
                     } else {
-                        auto [parent, child] = find_equal(holder->get_value());
+                        auto [parent, child] = find_equivalent(holder->get_value());
                         if (child == nullptr) {
                             insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.release()));
                         }
@@ -1282,7 +1290,7 @@ public:
             return InsertReturnType{end(), false, NodeHandleT()};
         }
         auto ptr = nh.ptr_;
-        auto [parent, child] = find_equal(ptr->get_value());
+        auto [parent, child] = find_equivalent(ptr->get_value());
         if (child != nullptr) {
             return InsertReturnType{
                 iterator(static_cast<node_pointer>(child)),
@@ -1306,7 +1314,7 @@ public:
         }
         auto ptr = nh.ptr_;
         node_base_pointer dummy;
-        auto [parent, child] = find_equal(hint, dummy, ptr->get_value());
+        auto [parent, child] = find_equivalent(hint, dummy, ptr->get_value());
         auto ret             = static_cast<node_pointer>(child);
         if (child == nullptr) {
             insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
@@ -1320,7 +1328,7 @@ public:
     void nodeHandleMergeUnique(Tree<ValueT, KeyProj, Comp2T, AllocatorT>& source) {
         for (iterator iter = source.begin(); iter != source.end();) {
             auto src_ptr = iter.__get_np();
-            auto [parent, child] = find_equal(src_ptr->get_value());
+            auto [parent, child] = find_equivalent(src_ptr->get_value());
             ++iter;
             if (child != nullptr) {
                 continue;
@@ -1433,7 +1441,7 @@ public:
 
     template <class Self, class KeyT>
     SelfIterator<Self> find(this Self& self, const KeyT& key) {
-        auto [__, match] = self.find_equal(key);
+        auto [__, match] = self.find_equivalent(key);
         if (match == nullptr) {
             return self.end();
         }
@@ -1629,8 +1637,8 @@ public:
     // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
     // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
-    // TODO(gogagum): requires transparency
-    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) {
+    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key)
+    requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT> {
         auto node_ptr = root();
 
         if (node_ptr == nullptr) {
@@ -1644,8 +1652,8 @@ public:
         auto* node_base_ptr = root_ptr();
     
         while (true) {
-            const auto comp_res = key_comp_(key, key_proj_(node_ptr->get_value()));
-            if (comp_res < 0) {
+            const std::weak_ordering comp_res = key_comp_(key, key_proj_(node_ptr->get_value()));
+            if (std::is_lt(comp_res)) {
                 if (node_ptr->left_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
@@ -1654,7 +1662,7 @@ public:
                 }
                 node_base_ptr = std::addressof(node_ptr->left_);
                 node_ptr      = static_cast<node_pointer>(node_ptr->left_);
-            } else if (comp_res > 0) {
+            } else if (std::is_gt(comp_res)) {
                 if (node_ptr->right_ == nullptr) {
                     return {
                         static_cast<end_node_pointer>(node_ptr),
@@ -1673,8 +1681,9 @@ public:
     }
 
     template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equal(const KeyT& key) const {
-        return const_cast<Tree*>(this)->find_equal(key);
+    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key) const
+    requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT> {
+        return const_cast<Tree*>(this)->find_equivalent(key);
     }
 
     // Find key
@@ -1685,12 +1694,13 @@ public:
     // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
     std::pair<end_node_pointer, node_base_pointer&>
-    find_equal(const_iterator hint, node_base_pointer& dummy, const KeyT& key) {
+    find_equivalent(const_iterator hint, node_base_pointer& dummy, const KeyT& key)
+    requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT>{
         const auto& hint_key = key_proj_(*hint);
-        if (hint == end() || (key_comp_(key, hint_key) < 0)) { // check before
+        if (hint == end() || std::is_lt(key_comp_(key, hint_key))) { // check before
             // key < *hint
             const_iterator prior = hint;
-            if (prior == begin() || (key_comp_(key, key_proj_(*--prior)) < 0)) {
+            if (prior == begin() || (std::is_lt(key_comp_(key, key_proj_(*--prior))))) {
                 // *prev(hint) < key < *hint
                 if (hint.ptr_->left_ == nullptr) {
                     return {
@@ -1704,13 +1714,13 @@ public:
                 };
             }
             // key <= *prev(hint)
-            return find_equal(key);
+            return find_equivalent(key);
         }
     
-        if (key_comp_(hint_key, key) < 0) { // check after
+        if (std::is_gt(key_comp_(key, hint_key))) { // check after
             // *hint < key
             const_iterator next = std::next(hint);
-            if (next == end() || (key_comp_(key, key_proj_(*next)) < 0)) {
+            if (next == end() || (std::is_lt(key_comp_(key, key_proj_(*next))))) {
                 // *hint < key < *std::next(hint)
                 if (hint.__get_np()->right_ == nullptr) {
                     return {
@@ -1724,7 +1734,7 @@ public:
                 };
             }
             // *next(hint) <= key
-            return find_equal(key);
+            return find_equivalent(key);
         }
     
         // else key == *hint
