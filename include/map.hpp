@@ -317,49 +317,44 @@ public:
     [[nodiscard]] size_type size() const noexcept { return tree_.size(); }
     [[nodiscard]] size_type max_size() const noexcept { return tree_.max_size(); }
 
-    mapped_type& operator[](const key_type& key);
-    mapped_type& operator[](key_type&& key);
+    mapped_type& operator[](const key_type& key) {
+        return tree_
+            .emplaceUnique(
+                std::piecewise_construct,
+                std::forward_as_tuple(key),
+                std::forward_as_tuple()
+            )
+            .first
+            ->value();
+    }
 
-    template <class ArgT>
-    //requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
-    [[nodiscard]] mapped_type& at(ArgT&& arg) {
-        auto [_, child] = tree_.find_equivalent(arg);
+    mapped_type& operator[](key_type&& key) {
+        return tree_
+            .emplaceUnique(
+                std::piecewise_construct,
+                std::forward_as_tuple(std::move(key)),
+                std::forward_as_tuple()
+            )
+            .first
+            ->value();
+    }
+
+    template <class Self, class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    [[nodiscard]] mapped_type& at(this Self& self, TransparentKey&& arg) {
+        auto [_, child] = self.tree_.find_equivalent(arg);
         if (child == nullptr) {
-            std::__throw_out_of_range("map::at:  key not found");
+            throw std::out_of_range("map::at:  key not found");
         }
-        return static_cast<NodePointer_>(child)->get_value().second;
-    }
-
-    template <class ArgT>
-    //requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
-    [[nodiscard]] const mapped_type& at(ArgT&& arg) const {
-        auto [_, child] = tree_.find_equivalent(arg);
-        if (child == nullptr) {
-            std::__throw_out_of_range("map::at:  key not found");
-        }
-        return static_cast<NodePointer_>(child)->get_value().second;
-    }
-
-    mapped_type& at(const key_type& key) {
-        auto [_, child] = tree_.find_equivalent(key);
-        if (child == nullptr)
-            std::__throw_out_of_range("map::at:  key not found");
-        return static_cast<NodePointer_>(child)->get_value().second;
-    }
-
-    const mapped_type& at(const key_type& key) const {
-        auto [_, child] = tree_.find_equivalent(key);
-        if (child == nullptr)
-            std::__throw_out_of_range("map::at:  key not found");
-        return static_cast<NodePointer_>(child)->get_value().second;
+        return static_cast<NodePointer_>(child)->get_value().value();
     }
 
     [[nodiscard]] allocator_type get_allocator() const noexcept {
         return allocator_type(tree_.alloc());
     }
-    [[nodiscard]] key_compare key_comp() const { return tree_.value_comp().key_comp(); }
+    [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
     [[nodiscard]] value_compare value_comp() const {
-        return value_compare(tree_.value_comp().key_comp());
+        return value_compare(tree_.key_comp());
     }
 
     template <class... ArgsT>
@@ -675,30 +670,6 @@ map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
    >;
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](const key_type& key) {
-    return tree_
-        .emplaceUnique(
-            std::piecewise_construct,
-            std::forward_as_tuple(key),
-            std::forward_as_tuple()
-        )
-        .first
-        ->value();
-}
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
-ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](key_type&& key) {
-    return tree_
-        .emplaceUnique(
-            std::piecewise_construct,
-            std::forward_as_tuple(std::move(key)),
-            std::forward_as_tuple()
-        )
-        .first
-        ->value();
-}
-
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
 operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
@@ -741,7 +712,6 @@ erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& container, PredicateT pred) {
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 class multimap {
 public:
-    // types:
     using key_type        = KeyT;
     using mapped_type     = ValueT;
     using value_type      = MapValue<KeyT, ValueT>;
@@ -749,20 +719,6 @@ public:
     using allocator_type  = std::type_identity_t<AllocatorT>;
     using reference       = value_type& ;
     using const_reference = const value_type&;
-
-    class value_compare {
-        friend class multimap;
-
-    protected:
-        key_compare comp;
-
-        value_compare(key_compare __c) : comp(__c) {}
-
-    public:
-        bool operator()(const value_type& x, const value_type& y) const {
-            return comp(x.first, y.first);
-        }
-    };
 
 private:
     using ValueType_    = MapValue<key_type, mapped_type>;
@@ -910,10 +866,7 @@ public:
     [[nodiscard]] allocator_type get_allocator() const noexcept {
         return allocator_type(tree_.alloc());
     }
-    [[nodiscard]] key_compare key_comp() const { return tree_.value_comp().key_comp(); }
-    [[nodiscard]] value_compare value_comp() const {
-        return value_compare(tree_.value_comp().key_comp());
-    }
+    [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
 
     template <class... ArgsT>
     iterator emplace(ArgsT&&... args) {
