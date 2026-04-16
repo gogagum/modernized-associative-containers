@@ -19,9 +19,9 @@ TEST(MultisetCompare, Test1)
     static_assert(std::totally_ordered<mstd::multiset<int>>);
 
     static_assert(std::three_way_comparable<mstd::multiset<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multiset<float>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multiset<float>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<mstd::multiset<float>, std::partial_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::partial_ordering>);
 
     struct E
     {
@@ -308,17 +308,17 @@ private:
     std::vector<double> coords;
 };
 
-struct PathPointLess
+struct PathPointCmp
 {
-    bool operator()(const PathPoint &__lhs, const PathPoint &__rhs) const
+    auto operator()(const PathPoint &__lhs, const PathPoint &__rhs) const
     {
-        return __lhs.getType() < __rhs.getType();
+        return __lhs.getType() <=> __rhs.getType();
     }
 };
 
 TEST(MultisetEmplaceTest, Test1)
 {
-    typedef mstd::multiset<PathPoint, PathPointLess> Mset;
+    typedef mstd::multiset<PathPoint, PathPointCmp> Mset;
     Mset ms;
 
     std::vector<double> coord1 = {0.0, 1.0, 2.0};

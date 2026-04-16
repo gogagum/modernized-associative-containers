@@ -22,9 +22,10 @@
 #include <detail/node_handle.hpp>
 #include <ranges>
 #include <detail/tree.hpp>
-#include <detail/type_traits/is_allocator.hpp>
+#include <detail/concepts/allocator_concept.hpp>
+#include <detail/concepts/compare_concepts.hpp>
+#include <detail/concepts/container_compatible_range.hpp>
 #include <utility>
-#include <detail/ranges/container_compatible_range.hpp>
 #include <detail/utility/compare_three_way.hpp>
 #include <tuple>
 #include <version>
@@ -246,15 +247,15 @@ public:
     map(std::from_range_t, RangeT&& range, const allocator_type& alloc)
     : map(std::from_range, std::forward<RangeT>(range), key_compare(), alloc) {}
 
-    map(const map& __m) = default;
+    map(const map& other) = default;
 
-    map& operator=(const map& __m) = default;
+    map& operator=(const map& other) = default;
 
-    map(map&& m) = default;
+    map(map&& other) = default;
 
-    map(map&& m, const allocator_type& alloc) : tree_(std::move(m.tree_), alloc) {}
+    map(map&& other, const allocator_type& alloc) : tree_(std::move(other.tree_), alloc) {}
 
-    map& operator=(map&& __m) = default;
+    map& operator=(map&& other) = default;
 
     map(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
     : tree_(ValueCompare_(comp)) {
@@ -277,7 +278,7 @@ public:
 
     explicit map(const allocator_type& alloc) : tree_(typename Tree_::allocator_type(alloc)) {}
 
-    map(const map& __m, const allocator_type& alloc) : tree_(__m.tree_, alloc) {}
+    map(const map& other, const allocator_type& alloc) : tree_(other.tree_, alloc) {}
 
     ~map() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), ""); }
 
@@ -322,7 +323,7 @@ public:
     template <class ArgT>
     //requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
     [[nodiscard]] mapped_type& at(ArgT&& arg) {
-        auto [_, child] = tree_.find_equal(arg);
+        auto [_, child] = tree_.find_equivalent(arg);
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
@@ -332,7 +333,7 @@ public:
     template <class ArgT>
     //requires __is_transparently_comparable_v<CompareT, key_type, std::remove_cvref_t<ArgT>>
     [[nodiscard]] const mapped_type& at(ArgT&& arg) const {
-        auto [_, child] = tree_.find_equal(arg);
+        auto [_, child] = tree_.find_equivalent(arg);
         if (child == nullptr) {
             std::__throw_out_of_range("map::at:  key not found");
         }
@@ -340,14 +341,14 @@ public:
     }
 
     mapped_type& at(const key_type& key) {
-        auto [_, child] = tree_.find_equal(key);
+        auto [_, child] = tree_.find_equivalent(key);
         if (child == nullptr)
             std::__throw_out_of_range("map::at:  key not found");
         return static_cast<NodePointer_>(child)->get_value().second;
     }
 
     const mapped_type& at(const key_type& key) const {
-        auto [_, child] = tree_.find_equal(key);
+        auto [_, child] = tree_.find_equivalent(key);
         if (child == nullptr)
             std::__throw_out_of_range("map::at:  key not found");
         return static_cast<NodePointer_>(child)->get_value().second;
@@ -597,10 +598,9 @@ private:
 
 template <
     std::input_iterator IteratorT
-  , class CompareT   = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
+  , OrdersAtLeastWeakly<__iter_to_alloc_type<IteratorT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                          = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires (!Allocator<CompareT>)
 map(
     IteratorT,
     IteratorT,
@@ -614,10 +614,9 @@ map(
 
 template <
     std::ranges::input_range RangeT
-  , class CompareT   = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , OrdersAtLeastWeakly<__range_to_alloc_type<RangeT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                        = std::allocator<__range_to_alloc_type<RangeT>>
 >
-requires (!Allocator<CompareT>)
 map(
     std::from_range_t,
     RangeT&&,
@@ -633,10 +632,9 @@ map(
 template <
     class KeyT
   , class ValueT
-  , class CompareT   = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , Allocator AllocatorT               = std::allocator<MapValue<KeyT, ValueT>>
 >
-requires (!Allocator<CompareT>)
 map(
     std::initializer_list<MapValue<KeyT, ValueT>>,
     CompareT = CompareT(),
@@ -1076,10 +1074,9 @@ public:
 
 template <
     std::input_iterator IteratorT
-  , class CompareT   = CompareThreeWay
+  , OrdersAtLeastWeakly<__iter_to_alloc_type<IteratorT>> CompareT = CompareThreeWay
   , Allocator AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
-requires (!Allocator<CompareT>)
 multimap(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __iter_key_type<IteratorT>
@@ -1090,10 +1087,9 @@ multimap(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     std::ranges::input_range RangeT
-  , class CompareT   = CompareThreeWay
+  , OrdersAtLeastWeakly<__range_to_alloc_type<RangeT>> CompareT = CompareThreeWay
   , Allocator AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
 >
-requires (!Allocator<CompareT>)
 multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
        __range_key_type<RangeT>
@@ -1105,10 +1101,9 @@ multimap(std::from_range_t, RangeT&&, CompareT = CompareT(), AllocatorT = Alloca
 template <
     class KeyT
   , class ValueT
-  , class CompareT   = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
   , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
-requires (!Allocator<CompareT>)
 multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 

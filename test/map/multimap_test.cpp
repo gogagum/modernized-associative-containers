@@ -27,8 +27,8 @@ TEST(MultimapTest, Compare1)
     static_assert(std::totally_ordered<mstd::multimap<int, int>>);
 
     static_assert(std::three_way_comparable<mstd::multimap<int, int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<float, float>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<float, float>, std::weak_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multimap<float, float, mstd::FpCompareThreeWay<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<mstd::multimap<float, float, mstd::FpCompareThreeWay<float>>, std::weak_ordering>);
     static_assert(std::three_way_comparable<mstd::multimap<int, float>, std::partial_ordering>);
 
     struct E
@@ -192,9 +192,9 @@ struct T
     int i;
 };
 
-bool operator<(T l, T r) { return l.i < r.i; }
+std::strong_ordering operator<=>(T l, T r) { return l.i <=> r.i; }
 
-using Cmp = std::less<T>;
+using Cmp = mstd::CompareThreeWay;
 
 struct U
 {
