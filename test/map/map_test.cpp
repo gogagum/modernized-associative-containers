@@ -121,6 +121,18 @@ TEST(MapEmplaceTest, Test1)
     EXPECT_EQ(&(ret.first->value()[0]), px);
 }
 
+TEST(MapAtTest, Test1)
+{
+    typedef mstd::map<char, int> Map;
+    Map m;
+
+    m['a'] = 1;
+    m['b'] = 2;
+
+    EXPECT_EQ(m.at('a'), 1);
+    EXPECT_EQ(m.at('b'), 2);
+}
+
 TEST(MapEmplaceTest, Test2)
 {
     mstd::map<char, PathPoint> m;
