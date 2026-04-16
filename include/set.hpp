@@ -158,9 +158,7 @@ public:
 
     set& operator=(set&& other) = default;
 
-    ~set() {
-        static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()));
-    }
+    ~set() = default;
 
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
 
@@ -573,10 +571,7 @@ public:
 
     multiset& operator=(multiset&& other) = default;
 
-    ~multiset() {
-        static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), "");
-    }
-
+    ~multiset() = default;
     [[nodiscard]] iterator begin() noexcept { return tree_.begin(); }
     [[nodiscard]] const_iterator begin() const noexcept { return tree_.begin(); }
     [[nodiscard]] iterator end() noexcept { return tree_.end(); }

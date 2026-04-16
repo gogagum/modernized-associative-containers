@@ -280,7 +280,7 @@ public:
 
     map(const map& other, const allocator_type& alloc) : tree_(other.tree_, alloc) {}
 
-    ~map() { static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), ""); }
+    ~map() = default;
 
     template <class Self>
     [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept {
@@ -829,9 +829,7 @@ public:
     multimap(const multimap& other, const allocator_type& alloc)
     : tree_(other.tree_, alloc) {}
 
-    ~multimap() {
-        static_assert(sizeof(mstd::__diagnose_non_const_comparator<KeyT, CompareT>()), "");
-    }
+    ~multimap() = default;
 
     template <class Self>
     [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept { return self.tree_.begin(); }

@@ -798,9 +798,6 @@ private:
     friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
 };
 
-template <class _Tp, class CompareT>
-int __diagnose_non_const_comparator();
-
 template <
     class ValueT
   , class KeyProj
