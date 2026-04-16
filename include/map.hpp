@@ -218,14 +218,14 @@ public:
     explicit map(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {}
 
-    template <class IteratorT>
-    map(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    map(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
     : tree_(ValueCompare_(comp)) {
         insert(begin, end);
     }
 
-    template <class IteratorT>
-    map(IteratorT begin, IteratorT end, const key_compare& comp, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    map(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
@@ -239,8 +239,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
     
-    template <class IteratorT>
-    map(IteratorT begin, IteratorT end, const allocator_type& alloc)
+    template <std::input_iterator IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    map(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : map(begin, end, key_compare(), alloc) {}
 
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -403,8 +403,8 @@ public:
         insert(init_list.begin(), init_list.end());
     }
 
-    template <class IteratorT>
-    void insert(IteratorT first, IteratorT last) {
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    void insert(IteratorT first, SentinelT last) {
         tree_.insertRangeUnique(first, last);
     }
 
@@ -764,14 +764,14 @@ public:
     explicit multimap(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {}
 
-    template <class IteratorT>
-    multimap(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multimap(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <class IteratorT>
-    multimap(IteratorT begin, IteratorT end, const key_compare& comp, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multimap(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
@@ -785,8 +785,8 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
 
-    template <class IteratorT>
-    multimap(IteratorT begin, IteratorT end, const allocator_type& alloc)
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    multimap(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : multimap(begin, end, key_compare(), alloc) {}
     
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -910,8 +910,8 @@ public:
         return tree_.emplaceHintMulti(pos.i_, __v);
     }
 
-    template <class IteratorT>
-    void insert(IteratorT begin, IteratorT end) {
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    void insert(IteratorT begin, SentinelT end) {
         tree_.insertRangeMulti(begin, end);
     }
 
