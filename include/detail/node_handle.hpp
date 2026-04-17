@@ -16,12 +16,8 @@
 
 namespace mstd {
 
-// Specialized in Tree & __hash_table for their _NodeType.
 template <class NodeT, class AllocT>
-struct __generic_container_node_destructor;
-
-template <class NodeT, class AllocT>
-class BasicNodeHandle {
+class NodeHandle {
   
   template <class /*Value*/, class /*KeyProj*/, class /*Compare*/, class /*Allocator*/>
   friend class Tree;
@@ -36,37 +32,32 @@ private:
   NodePointerType_ ptr_ = nullptr;
   std::optional<allocator_type> alloc_;
 
-  void releasePtr_() {
-    ptr_   = nullptr;
-    alloc_ = std::nullopt;
-  }
-
   void destroyNodePointer_() {
     if (ptr_ != nullptr) {
-      using NodeAllocType = std::allocator_traits<allocator_type>::template rebind_alloc<NodeT>; 
+      using NodeAllocType = AllocT::template rebind_alloc<NodeT>; 
       NodeAllocType alloc(*alloc_);
-      __generic_container_node_destructor<NodeT, NodeAllocType>(alloc, true)(ptr_);
+      typename NodeT::template Destructor<NodeAllocType>{alloc, true}(ptr_);
       ptr_ = nullptr;
     }
   }
 
-  BasicNodeHandle(NodePointerType_ ptr, allocator_type const& alloc)
+  NodeHandle(NodePointerType_ ptr, allocator_type const& alloc)
       : ptr_(ptr)
       , alloc_(alloc) {}
 
 public:
-  BasicNodeHandle() = default;
+  NodeHandle() = default;
 
-  BasicNodeHandle(BasicNodeHandle&& other) noexcept
+  NodeHandle(NodeHandle&& other) noexcept
       : ptr_(other.ptr_)
       , alloc_(std::move(other.alloc_)) {
     other.ptr_   = nullptr;
     other.alloc_ = std::nullopt;
   }
 
-  BasicNodeHandle& operator=(BasicNodeHandle&& other) {
+  NodeHandle& operator=(NodeHandle&& other) {
     MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-        alloc_ == std::nullopt || AllocTraits_::propagate_on_container_move_assignment::value ||
+        !alloc_.has_value() || AllocTraits_::propagate_on_container_move_assignment::value ||
             alloc_ == other.alloc_,
         "node_type with incompatible allocator passed to "
         "node_type::operator=(node_type&&)");
@@ -90,34 +81,30 @@ public:
 
   [[nodiscard]] bool empty() const { return ptr_ == nullptr; }
 
-  void swap(BasicNodeHandle& other) noexcept(
-      AllocTraits_::propagate_on_container_swap::value || AllocTraits_::is_always_equal::value) {
-    using std::swap;
-    swap(ptr_, other.ptr_);
+  void swap(NodeHandle& other) noexcept(
+      AllocTraits_::propagate_on_container_swap::value
+   || AllocTraits_::is_always_equal::value
+  ) {
+    std::swap(ptr_, other.ptr_);
     if (AllocTraits_::propagate_on_container_swap::value 
         || alloc_ == std::nullopt
-        || other.alloc_ == std::nullopt) {
-      swap(alloc_, other.alloc_);
+        || other.alloc_ == std::nullopt
+    ) {
+      std::swap(alloc_, other.alloc_);
     }
   }
 
   friend void
-  swap(BasicNodeHandle& lhs, BasicNodeHandle& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+  swap(NodeHandle& lhs, NodeHandle& rhs) noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
   }
 
-  ~BasicNodeHandle() { destroyNodePointer_(); }
+  ~NodeHandle() { destroyNodePointer_(); }
 };
 
-template <class NodeT, class AllocT>
-using SetNodeHandle = BasicNodeHandle< NodeT, AllocT>;
-
-template <class NodeT, class AllocT>
-using MapNodeHandle = BasicNodeHandle< NodeT, AllocT>;
-
-template <class _Iterator, class NodeT>
-struct __insert_return_type {
-  _Iterator position;
+template <class IteratorT, class NodeT>
+struct InsertReturnType {
+  IteratorT position;
   bool inserted;
   NodeT node;
 };

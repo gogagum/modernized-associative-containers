@@ -68,8 +68,8 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    using node_type          = SetNodeHandle<typename Tree_::node, allocator_type>;
-    using insert_return_type = __insert_return_type<iterator, node_type>;
+    using node_type          = NodeHandle<typename Tree_::node, allocator_type>;
+    using insert_return_type = InsertReturnType<iterator, node_type>;
 
     template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
     friend class set;
@@ -469,7 +469,7 @@ public:
     using const_iterator         = Tree_::const_iterator;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-    using node_type              = SetNodeHandle<typename Tree_::node, allocator_type>;
+    using node_type              = NodeHandle<typename Tree_::node, allocator_type>;
 
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;

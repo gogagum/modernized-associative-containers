@@ -180,8 +180,8 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
-    using insert_return_type = __insert_return_type<iterator, node_type>;
+    using node_type = NodeHandle<typename Tree_::node, allocator_type>;
+    using insert_return_type = InsertReturnType<iterator, node_type>;
 
     template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
     friend class map;
@@ -352,17 +352,17 @@ public:
             .first;
     }
 
-    template <class _Pp>
-    requires std::is_constructible_v<value_type, _Pp>
-    std::pair<iterator, bool> insert(_Pp&& value) {
-        return tree_.emplaceUnique(std::forward<_Pp>(value));
+    template <class P>
+    requires std::is_constructible_v<value_type, P>
+    std::pair<iterator, bool> insert(P&& value) {
+        return tree_.emplaceUnique(std::forward<P>(value));
     }
 
-    template <class _Pp>
-    requires std::is_constructible_v<value_type, _Pp>
-    iterator insert(const_iterator pos, _Pp&& value) {
+    template <class P>
+    requires std::is_constructible_v<value_type, P>
+    iterator insert(const_iterator pos, P&& value) {
         return tree_
-            .emplaceHintUnique(pos.i_, std::forward<_Pp>(value))
+            .emplaceHintUnique(pos.i_, std::forward<P>(value))
             .first;
     }
 
@@ -724,7 +724,7 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    using node_type = MapNodeHandle<typename Tree_::node, allocator_type>;
+    using node_type = NodeHandle<typename Tree_::node, allocator_type>;
 
     template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
     friend class map;
