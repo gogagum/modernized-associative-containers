@@ -2,7 +2,8 @@
 #define COUNTER_TYPE_HPP
 
 
-#include <cstdint>
+#include <cstddef>
+#include <compare>
 
 struct counter_type
 {
@@ -82,14 +83,14 @@ struct counter_type
 
 };
 
-int counter_type::default_count = 0;
-int counter_type::specialize_count = 0;
-int counter_type::copy_count = 0;
-int counter_type::copy_assign_count = 0;
-int counter_type::less_compare_count = 0;
-int counter_type::move_count = 0;
-int counter_type::move_assign_count = 0;
-int counter_type::destructor_count = 0;
+inline int counter_type::default_count = 0;
+inline int counter_type::specialize_count = 0;
+inline int counter_type::copy_count = 0;
+inline int counter_type::copy_assign_count = 0;
+inline int counter_type::less_compare_count = 0;
+inline int counter_type::move_count = 0;
+inline int counter_type::move_assign_count = 0;
+inline int counter_type::destructor_count = 0;
 
 struct counter_type_hasher
 {

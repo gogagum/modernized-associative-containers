@@ -379,9 +379,6 @@ public:
             return self.tree_.equalRangeMulti(key);
         }
     }
-
-    template <class, class...>
-    friend struct __specialized_algorithm;
 };
 
 template <
@@ -431,7 +428,6 @@ operator<=>(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT
     return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), CompareT{});
 }
 
-// specialized algorithms:
 template <class KeyT, class CompareT, class AllocatorT>
 inline void swap(set<KeyT, CompareT, AllocatorT>& lhs, set<KeyT, CompareT, AllocatorT>& rhs)
 noexcept(noexcept(lhs.swap(rhs))) {
@@ -747,9 +743,6 @@ public:
     [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& transparent_key) {
         return self.tree_.equalRangeMulti(transparent_key);
     }
-    
-    template <class, class...>
-    friend struct __specialized_algorithm;
 };
 
 template <
@@ -809,8 +802,7 @@ operator<=>(const multiset<KeyT, CompareT, AllocatorT>& lhs, const multiset<KeyT
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
-inline void
-swap(multiset<KeyT, CompareT, AllocatorT>& lhs, multiset<KeyT, CompareT, AllocatorT>& rhs)
+inline void swap(multiset<KeyT, CompareT, AllocatorT>& lhs, multiset<KeyT, CompareT, AllocatorT>& rhs)
 noexcept(noexcept(lhs.swap(rhs))) {
     lhs.swap(rhs);
 }
