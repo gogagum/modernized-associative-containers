@@ -19,8 +19,6 @@
 #include <type_traits>
 #include <cstring>
 
-#include "test_macros.hpp"
-
 template <class T>
 class bare_allocator {
 public:
@@ -85,10 +83,10 @@ struct malloc_allocator_base {
   }
 };
 
-size_t malloc_allocator_base::outstanding_bytes         = 0;
-size_t malloc_allocator_base::alloc_count               = 0;
-size_t malloc_allocator_base::dealloc_count             = 0;
-bool malloc_allocator_base::disable_default_constructor = false;
+inline size_t malloc_allocator_base::outstanding_bytes         = 0;
+inline size_t malloc_allocator_base::alloc_count               = 0;
+inline size_t malloc_allocator_base::dealloc_count             = 0;
+inline bool malloc_allocator_base::disable_default_constructor = false;
 
 template <class T>
 class malloc_allocator : public malloc_allocator_base {
@@ -474,7 +472,7 @@ public:
 
   constexpr void deallocate(T* p, std::size_t n) {
     if (!std::is_constant_evaluated)
-      DoNotOptimize(std::memset(static_cast<void*>(p), 0, sizeof(T) * n));
+      std::memset(static_cast<void*>(p), 0, sizeof(T) * n);
     std::allocator<T>().deallocate(p, n);
   }
 
