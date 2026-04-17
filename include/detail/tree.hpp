@@ -554,6 +554,37 @@ public:
     // memory provided by the union member
 
 private:
+    template <class AllocatorT>
+    class Destructor {
+        using AllocatorType_ = AllocatorT;
+        using AllocTraits_   = std::allocator_traits<AllocatorType_>;
+    
+    public:
+        using pointer = AllocTraits_::pointer;
+    
+    private:
+        AllocatorType_& na_;
+    
+    public:
+        bool value_constructed;
+    
+        Destructor(const Destructor&)            = default;
+        Destructor& operator=(const Destructor&) = delete;
+    
+        explicit Destructor(AllocatorType_& na, bool val = false) noexcept
+        : na_(na)
+        , value_constructed(val) {}
+    
+        void operator()(pointer ptr) noexcept {
+            if (value_constructed) {
+                AllocTraits_::destroy(na_, std::addressof(ptr->get_value()));
+            }
+            if (ptr) {
+                AllocTraits_::deallocate(na_, ptr, 1);
+            }
+        }
+    };
+
     union {
         node_value_type value_;
     };
@@ -569,44 +600,12 @@ public:
     ~TreeNode()                          = delete;
     TreeNode(TreeNode const&)            = delete;
     TreeNode& operator=(TreeNode const&) = delete;
-};
 
-template <class AllocatorT>
-class TreeNodeDestructor {
-    using AllocatorType_ = AllocatorT;
-    using AllocTraits_   = std::allocator_traits<AllocatorType_>;
+    template <class, class>
+    friend class BasicNodeHandle;
 
-public:
-    using pointer = AllocTraits_::pointer;
-
-private:
-    AllocatorType_& na_;
-
-public:
-    bool value_constructed;
-
-    TreeNodeDestructor(const TreeNodeDestructor&)            = default;
-    TreeNodeDestructor& operator=(const TreeNodeDestructor&) = delete;
-
-    explicit TreeNodeDestructor(AllocatorType_& na, bool val = false) noexcept
-    : na_(na)
-    , value_constructed(val) {}
-
-    void operator()(pointer ptr) noexcept {
-        if (value_constructed) {
-            AllocTraits_::destroy(na_, std::addressof(ptr->get_value()));
-        }
-        if (ptr) {
-            AllocTraits_::deallocate(na_, ptr, 1);
-        }
-    }
-};
-
-template <class NodeT, class _Alloc>
-struct __generic_container_node_destructor;
-template <class _Tp, class VoidPtrT, class _Alloc>
-struct __generic_container_node_destructor<TreeNode<_Tp, VoidPtrT>, _Alloc> : TreeNodeDestructor<_Alloc> {
-    using TreeNodeDestructor<_Alloc>::TreeNodeDestructor;
+    template <class, class, class, class>
+    friend class Tree;
 };
 
 // Do an in-order traversal of the tree until `brk` returns true. Takes the root node of the tree.
@@ -1605,7 +1604,7 @@ public:
         };
     }
 
-    using node_holder = std::unique_ptr<node, TreeNodeDestructor<node_allocator>>;
+    using node_holder = std::unique_ptr<node, typename node::template Destructor<node_allocator>>;
 
     node_holder remove(const_iterator pos) noexcept {
         auto node_ptr = pos.__get_np();
