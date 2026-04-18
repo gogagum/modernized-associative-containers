@@ -25,6 +25,7 @@
 #include <detail/concepts/allocator_concept.hpp>
 #include <detail/concepts/compare_concepts.hpp>
 #include <detail/concepts/container_compatible_range.hpp>
+#include <type_traits>
 #include <utility>
 #include <detail/utility/compare_three_way.hpp>
 #include <tuple>
@@ -34,113 +35,6 @@
 
 namespace mstd {
 
-template <class TreeIteratorT>
-class MapIterator {
-    TreeIteratorT i_;
-
-public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type        = typename TreeIteratorT::value_type;
-    using difference_type   = typename TreeIteratorT::difference_type;
-    using reference         = value_type&;
-    using pointer           = typename TreeIteratorT::pointer;
-
-    MapIterator() noexcept {}
-
-    MapIterator(TreeIteratorT __i) noexcept : i_(__i) {}
-
-    reference operator*() const { return *i_; }
-    pointer operator->() const { return std::pointer_traits<pointer>::pointer_to(*i_); }
-
-    MapIterator& operator++() {
-        ++i_;
-        return *this;
-    }
-    MapIterator operator++(int) {
-        MapIterator t(*this);
-        ++(*this);
-        return t;
-    }
-
-    MapIterator& operator--() {
-        --i_;
-        return *this;
-    }
-    MapIterator operator--(int) {
-        MapIterator __t(*this);
-        --(*this);
-        return __t;
-    }
-
-    friend bool operator==(const MapIterator& x, const MapIterator& y) {
-        return x.i_ == y.i_;
-    }
-    friend bool operator!=(const MapIterator& x, const MapIterator& y) {
-        return x.i_ != y.i_;
-    }
-
-    template <class, class, class, class>
-    friend class map;
-    template <class, class, class, class>
-    friend class multimap;
-    template <class>
-    friend class MapConstIterator;
-};
-
-template <class TreeIteratorT>
-class MapConstIterator {
-    TreeIteratorT i_;
-
-public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type        = typename TreeIteratorT::value_type;
-    using difference_type   = typename TreeIteratorT::difference_type;
-    using reference         = const value_type&;
-    using pointer           = typename TreeIteratorT::pointer;
-
-    MapConstIterator() noexcept {}
-
-    MapConstIterator(TreeIteratorT i) noexcept : i_(i) {}
-    MapConstIterator(MapIterator< typename TreeIteratorT::non_const_iterator> i) noexcept : i_(i.i_) {}
-
-    reference operator*() const { return *i_; }
-    pointer operator->() const { return std::pointer_traits<pointer>::pointer_to(*i_); }
-
-    MapConstIterator& operator++() {
-        ++i_;
-        return *this;
-    }
-    MapConstIterator operator++(int) {
-        MapConstIterator t(*this);
-        ++(*this);
-        return t;
-    }
-
-    MapConstIterator& operator--() {
-        --i_;
-        return *this;
-    }
-    MapConstIterator operator--(int) {
-        MapConstIterator t(*this);
-        --(*this);
-        return t;
-    }
-
-    friend bool operator==(const MapConstIterator& x, const MapConstIterator& y) {
-        return x.i_ == y.i_;
-    }
-    friend bool operator!=(const MapConstIterator& x, const MapConstIterator& y) {
-        return x.i_ != y.i_;
-    }
-
-    template <class, class, class, class>
-    friend class map;
-    template <class, class, class, class>
-    friend class multimap;
-    template <class, class, class>
-    friend class TreeConstIterator;
-};
-
 template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<MapValue<KeyT, ValueT>>>
 class multimap;
 
@@ -148,31 +42,30 @@ template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class Allo
 class map {
 public:
     // types:
-    using key_type = KeyT;
-    using mapped_type = ValueT;
-    using value_type = MapValue<KeyT, ValueT>;
-    using key_compare = std::type_identity_t<CompareT>;
-    using allocator_type = std::type_identity_t<AllocatorT>;
-    using reference = value_type&;
+    using key_type        = KeyT;
+    using mapped_type     = ValueT;
+    using value_type      = MapValue<KeyT, ValueT>;
+    using key_compare     = std::type_identity_t<CompareT>;
+    using allocator_type  = std::type_identity_t<AllocatorT>;
+    using reference       = value_type&;
     using const_reference = const value_type&;
 
     static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using ValueType_    = MapValue<KeyT, ValueT>;
-    using Tree_         = mstd::Tree<ValueType_, typename ValueType_::KeyProj, key_compare, allocator_type>;
+    using Tree_         = mstd::Tree<value_type, typename value_type::KeyProj, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
 
 public:
-    using pointer = AllocTraits_::pointer;
-    using const_pointer = AllocTraits_::const_pointer;
-    using size_type = AllocTraits_::size_type;
-    using difference_type = AllocTraits_::difference_type;
-    using iterator               = MapIterator<typename Tree_::iterator>;
-    using const_iterator         = MapConstIterator<typename Tree_::const_iterator>;
+    using pointer                = Tree_::pointer;
+    using const_pointer          = Tree_::const_pointer;
+    using size_type              = Tree_::size_type;
+    using difference_type        = Tree_::difference_type;
+    using iterator               = Tree_::iterator;
+    using const_iterator         = Tree_::const_iterator;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     template <class Self>
@@ -183,21 +76,21 @@ public:
     using node_type = NodeHandle<typename Tree_::node, allocator_type>;
     using insert_return_type = InsertReturnType<iterator, node_type>;
 
-    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
+    template <class /*Key*/, class /*Value*/, class /*Compare*/, class /*Allocator*/>
     friend class map;
-    template <class _Key2, class _Value2, class Comp2T, class _Alloc2>
+    template <class /*Key*/, class /*Value*/, class /*Compare*/, class /*Allocator*/>
     friend class multimap;
 
     map() noexcept(
-       std::is_nothrow_default_constructible<allocator_type>::value
-    && std::is_nothrow_default_constructible<key_compare>::value
-    && std::is_nothrow_copy_constructible<key_compare>::value
+       std::is_nothrow_default_constructible_v<allocator_type>
+    && std::is_nothrow_default_constructible_v<key_compare>
+    && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(key_compare()) {}
 
     explicit map(const key_compare& comp) noexcept(
-       std::is_nothrow_default_constructible<allocator_type>::value 
-    && std::is_nothrow_copy_constructible<key_compare>::value
+       std::is_nothrow_default_constructible_v<allocator_type>
+    && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(comp) {}
 
@@ -239,7 +132,8 @@ public:
 
     map(map&& other) = default;
 
-    map(map&& other, const allocator_type& alloc) : tree_(std::move(other.tree_), alloc) {}
+    map(map&& other, const allocator_type& alloc)
+    : tree_(std::move(other.tree_), alloc) {}
 
     map& operator=(map&& other) = default;
 
@@ -348,7 +242,7 @@ public:
     template <class... ArgsT>
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
         return tree_
-            .emplaceHintUnique(pos.i_, std::forward<ArgsT>(args)...)
+            .emplaceHintUnique(pos, std::forward<ArgsT>(args)...)
             .first;
     }
 
@@ -379,7 +273,7 @@ public:
     }
 
     iterator insert(const_iterator pos, value_type&& value) {
-        return tree_.emplaceHintUnique(pos.i_, std::move(value)).first;
+        return tree_.emplaceHintUnique(pos, std::move(value)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -420,7 +314,7 @@ public:
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, const key_type& k, ArgsT&&... args) {
         return tree_.emplaceHintUnique(
-            hint.i_,
+            hint,
             std::piecewise_construct,
             std::forward_as_tuple(k),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -430,7 +324,7 @@ public:
     template <class... ArgsT>
     iterator try_emplace(const_iterator hint, key_type&& k, ArgsT&&... args) {
         return tree_.emplaceHintUnique(
-            hint.i_,
+            hint,
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
@@ -459,7 +353,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, const key_type& k, _Vp&& v) {
-        auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, k, std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplaceHintUnique(hint, k, std::forward<_Vp>(v));
         if (!inserted) {
             r->value() = std::forward<_Vp>(v);
         }
@@ -468,7 +362,7 @@ public:
 
     template <class _Vp>
     iterator insert_or_assign(const_iterator hint, key_type&& k, _Vp&& v) {
-        auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, std::move(k), std::forward<_Vp>(v));
+        auto [r, inserted] = tree_.emplaceHintUnique(hint, std::move(k), std::forward<_Vp>(v));
         if (!inserted) {
             r->value() = std::forward<_Vp>(v);
         }
@@ -711,13 +605,13 @@ private:
     Tree_ tree_;
 
 public:
-    using pointer = AllocTraits_::pointer;
-    using const_pointer = AllocTraits_::const_pointer;
-    using size_type = AllocTraits_::size_type;
-    using difference_type = AllocTraits_::difference_type;
-    using iterator = MapIterator<typename Tree_::iterator>;
-    using const_iterator = MapConstIterator<typename Tree_::const_iterator>;
-    using reverse_iterator = std::reverse_iterator<iterator>;
+    using pointer                = AllocTraits_::pointer;
+    using const_pointer          = AllocTraits_::const_pointer;
+    using size_type              = AllocTraits_::size_type;
+    using difference_type        = AllocTraits_::difference_type;
+    using iterator               = Tree_::iterator;
+    using const_iterator         = Tree_::const_iterator;
+    using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
