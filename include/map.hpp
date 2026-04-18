@@ -99,13 +99,13 @@ public:
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
     map(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
-    : tree_(ValueCompare_(comp)) {
+    : tree_(key_compare(comp)) {
         insert(begin, end);
     }
 
     template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
     map(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(key_compare(comp), typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
 
@@ -114,11 +114,11 @@ public:
         RangeT&& range,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type())
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(key_compare(comp), typename Tree_::allocator_type(alloc)) {
         insert_range(std::forward<RangeT>(range));
     }
     
-    template <std::input_iterator IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
     map(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : map(begin, end, key_compare(), alloc) {}
 
@@ -138,12 +138,12 @@ public:
     map& operator=(map&& other) = default;
 
     map(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
-    : tree_(ValueCompare_(comp)) {
+    : tree_(key_compare(comp)) {
         insert(init_list.begin(), init_list.end());
     }
 
     map(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(key_compare(comp), typename Tree_::allocator_type(alloc)) {
         insert(init_list.begin(), init_list.end());
     }
 
@@ -482,8 +482,8 @@ public:
 
 template <
     std::input_iterator IteratorT
-  , OrdersAtLeastWeakly<__iter_to_alloc_type<IteratorT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT                                          = std::allocator<__iter_to_alloc_type<IteratorT>>
+  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                     = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
 map(
     IteratorT,
@@ -493,13 +493,14 @@ map(
 ) -> map<
         __iter_key_type<IteratorT>
       , __iter_mapped_type<IteratorT>
-      , CompareT, AllocatorT
+      , CompareT
+      , AllocatorT
 >;
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<__range_to_alloc_type<RangeT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT                                        = std::allocator<__range_to_alloc_type<RangeT>>
+  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                   = std::allocator<__range_to_alloc_type<RangeT>>
 >
 map(
     std::from_range_t,

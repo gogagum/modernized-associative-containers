@@ -10,7 +10,7 @@
 #ifndef MSTD_ITERATOR_ITERATOR_TRAITS_HPP
 #define MSTD_ITERATOR_ITERATOR_TRAITS_HPP
 
-#include <utility>
+#include "detail/map_value.hpp"
 #include <tuple>
 #include <type_traits>
 
@@ -24,8 +24,8 @@ using __iter_mapped_type = std::tuple_element_t<1, std::iter_value_t<IteratorT>>
 
 template <class IteratorT>
 using __iter_to_alloc_type
-  = std::pair<
-      const std::tuple_element_t<0, std::iter_value_t<IteratorT>>
+  = MapValue<
+      std::tuple_element_t<0, std::iter_value_t<IteratorT>>
     , std::tuple_element_t<1, std::iter_value_t<IteratorT>>
     >;
 

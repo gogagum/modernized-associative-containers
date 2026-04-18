@@ -5,6 +5,15 @@
 #include <map.hpp>
 #include <string>
 
+TEST(MapFromVector, Test1)
+{
+    std::vector<std::pair<int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::map(nums.begin(), nums.end());
+
+    std::vector<std::tuple<int, int>> nums2{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c2 = mstd::map(nums2.begin(), nums2.end());
+}
+
 TEST(MapInsertTest, Test1)
 {
     typedef mstd::map<int, const int> MapInt;
