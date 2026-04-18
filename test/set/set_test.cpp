@@ -4,6 +4,13 @@
 #include <set.hpp>
 #include <string>
 
+TEST(SetFromVector, Test1)
+{
+    std::vector<int> nums{1, 2, 2, 3};
+
+    auto c1 = mstd::set(nums.begin(), nums.end());
+}
+
 TEST(SetCompare, Test1)
 {
     mstd::set<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};

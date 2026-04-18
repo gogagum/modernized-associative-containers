@@ -14,6 +14,11 @@ public:
     MapValue(const MapValue&) = default;
     MapValue(MapValue&&) = default; // TODO(gogagum): make this noexcept when possible
     MapValue(const KeyT& key, const ValueT& value) : key_(key), value_(value) {}
+    // TODO(gogagum): think of a constructor that gets key and value via structured binding
+    MapValue(const std::pair<KeyT, ValueT>& kv_pair) : key_(kv_pair.first), value_(kv_pair.second) {}
+    MapValue(std::pair<KeyT, ValueT>&& kv_pair) : key_(std::move(kv_pair.first)), value_(std::move(kv_pair.second)) {}
+    MapValue(const std::tuple<KeyT, ValueT>& kv_pair) : key_(std::get<0>(kv_pair)), value_(std::get<1>(kv_pair)) {}
+    MapValue(std::tuple<KeyT, ValueT>&& kv_pair) : key_(std::move(std::get<0>(kv_pair))), value_(std::move(std::get<1>(kv_pair))) {}
     MapValue(KeyT&& key, ValueT&& value) : key_(std::move(key)), value_(std::move(value)) {}
     template <class KT, class VT>
     MapValue(KT&& key, VT&& value) : key_(std::forward<KT>(key)), value_(std::forward<VT>(value)) {}

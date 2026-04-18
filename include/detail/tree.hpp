@@ -1256,7 +1256,7 @@ public:
                                      static_cast<node_base_pointer>(holder.get()));
                         max_node = holder.release();
                     } else {
-                        auto [parent, child] = find_equivalent(holder->get_value());
+                        auto [parent, child] = find_equivalent(key_proj_(holder->get_value()));
                         if (child == nullptr) {
                             insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.release()));
                         }
