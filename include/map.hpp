@@ -172,30 +172,30 @@ public:
         return self.tree_.end();
     }
 
-    [[nodiscard]] reverse_iterator rbegin() noexcept {
-        return reverse_iterator(end());
+    template <class Self>
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rbegin(this Self& self) noexcept {
+        return std::reverse_iterator(self.end());
     }
 
-    [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
-        return const_reverse_iterator(end());
-    }
-
-    [[nodiscard]] reverse_iterator rend() noexcept {
-        return reverse_iterator(begin());
-    }
-
-    [[nodiscard]] const_reverse_iterator rend() const noexcept {
-        return const_reverse_iterator(begin());
+    template <class Self>
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rend(this Self& self) noexcept {
+        return std::reverse_iterator(self.begin());
     }
 
     [[nodiscard]] const_iterator cbegin() const noexcept { return begin(); }
     [[nodiscard]] const_iterator cend() const noexcept { return end(); }
-    [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
+    [[nodiscard]] const_reverse_iterator crbegin() const noexcept {
+        return rbegin();
+    }
+    [[nodiscard]] const_reverse_iterator crend() const noexcept {
+        return rend();
+    }
 
     [[nodiscard]] bool empty() const noexcept { return tree_.size() == 0; }
     [[nodiscard]] size_type size() const noexcept { return tree_.size(); }
-    [[nodiscard]] size_type max_size() const noexcept { return tree_.max_size(); }
+    [[nodiscard]] size_type max_size() const noexcept {
+        return tree_.max_size();
+    }
 
     mapped_type& operator[](const key_type& key) {
         return tree_
@@ -226,7 +226,7 @@ public:
         if (child == nullptr) {
             throw std::out_of_range("map::at:  key not found");
         }
-        return static_cast<NodePointer_>(child)->get_value().value();
+        return static_cast<Tree_::node_pointer>(child)->get_value().value();
     }
 
     [[nodiscard]] allocator_type get_allocator() const noexcept {
@@ -377,13 +377,17 @@ public:
     void clear() noexcept { tree_.clear(); }
 
     insert_return_type insert(node_type&& nh) {
-        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(nh.empty() || nh.get_allocator() == get_allocator(),
-                                            "node_type with incompatible allocator passed to map::insert()");
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            nh.empty() || nh.get_allocator() == get_allocator(),
+            "node_type with incompatible allocator passed to map::insert()"
+        );
         return tree_.template nodeHandleInsertUnique< node_type, insert_return_type>(std::move(nh));
     }
     iterator insert(const_iterator __hint, node_type&& nh) {
-        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(nh.empty() || nh.get_allocator() == get_allocator(),
-                                            "node_type with incompatible allocator passed to map::insert()");
+        MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
+            nh.empty() || nh.get_allocator() == get_allocator(),
+            "node_type with incompatible allocator passed to map::insert()"
+        );
         return tree_.template nodeHandleInsertUnique<node_type>(__hint.i_, std::move(nh));
     }
     [[nodiscard]] node_type extract(key_type const& __key) {
@@ -395,29 +399,39 @@ public:
     template <class CompareT2>
     void merge(map<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-            source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+            source.get_allocator() == get_allocator(),
+            "merging container with incompatible allocator"
+        );
         tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class CompareT2>
     void merge(map<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-            source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+            source.get_allocator() == get_allocator(),
+            "merging container with incompatible allocator"
+        );
         tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class CompareT2>
     void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-            source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+            source.get_allocator() == get_allocator(),
+            "merging container with incompatible allocator"
+        );
         tree_.nodeHandleMergeUnique(source.tree_);
     }
     template <class CompareT2>
     void merge(multimap<key_type, mapped_type, CompareT2, allocator_type>&& source) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-            source.get_allocator() == get_allocator(), "merging container with incompatible allocator");
+            source.get_allocator() == get_allocator(),
+            "merging container with incompatible allocator"
+        );
         tree_.nodeHandleMergeUnique(source.tree_);
     }
 
-    void swap(map& __m) noexcept(std::is_nothrow_swappable_v<Tree_>) { tree_.swap(__m.tree_); }
+    void swap(map& other) noexcept(std::is_nothrow_swappable_v<Tree_>) {
+        tree_.swap(other.tree_);
+    }
 
     template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& key) {
@@ -464,9 +478,6 @@ public:
             return self.tree_.equalRangeMulti(k);
         }
     }
-
-private:
-    using NodePointer_ = Tree_::node_pointer;
 };
 
 template <
@@ -597,28 +608,30 @@ public:
     using reference       = value_type& ;
     using const_reference = const value_type&;
 
+    static_assert(std::is_same_v<typename allocator_type::value_type, value_type>,
+                  "Allocator::value_type must be same type as value_type");
+
 private:
-    using ValueType_    = MapValue<key_type, mapped_type>;
-    using Tree_         = Tree<ValueType_, typename ValueType_::KeyProj, key_compare, allocator_type>;
+    using Tree_         = Tree<value_type, typename value_type::KeyProj, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
 
 public:
-    using pointer                = AllocTraits_::pointer;
-    using const_pointer          = AllocTraits_::const_pointer;
-    using size_type              = AllocTraits_::size_type;
-    using difference_type        = AllocTraits_::difference_type;
+    using pointer                = Tree_::pointer;
+    using const_pointer          = Tree_::const_pointer;
+    using size_type              = Tree_::size_type;
+    using difference_type        = Tree_::difference_type;
     using iterator               = Tree_::iterator;
     using const_iterator         = Tree_::const_iterator;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    using node_type = NodeHandle<typename Tree_::node, allocator_type>;
+
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
-
-    using node_type = NodeHandle<typename Tree_::node, allocator_type>;
 
     template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
     friend class map;
@@ -626,15 +639,15 @@ public:
     friend class multimap;
 
     multimap() noexcept(
-        std::is_nothrow_default_constructible<allocator_type>::value
-     && std::is_nothrow_default_constructible<key_compare>::value
-     && std::is_nothrow_copy_constructible<key_compare>::value
+        std::is_nothrow_default_constructible_v<allocator_type>
+     && std::is_nothrow_default_constructible_v<key_compare>
+     && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(key_compare()) {}
 
     explicit multimap(const key_compare& comp) noexcept(
-        std::is_nothrow_default_constructible<allocator_type>::value
-     && std::is_nothrow_copy_constructible<key_compare>::value
+        std::is_nothrow_default_constructible_v<allocator_type>
+     && std::is_nothrow_copy_constructible_v<key_compare>
     )
     : tree_(comp) {}
 
@@ -709,30 +722,33 @@ public:
     ~multimap() = default;
 
     template <class Self>
-    [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept { return self.tree_.begin(); }
+    [[nodiscard]] SelfIterator<Self> begin(this Self& self) noexcept {
+        return self.tree_.begin();
+    }
+
     template <class Self>
-    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept { return self.tree_.end(); }
-
-    [[nodiscard]] reverse_iterator rbegin() noexcept {
-        return reverse_iterator(end());
+    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
+        return self.tree_.end();
     }
 
-    [[nodiscard]] const_reverse_iterator rbegin() const noexcept {
-        return const_reverse_iterator(end());
+    template <class Self>
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rbegin(this Self& self) noexcept {
+        return std::reverse_iterator(self.end());
     }
 
-    [[nodiscard]] reverse_iterator rend() noexcept {
-        return reverse_iterator(begin());
-    }
-
-    [[nodiscard]] const_reverse_iterator rend() const noexcept {
-        return const_reverse_iterator(begin());
+    template <class Self>
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rend(this Self& self) noexcept {
+        return std::reverse_iterator(self.begin());
     }
 
     [[nodiscard]] const_iterator cbegin() const noexcept { return begin(); }
     [[nodiscard]] const_iterator cend() const noexcept { return end(); }
-    [[nodiscard]] const_reverse_iterator crbegin() const noexcept { return rbegin(); }
-    [[nodiscard]] const_reverse_iterator crend() const noexcept { return rend(); }
+    [[nodiscard]] const_reverse_iterator crbegin() const noexcept {
+        return rbegin();
+    }
+    [[nodiscard]] const_reverse_iterator crend() const noexcept {
+        return rend();
+    }
 
     [[nodiscard]] bool empty() const noexcept { return tree_.size() == 0; }
     [[nodiscard]] size_type size() const noexcept { return tree_.size(); }
