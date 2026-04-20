@@ -31,10 +31,18 @@
 
 namespace mstd {
 
-template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT> >
+template <
+    class KeyT
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , Allocator AllocatorT = std::allocator<KeyT>
+>
 class multiset;
 
-template <class KeyT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<KeyT> >
+template <
+    class KeyT
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , Allocator AllocatorT               = std::allocator<KeyT>
+>
 class set {
 public:
     // types:
@@ -64,17 +72,18 @@ public:
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     template <class Self>
-    using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
+    using SelfIterator //
+        = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
     using node_type          = NodeHandle<typename Tree_::node, allocator_type>;
     using insert_return_type = InsertReturnType<iterator, node_type>;
 
-    template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
+    template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class set;
 
-    template <class /*Key*/, class /*Compare*/, class /*Allocator*/>
+    template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class multiset;
 
     set() noexcept(
@@ -92,28 +101,34 @@ public:
     explicit set(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     set(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
-    : tree_(comp) {
-        insert(begin, end);
-    }
+    : tree_(comp) { insert(begin, end); }
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    set(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
-    : tree_(comp, alloc) {
-        insert(begin, end);
-    }
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
+    set(IteratorT begin,
+        SentinelT end,
+        const key_compare& comp,
+        const allocator_type& alloc)
+    : tree_(comp, alloc) { insert(begin, end); }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     set(std::from_range_t,
         RangeT&& range,
         const key_compare& comp = key_compare(),
         const allocator_type& alloc = allocator_type())
-    : tree_(comp, alloc) {
-        insert_range(std::forward<RangeT>(range));
-    }
+    : tree_(comp, alloc) { insert_range(std::forward<RangeT>(range)); }
     
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     set(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : set(begin, end, key_compare(), alloc) {}
     
@@ -136,12 +151,19 @@ public:
     set(set&& other, const allocator_type& alloc)
     : tree_(std::move(other.tree_), alloc) {}
 
-    set(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
+    set(
+        std::initializer_list<value_type> init_list,
+        const key_compare& comp = key_compare()
+    )
     : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
-    set(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
+    set(
+        std::initializer_list<value_type> init_list,
+        const key_compare& comp,
+        const allocator_type& alloc
+    )
     : tree_(comp, alloc) {
         insert(init_list.begin(), init_list.end());
     }
@@ -170,12 +192,14 @@ public:
     }
 
     template <class Self>
-    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rbegin(this Self& self) noexcept {
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>>
+    rbegin(this Self& self) noexcept {
         return std::reverse_iterator<SelfIterator<Self>>(self.end());
     }
 
     template <class Self>
-    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rend(this Self& self) noexcept {
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>>
+    rend(this Self& self) noexcept {
         return std::reverse_iterator<SelfIterator<Self>>(self.begin());
     }
 
@@ -216,17 +240,25 @@ public:
     template <std::convertible_to<value_type> TransparentKey>
     requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     iterator insert(const_iterator pos, TransparentKey&& val) {
-        return tree_.emplaceHintUnique(pos, std::forward<TransparentKey>(val)).first;
+        return tree_
+            .emplaceHintUnique(pos, std::forward<TransparentKey>(val))
+            .first;
     }
 
-    template <class IteratorT>
-    void insert(IteratorT first, IteratorT last) {
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> Sentinel
+    >
+    void insert(IteratorT first, Sentinel last) {
         tree_.insertRangeUnique(first, last);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
-    void insert_range(RangeT&& range) {
-        tree_.insertRangeUnique(std::ranges::begin(range), std::ranges::end(range));
+    void insert(RangeT&& range) {
+        tree_.insertRangeUnique(
+            std::ranges::begin(range),
+            std::ranges::end(range)
+        );
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -322,12 +354,16 @@ public:
     }
 
     // set operations:
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <
+        class Self
+      , typename TransparentKey
+    > requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& k) {
         return self.tree_.find(k);
     }
 
-    template <typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& k) const {
         if constexpr (std::is_same_v<std::remove_cvref_t<TransparentKey>, key_type>) {
             return tree_.countUnique(k);
@@ -336,32 +372,39 @@ public:
         }
     }
 
-    template <typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& k) const {
         return find(k) != end();
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
-    [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& k) {
-        if constexpr (std::is_same_v<std::remove_cvref_t<TransparentKey>, key_type>) {
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    [[nodiscard]] SelfIterator<Self>
+    lower_bound(this Self& self, const TransparentKey& k) {
+        if constexpr (std::same_as<std::remove_cvref_t<TransparentKey>, key_type>) {
             return self.tree_.lowerBoundUnique(k);
         } else {
             return self.tree_.lowerBoundMulti(k);
         }
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
-    [[nodiscard]] SelfIterator<Self> upper_bound(this Self& self, const TransparentKey& k) {
-        if constexpr (std::is_same_v<std::remove_cvref_t<TransparentKey>, key_type>) {
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    [[nodiscard]] SelfIterator<Self>
+    upper_bound(this Self& self, const TransparentKey& k) {
+        if constexpr (std::same_as<std::remove_cvref_t<TransparentKey>, key_type>) {
             return self.tree_.upperBoundUnique(k);
         } else {
             return self.tree_.upperBoundMulti(k);
         }
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
-    [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& k) {
-        if constexpr (std::is_same_v<std::remove_cvref_t<TransparentKey>, key_type>) {
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    [[nodiscard]] SelfSubrange<Self>
+    equal_range(this Self& self, const TransparentKey& k) {
+        if constexpr (std::same_as<std::remove_cvref_t<TransparentKey>, key_type>) {
             return self.tree_.equalRangeUnique(k);
         } else {
             return self.tree_.equalRangeMulti(k);
@@ -428,7 +471,11 @@ erase_if(set<KeyT, CompareT, AllocatorT>& container, PredicateT pred) {
     return mstd::erase_if_container(container, pred);
 }
 
-template <class KeyT, class CompareT, class AllocatorT>
+template <
+    class KeyT
+  , OrdersAtLeastWeakly<KeyT> CompareT
+  , Allocator AllocatorT
+>
 class multiset {
 public:
     // types:
@@ -464,9 +511,9 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    template <class /*Key*/, class /*Compare*/, class /*Alloc*/>
+    template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class set;
-    template <class /*Key*/, class /*Compare*/, class /*Alloc*/>
+    template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class multiset;
 
     // construct/copy/destroy:
@@ -486,21 +533,31 @@ public:
     explicit multiset(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, alloc) {}
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     multiset(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     multiset(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : multiset(begin, end, key_compare(), alloc) {}
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    multiset(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
-    : tree_(comp, alloc) {
-        insert(begin, end);
-    }
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
+    multiset(IteratorT begin,
+             SentinelT end,
+             const key_compare& comp,
+             const allocator_type& alloc)
+    : tree_(comp, alloc) { insert(begin, end); }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
     multiset(std::from_range_t,
@@ -562,12 +619,14 @@ public:
     }
 
     template <class Self>
-    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rbegin(this Self& self) noexcept {
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>>
+    rbegin(this Self& self) noexcept {
         return std::reverse_iterator(self.end());
     }
 
     template <class Self>
-    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>> rend(this Self& self) noexcept {
+    [[nodiscard]] std::reverse_iterator<SelfIterator<Self>>
+    rend(this Self& self) noexcept {
         return std::reverse_iterator(self.begin());
     }
 
@@ -596,28 +655,29 @@ public:
         return tree_.emplaceHintMulti(pos, std::forward<ArgsT>(args)...);
     }
 
-    iterator insert(const value_type& value) {
-        return tree_.emplaceMulti(value);
+    template <std::convertible_to<value_type> TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, TransparentKey, value_type>
+    iterator insert(TransparentKey&& value) {
+        return tree_.emplaceMulti(std::forward<TransparentKey>(value));
     }
 
-    iterator insert(const_iterator pos, const value_type& value) {
-        return tree_.emplaceHintMulti(pos, value);
+    template <std::convertible_to<value_type> TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, TransparentKey, value_type>
+    iterator insert(const_iterator pos, TransparentKey&& value) {
+        return tree_.emplaceHintMulti(pos, std::forward<TransparentKey>(value));
     }
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     void insert(IteratorT begin, SentinelT end) {
         tree_.insertRangeMulti(begin, end);
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
-    void insert_range(RangeT&& range) {
+    void insert(RangeT&& range) {
         tree_.insertRangeMulti(std::ranges::begin(range), std::ranges::end(range));
-    }
-    
-    iterator insert(value_type&& value) { return tree_.emplaceMulti(std::move(value)); }
-
-    iterator insert(const_iterator pos, value_type&& value) {
-        return tree_.emplaceHintMulti(pos, std::move(value));
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -702,32 +762,38 @@ public:
     [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
 
     // set operations:
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& k) {
         return self.tree_.find(k);
     }
 
-    template <typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& k) const {
         return tree_.countMulti(k);
     }
 
-    template <typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& k) const {
         return find(k) != end();
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& k) {
         return self.tree_.lowerBoundMulti(k);
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> upper_bound(this Self& self, const TransparentKey& k) {
         return self.tree_.upperBoundMulti(k);
     }
 
-    template <class Self, typename TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, typename TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& k) {
         return self.tree_.equalRangeMulti(k);
     }
