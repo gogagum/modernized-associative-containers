@@ -103,10 +103,16 @@ public:
 };
 
 template <class IteratorT, class NodeT>
-struct InsertReturnType {
+struct NodeHandleInsertReturnType {
   IteratorT position;
   bool inserted;
   NodeT node;
+};
+
+template <class IteratorT>
+struct InsertReturnType {
+  IteratorT position;
+  bool inserted;
 };
 
 } // namespace mstd

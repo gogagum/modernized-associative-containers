@@ -382,16 +382,16 @@ TEST(SetOperations, Test1)
     mstd::set<int> s0;
     typedef mstd::set<int>::iterator iterator;
     typedef mstd::set<int>::const_iterator const_iterator;
-    typedef std::pair<iterator, bool> insert_return_type;
+    typedef std::pair<iterator, bool> node_handle_insert_return_type;
 
     std::ranges::input_range auto pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 0);
     EXPECT_EQ(pp0.begin(), s0.end());
     EXPECT_EQ(pp0.end(), s0.end());
 
-    insert_return_type irt0 = s0.insert(1);
-    insert_return_type irt1 = s0.insert(2);
-    insert_return_type irt2 = s0.insert(3);
+    node_handle_insert_return_type irt0 = s0.insert(1);
+    node_handle_insert_return_type irt1 = s0.insert(2);
+    node_handle_insert_return_type irt2 = s0.insert(3);
 
     pp0 = s0.equal_range(2);
     EXPECT_EQ(s0.count(2), 1);
@@ -402,8 +402,8 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp0.end(), irt2.first);
 
     s0.insert(3);
-    insert_return_type irt3 = s0.insert(3);
-    insert_return_type irt4 = s0.insert(4);
+    node_handle_insert_return_type irt3 = s0.insert(3);
+    node_handle_insert_return_type irt4 = s0.insert(4);
 
     pp0 = s0.equal_range(3);
     EXPECT_EQ(s0.count(3), 1);
@@ -413,7 +413,7 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(--pp0.begin(), irt1.first);
     EXPECT_EQ(pp0.end(), irt4.first);
 
-    insert_return_type irt5 = s0.insert(0);
+    node_handle_insert_return_type irt5 = s0.insert(0);
     s0.insert(1);
     s0.insert(1);
     s0.insert(1);
@@ -426,7 +426,7 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(--pp0.begin(), irt5.first);
     EXPECT_EQ(pp0.end(), irt1.first);
 
-    insert_return_type irt6 = s0.insert(5);
+    node_handle_insert_return_type irt6 = s0.insert(5);
     s0.insert(5);
     s0.insert(5);
 
@@ -450,7 +450,7 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp0.end(), irt6.first);
 
     s0.insert(0);
-    insert_return_type irt7 = s0.insert(0);
+    node_handle_insert_return_type irt7 = s0.insert(0);
     s0.insert(1);
 
     pp0 = s0.equal_range(0);

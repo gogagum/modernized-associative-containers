@@ -23,6 +23,7 @@
 #include <functional>
 
 #include <detail/utility/try_key_extraction.hpp>
+#include <detail/node_handle.hpp>
 
 
 #define MSTD_ASSERT_INTERNAL(stmt, message) assert((stmt) && (message));
@@ -1277,26 +1278,30 @@ public:
         return ret;
     }
 
-    template <class NodeHandleT, class InsertReturnType>
-    InsertReturnType nodeHandleInsertUnique(NodeHandleT&& nh) {
+    template <class NodeHandleT>
+    NodeHandleInsertReturnType<iterator, NodeHandleT> nodeHandleInsertUnique(NodeHandleT&& nh) {
         if (nh.empty()) {
-            return InsertReturnType{end(), false, NodeHandleT()};
+            return NodeHandleInsertReturnType{
+                .position = end(),
+                .inserted = false,
+                .node     = NodeHandleT(),
+            };
         }
         auto ptr = nh.ptr_;
         auto [parent, child] = find_equivalent(ptr->get_value());
         if (child != nullptr) {
-            return InsertReturnType{
-                iterator(static_cast<node_pointer>(child)),
-                false,
-                std::move(nh),
+            return NodeHandleInsertReturnType{
+                .position = iterator(static_cast<node_pointer>(child)),
+                .inserted = false,
+                .node     = std::move(nh),
             };
         }
         insertNodeAt(parent, child, static_cast<node_base_pointer>(ptr));
         nh.__release_ptr();
-        return InsertReturnType{
-            iterator(ptr),
-            true,
-            NodeHandleT(),
+        return NodeHandleInsertReturnType{
+            .position = iterator(ptr),
+            .inserted = true,
+            .node     = NodeHandleT(),
         };
     }
 

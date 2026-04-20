@@ -78,7 +78,7 @@ public:
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
     using node_type          = NodeHandle<typename Tree_::node, allocator_type>;
-    using insert_return_type = InsertReturnType<iterator, node_type>;
+    using node_handle_insert_return_type = NodeHandleInsertReturnType<iterator, node_type>;
 
     template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class set;
@@ -276,12 +276,12 @@ public:
         tree_.clear();
     }
 
-    insert_return_type insert(node_type&& nh) {
+    node_handle_insert_return_type insert(node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             nh.empty() || (nh.get_allocator() == get_allocator()),
             "node_type with incompatible allocator passed to set::insert()"
         );
-        return tree_.template nodeHandleInsertUnique<node_type, insert_return_type>(std::move(nh));
+        return tree_.template nodeHandleInsertUnique<node_type>(std::move(nh));
     }
 
     iterator insert(const_iterator hint, node_type&& nh) {
