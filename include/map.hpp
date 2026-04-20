@@ -73,8 +73,9 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    using node_type = NodeHandle<typename Tree_::node, allocator_type>;
-    using insert_return_type = InsertReturnType<iterator, node_type>;
+    using node_type                      = NodeHandle<typename Tree_::node, allocator_type>;
+    using node_handle_insert_return_type = NodeHandleInsertReturnType<iterator, node_type>;
+    using insert_return_type             = InsertReturnType<iterator>;
 
     template <class /*Key*/, class /*Value*/, class /*Compare*/, class /*Allocator*/>
     friend class map;
@@ -146,14 +147,14 @@ public:
 
     map(std::initializer_list<value_type> init_list,
         const key_compare& comp = key_compare())
-    : tree_(key_compare(comp)) {
+    : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
     map(std::initializer_list<value_type> init_list,
         const key_compare& comp,
         const allocator_type& alloc)
-    : tree_(key_compare(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(comp, alloc) {
         insert(init_list.begin(), init_list.end());
     }
 
@@ -167,8 +168,7 @@ public:
         return *this;
     }
 
-    explicit map(const allocator_type& alloc)
-    : tree_(typename Tree_::allocator_type(alloc)) {}
+    explicit map(const allocator_type& alloc) : tree_(alloc) {}
 
     map(const map& other, const allocator_type& alloc)
     : tree_(other.tree_, alloc) {}
@@ -261,34 +261,16 @@ public:
             .first;
     }
 
-    template <class P>
-    requires std::is_constructible_v<value_type, P>
+    template <std::convertible_to<value_type> P>
     std::pair<iterator, bool> insert(P&& value) {
         return tree_.emplaceUnique(std::forward<P>(value));
     }
 
-    template <class P>
-    requires std::is_constructible_v<value_type, P>
+    template <std::convertible_to<value_type> P>
     iterator insert(const_iterator pos, P&& value) {
         return tree_
-            .emplaceHintUnique(pos.i_, std::forward<P>(value))
+            .emplaceHintUnique(pos, std::forward<P>(value))
             .first;
-    }
-
-    std::pair<iterator, bool> insert(const value_type& value) {
-        return tree_.emplaceUnique(value);
-    }
-
-    iterator insert(const_iterator pos, const value_type& value) {
-        return tree_.emplaceHintUnique(pos.i_, value).first;
-    }
-
-    std::pair<iterator, bool> insert(value_type&& value) {
-        return tree_.emplaceUnique(std::move(value));
-    }
-
-    iterator insert(const_iterator pos, value_type&& value) {
-        return tree_.emplaceHintUnique(pos, std::move(value)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -394,12 +376,12 @@ public:
     
     void clear() noexcept { tree_.clear(); }
 
-    insert_return_type insert(node_type&& nh) {
+    node_handle_insert_return_type insert(node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
             nh.empty() || nh.get_allocator() == get_allocator(),
             "node_type with incompatible allocator passed to map::insert()"
         );
-        return tree_.template nodeHandleInsertUnique< node_type, insert_return_type>(std::move(nh));
+        return tree_.template nodeHandleInsertUnique<node_type>(std::move(nh));
     }
     iterator insert(const_iterator hint, node_type&& nh) {
         MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
@@ -581,13 +563,15 @@ map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
-operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
+operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x,
+           const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 auto
-operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
+operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x,
+            const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
     using Map = map<KeyT, ValueT, CompareT, AllocatorT>;
     
     return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), [](const Map::value_type& val1, const Map::value_type& val2) {
@@ -676,14 +660,25 @@ public:
     explicit multimap(const key_compare& comp, const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {}
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    multimap(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
+    multimap(IteratorT begin,
+             SentinelT end,
+             const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
-    multimap(IteratorT begin, SentinelT end, const key_compare& comp, const allocator_type& alloc)
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
+    multimap(IteratorT begin,
+             SentinelT end,
+             const key_compare& comp,
+             const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
@@ -696,7 +691,10 @@ public:
         insert_range(std::forward<RangeT>(range));
     }
 
-    template <_ContainerCompatibleIterator<value_type> IteratorT, std::sentinel_for<IteratorT> SentinelT>
+    template <
+        _ContainerCompatibleIterator<value_type> IteratorT
+      , std::sentinel_for<IteratorT> SentinelT
+    >
     multimap(IteratorT begin, SentinelT end, const allocator_type& alloc)
     : multimap(begin, end, key_compare(), alloc) {}
     
@@ -715,17 +713,21 @@ public:
 
     multimap& operator=(multimap&& other) = default;
 
-    multimap(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
+    multimap(std::initializer_list<value_type> init_list,
+             const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
-    multimap(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
+    multimap(std::initializer_list<value_type> init_list,
+             const key_compare& comp,
+             const allocator_type& alloc)
     : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert(init_list.begin(), init_list.end());
     }
 
-    multimap(std::initializer_list<value_type> init_list, const allocator_type& alloc)
+    multimap(std::initializer_list<value_type> init_list,
+             const allocator_type& alloc)
     : multimap(init_list, key_compare(), alloc) {}
     
     multimap& operator=(std::initializer_list<value_type> init_list) {
@@ -910,32 +912,38 @@ public:
         tree_.swap(other.tree_);
     }
 
-    template <class Self, class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> find(this Self& self, const TransparentKey& key) {
         return self.tree_.find(key);
     }
 
-    template <class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] size_type count(const TransparentKey& key) const {
         return tree_.countMulti(key);
     }
 
-    template <class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] bool contains(const TransparentKey& key) const {
         return find(key) != end();
     }
 
-    template <class Self, class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfIterator<Self> lower_bound(this Self& self, const TransparentKey& key) {
         return self.tree_.lowerBoundMulti(key);
     }
 
-    template <class Self, class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] iterator upper_bound(this Self& self, const TransparentKey& key) {
         return self.tree_.upperBoundMulti(key);
     }
 
-    template <class Self, class TransparentKey> requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    template <class Self, class TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
     [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& key) {
         return self.tree_.equalRangeMulti(key);
     }
@@ -1010,7 +1018,8 @@ multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
-operator==(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x, const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
+operator==(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
+           const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
     return std::ranges::equal(x, y);
 }
 
@@ -1038,7 +1047,8 @@ operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline void
-swap(multimap<KeyT, ValueT, CompareT, AllocatorT>& x, multimap<KeyT, ValueT, CompareT, AllocatorT>& y)
+swap(multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
+     multimap<KeyT, ValueT, CompareT, AllocatorT>& y)
 noexcept(noexcept(x.swap(y))) {
     x.swap(y);
 }
