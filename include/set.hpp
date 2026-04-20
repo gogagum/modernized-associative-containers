@@ -207,12 +207,16 @@ public:
             .first;
     }
 
-    std::pair<iterator, bool> insert(const value_type& val) {
-        return tree_.emplaceUnique(val);
+    template <std::convertible_to<value_type> TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    std::pair<iterator, bool> insert(TransparentKey&& val) {
+        return tree_.emplaceUnique(std::forward<TransparentKey>(val));
     }
 
-    iterator insert(const_iterator pos, const value_type& val) {
-        return tree_.emplaceHintUnique(pos, val).first;
+    template <std::convertible_to<value_type> TransparentKey>
+    requires OrdersWithAtLeastWeakly<CompareT, key_type, TransparentKey>
+    iterator insert(const_iterator pos, TransparentKey&& val) {
+        return tree_.emplaceHintUnique(pos, std::forward<TransparentKey>(val)).first;
     }
 
     template <class IteratorT>
@@ -223,14 +227,6 @@ public:
     template <_ContainerCompatibleRange<value_type> RangeT>
     void insert_range(RangeT&& range) {
         tree_.insertRangeUnique(std::ranges::begin(range), std::ranges::end(range));
-    }
-    
-    std::pair<iterator, bool> insert(value_type&& val) {
-        return tree_.emplaceUnique(std::move(val));
-    }
-
-    iterator insert(const_iterator pos, value_type&& val) {
-        return tree_.emplaceHintUnique(pos, std::move(val)).first;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
