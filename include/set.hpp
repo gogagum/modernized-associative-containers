@@ -77,8 +77,9 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    using node_type          = NodeHandle<typename Tree_::node, allocator_type>;
+    using node_type                      = NodeHandle<typename Tree_::node, allocator_type>;
     using node_handle_insert_return_type = NodeHandleInsertReturnType<iterator, node_type>;
+    using insert_return_type             = InsertReturnType<iterator>;
 
     template <class Key2, OrdersAtLeastWeakly<Key2> CompareT2, Allocator AllocatorT2>
     friend class set;
@@ -215,7 +216,7 @@ public:
 
     // modifiers:
     template <class... ArgsT>
-    std::pair<iterator, bool> emplace(ArgsT&&... args) {
+    insert_return_type emplace(ArgsT&&... args) {
         return tree_.emplaceUnique(std::forward<ArgsT>(args)...);
     }
 
@@ -223,12 +224,12 @@ public:
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
         return tree_
             .emplaceHintUnique(pos, std::forward<ArgsT>(args)...)
-            .first;
+            .position;
     }
 
     template <std::convertible_to<value_type> TransparentKey>
     requires OrdersWithAtLeastWeakly<key_compare, key_type, TransparentKey>
-    std::pair<iterator, bool> insert(TransparentKey&& val) {
+    insert_return_type insert(TransparentKey&& val) {
         return tree_.emplaceUnique(std::forward<TransparentKey>(val));
     }
 
@@ -237,7 +238,7 @@ public:
     iterator insert(const_iterator pos, TransparentKey&& val) {
         return tree_
             .emplaceHintUnique(pos, std::forward<TransparentKey>(val))
-            .first;
+            .position;
     }
 
     template <
@@ -506,7 +507,8 @@ public:
     using node_type              = NodeHandle<typename Tree_::node, allocator_type>;
 
     template <class Self>
-    using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
+    using SelfIterator //
+        = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
@@ -536,7 +538,9 @@ public:
         _ContainerCompatibleIterator<value_type> IteratorT
       , std::sentinel_for<IteratorT> SentinelT
     >
-    multiset(IteratorT begin, SentinelT end, const key_compare& comp = key_compare())
+    multiset(IteratorT begin,
+             SentinelT end,
+             const key_compare& comp = key_compare())
     : tree_(comp) {
         insert(begin, end);
     }
@@ -583,17 +587,17 @@ public:
     multiset(const multiset& other, const allocator_type& alloc)
     : tree_(other.tree_, alloc) {}
 
-    multiset(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
-    : tree_(comp) {
-        insert(init_list.begin(), init_list.end());
-    }
+    multiset(std::initializer_list<value_type> init_list,
+             const key_compare& comp = key_compare())
+    : tree_(comp) { insert(init_list.begin(), init_list.end()); }
 
-    multiset(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
-    : tree_(comp, alloc) {
-        insert(init_list.begin(), init_list.end());
-    }
+    multiset(std::initializer_list<value_type> init_list,
+             const key_compare& comp,
+             const allocator_type& alloc)
+    : tree_(comp, alloc) { insert(init_list.begin(), init_list.end());}
 
-    multiset(std::initializer_list<value_type> init_list, const allocator_type& alloc)
+    multiset(std::initializer_list<value_type> init_list,
+             const allocator_type& alloc)
     : multiset(init_list, key_compare(), alloc) {}
 
     multiset& operator=(std::initializer_list<value_type> init_list) {

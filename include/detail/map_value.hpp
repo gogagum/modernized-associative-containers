@@ -4,6 +4,9 @@
 #include <utility>
 #include <tuple>
 
+#include "concepts/allocator_concept.hpp"
+#include "concepts/compare_concepts.hpp"
+
 namespace mstd {
 
 template <class KeyT, class ValueT>
@@ -51,10 +54,10 @@ private:
     KeyT key_;
     ValueT value_;
 
-    template <class, class, class, class>
+    template <class KeyT2, class, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT>
     friend class map;
 
-    template <class, class, class, class>
+    template <class KeyT2, class, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT>
     friend class multimap;
 
     template <class, class, class, class>

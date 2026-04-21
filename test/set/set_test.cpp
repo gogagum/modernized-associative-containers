@@ -2,7 +2,6 @@
 #include <rval_struct.hpp>
 
 #include <set.hpp>
-#include <string>
 
 TEST(SetFromVector, Test1)
 {
@@ -247,16 +246,16 @@ TEST(SetEmplace, Test1)
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
 
     auto ret = s.emplace('a', coord1);
-    EXPECT_TRUE(ret.second);
+    EXPECT_TRUE(ret.inserted);
     EXPECT_EQ(s.size(), 1);
-    EXPECT_EQ(ret.first->getType(), 'a');
+    EXPECT_EQ(ret.position->getType(), 'a');
 
     coord1[0] = 3.0;
     ret = s.emplace('a', coord1);
-    EXPECT_FALSE(ret.second);
+    EXPECT_FALSE(ret.inserted);
     EXPECT_EQ(s.size(), 1);
-    EXPECT_EQ(ret.first->getType(), 'a');
-    EXPECT_EQ(ret.first->getCoords()[0], 0.0);
+    EXPECT_EQ(ret.position->getType(), 'a');
+    EXPECT_EQ(ret.position->getCoords()[0], 0.0);
 
     auto it = s.emplace_hint(s.begin(), 'b', coord1);
     EXPECT_NE(it, s.end());
@@ -265,9 +264,9 @@ TEST(SetEmplace, Test1)
 
     double *px = &coord1[0];
     ret = s.emplace('c', std::move(coord1));
-    EXPECT_TRUE(ret.second);
-    EXPECT_EQ(ret.first->getType(), 'c');
-    EXPECT_EQ(&(ret.first->getCoords()[0]), px);
+    EXPECT_TRUE(ret.inserted);
+    EXPECT_EQ(ret.position->getType(), 'c');
+    EXPECT_EQ(&(ret.position->getCoords()[0]), px);
 }
 
 TEST(SetInsert, Test1)
@@ -326,12 +325,12 @@ TEST(SetInsert, Test2)
     Set s;
     EXPECT_TRUE(s.empty());
 
-    std::pair<Set::iterator, bool> p = s.insert(rvalstruct(1));
-    EXPECT_TRUE(p.second);
+    auto p = s.insert(rvalstruct(1));
+    EXPECT_TRUE(p.inserted);
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
-    EXPECT_EQ(p.first, s.begin());
-    EXPECT_EQ((*p.first).val, 1);
+    EXPECT_EQ(p.position, s.begin());
+    EXPECT_EQ((*p.position).val, 1);
 }
 
 TEST(SetInsert, Test3)
@@ -340,13 +339,13 @@ TEST(SetInsert, Test3)
     Set s;
     EXPECT_TRUE(s.empty());
 
-    std::pair<Set::iterator, bool> p1 = s.insert(rvalstruct(2));
-    std::pair<Set::iterator, bool> p2 = s.insert(rvalstruct(2));
-    EXPECT_TRUE(p1.second);
-    EXPECT_FALSE(p2.second);
+    auto p1 = s.insert(rvalstruct(2));
+    auto p2 = s.insert(rvalstruct(2));
+    EXPECT_TRUE(p1.inserted);
+    EXPECT_FALSE(p2.inserted);
     EXPECT_EQ(s.size(), 1);
-    EXPECT_EQ(p1.first, p2.first);
-    EXPECT_EQ((*p1.first).val, 2);
+    EXPECT_EQ(p1.position, p2.position);
+    EXPECT_EQ((*p1.position).val, 2);
 }
 
 TEST(SetInsert, Test4)
@@ -380,38 +379,37 @@ TEST(SetOperations, Test1)
     mstd::set<int> s0;
     typedef mstd::set<int>::iterator iterator;
     typedef mstd::set<int>::const_iterator const_iterator;
-    typedef std::pair<iterator, bool> node_handle_insert_return_type;
 
     std::ranges::input_range auto pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 0);
     EXPECT_EQ(pp0.begin(), s0.end());
     EXPECT_EQ(pp0.end(), s0.end());
 
-    node_handle_insert_return_type irt0 = s0.insert(1);
-    node_handle_insert_return_type irt1 = s0.insert(2);
-    node_handle_insert_return_type irt2 = s0.insert(3);
+    auto irt0 = s0.insert(1);
+    auto irt1 = s0.insert(2);
+    auto irt2 = s0.insert(3);
 
     pp0 = s0.equal_range(2);
     EXPECT_EQ(s0.count(2), 1);
     EXPECT_EQ(*pp0.begin(), 2);
     EXPECT_EQ(*pp0.end(), 3);
-    EXPECT_EQ(pp0.begin(), irt1.first);
-    EXPECT_EQ(--pp0.begin(), irt0.first);
-    EXPECT_EQ(pp0.end(), irt2.first);
+    EXPECT_EQ(pp0.begin(), irt1.position);
+    EXPECT_EQ(--pp0.begin(), irt0.position);
+    EXPECT_EQ(pp0.end(), irt2.position);
 
     s0.insert(3);
-    node_handle_insert_return_type irt3 = s0.insert(3);
-    node_handle_insert_return_type irt4 = s0.insert(4);
+    auto irt3 = s0.insert(3);
+    auto irt4 = s0.insert(4);
 
     pp0 = s0.equal_range(3);
     EXPECT_EQ(s0.count(3), 1);
     EXPECT_EQ(*pp0.begin(), 3);
     EXPECT_EQ(*pp0.end(), 4);
-    EXPECT_EQ(pp0.begin(), irt2.first);
-    EXPECT_EQ(--pp0.begin(), irt1.first);
-    EXPECT_EQ(pp0.end(), irt4.first);
+    EXPECT_EQ(pp0.begin(), irt2.position);
+    EXPECT_EQ(--pp0.begin(), irt1.position);
+    EXPECT_EQ(pp0.end(), irt4.position);
 
-    node_handle_insert_return_type irt5 = s0.insert(0);
+    auto irt5 = s0.insert(0);
     s0.insert(1);
     s0.insert(1);
     s0.insert(1);
@@ -420,19 +418,19 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(s0.count(1), 1);
     EXPECT_EQ(*pp0.begin(), 1);
     EXPECT_EQ(*pp0.end(), 2);
-    EXPECT_EQ(pp0.begin(), irt0.first);
-    EXPECT_EQ(--pp0.begin(), irt5.first);
-    EXPECT_EQ(pp0.end(), irt1.first);
+    EXPECT_EQ(pp0.begin(), irt0.position);
+    EXPECT_EQ(--pp0.begin(), irt5.position);
+    EXPECT_EQ(pp0.end(), irt1.position);
 
-    node_handle_insert_return_type irt6 = s0.insert(5);
+    auto irt6 = s0.insert(5);
     s0.insert(5);
     s0.insert(5);
 
     pp0 = s0.equal_range(5);
     EXPECT_EQ(s0.count(5), 1);
     EXPECT_EQ(*pp0.begin(), 5);
-    EXPECT_EQ(pp0.begin(), irt6.first);
-    EXPECT_EQ(--pp0.begin(), irt4.first);
+    EXPECT_EQ(pp0.begin(), irt6.position);
+    EXPECT_EQ(--pp0.begin(), irt4.position);
     EXPECT_EQ(pp0.end(), s0.end());
 
     s0.insert(4);
@@ -443,30 +441,30 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(s0.count(4), 1);
     EXPECT_EQ(*pp0.begin(), 4);
     EXPECT_EQ(*pp0.end(), 5);
-    EXPECT_EQ(pp0.begin(), irt4.first);
-    EXPECT_EQ(--pp0.begin(), irt3.first);
-    EXPECT_EQ(pp0.end(), irt6.first);
+    EXPECT_EQ(pp0.begin(), irt4.position);
+    EXPECT_EQ(--pp0.begin(), irt3.position);
+    EXPECT_EQ(pp0.end(), irt6.position);
 
     s0.insert(0);
-    node_handle_insert_return_type irt7 = s0.insert(0);
+    auto irt7 = s0.insert(0);
     s0.insert(1);
 
     pp0 = s0.equal_range(0);
     EXPECT_EQ(s0.count(0), 1);
     EXPECT_EQ(*pp0.begin(), 0);
     EXPECT_EQ(*pp0.end(), 1);
-    EXPECT_EQ(pp0.begin(), irt5.first);
+    EXPECT_EQ(pp0.begin(), irt5.position);
     EXPECT_EQ(pp0.begin(), s0.begin());
-    EXPECT_EQ(pp0.end(), irt0.first);
+    EXPECT_EQ(pp0.end(), irt0.position);
 
     const mstd::set<int> &s1 = s0;
     auto pp1 = s1.equal_range(1);
     EXPECT_EQ(s1.count(1), 1);
     EXPECT_EQ(*pp1.begin(), 1);
     EXPECT_EQ(*pp1.end(), 2);
-    EXPECT_EQ(pp1.begin(), irt0.first);
-    EXPECT_EQ(--pp1.begin(), irt7.first);
-    EXPECT_EQ(pp1.end(), irt1.first);
+    EXPECT_EQ(pp1.begin(), irt0.position);
+    EXPECT_EQ(--pp1.begin(), irt7.position);
+    EXPECT_EQ(pp1.end(), irt1.position);
 }
 
 struct Cmp
