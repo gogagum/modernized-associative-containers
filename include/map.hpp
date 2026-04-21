@@ -35,10 +35,20 @@
 
 namespace mstd {
 
-template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<MapValue<KeyT, ValueT>>>
+template <
+    class KeyT
+  , class ValueT
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
+>
 class multimap;
 
-template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<MapValue<KeyT, ValueT>>>
+template <
+    class KeyT
+  , class ValueT
+  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
+>
 class map {
 public:
     // types:
@@ -77,9 +87,9 @@ public:
     using node_handle_insert_return_type = NodeHandleInsertReturnType<iterator, node_type>;
     using insert_return_type             = InsertReturnType<iterator>;
 
-    template <class /*Key*/, class /*Value*/, class /*Compare*/, class /*Allocator*/>
+    template <class KeyT2, class /*Value*/, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT2>
     friend class map;
-    template <class /*Key*/, class /*Value*/, class /*Compare*/, class /*Allocator*/>
+    template <class KeyT2, class /*Value*/, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT2>
     friend class multimap;
 
     map() noexcept(
@@ -219,7 +229,7 @@ public:
                 std::forward_as_tuple(key),
                 std::forward_as_tuple()
             )
-            .first
+            .position
             ->value();
     }
 
@@ -230,7 +240,7 @@ public:
                 std::forward_as_tuple(std::move(key)),
                 std::forward_as_tuple()
             )
-            .first
+            .position
             ->value();
     }
 
@@ -250,7 +260,7 @@ public:
     [[nodiscard]] key_compare key_comp() const { return tree_.key_comp(); }
 
     template <class... ArgsT>
-    std::pair<iterator, bool> emplace(ArgsT&&... args) {
+    insert_return_type emplace(ArgsT&&... args) {
         return tree_.emplaceUnique(std::forward<ArgsT>(args)...);
     }
 
@@ -258,11 +268,11 @@ public:
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
         return tree_
             .emplaceHintUnique(pos, std::forward<ArgsT>(args)...)
-            .first;
+            .position;
     }
 
     template <std::convertible_to<value_type> P>
-    std::pair<iterator, bool> insert(P&& value) {
+    insert_return_type insert(P&& value) {
         return tree_.emplaceUnique(std::forward<P>(value));
     }
 
@@ -270,7 +280,7 @@ public:
     iterator insert(const_iterator pos, P&& value) {
         return tree_
             .emplaceHintUnique(pos, std::forward<P>(value))
-            .first;
+            .position;
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -294,7 +304,7 @@ public:
     }
 
     template <class... ArgsT>
-    std::pair<iterator, bool> try_emplace(const key_type& k, ArgsT&&... args) {
+    insert_return_type try_emplace(const key_type& k, ArgsT&&... args) {
         return tree_.emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(k),
@@ -303,7 +313,7 @@ public:
     }
 
     template <class... ArgsT>
-    std::pair<iterator, bool> try_emplace(key_type&& k, ArgsT&&... args) {
+    insert_return_type try_emplace(key_type&& k, ArgsT&&... args) {
         return tree_.emplaceUnique(
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
@@ -318,7 +328,7 @@ public:
             std::piecewise_construct,
             std::forward_as_tuple(k),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
-        ).first;
+        ).position;
     }
 
     template <class... ArgsT>
@@ -328,11 +338,11 @@ public:
             std::piecewise_construct,
             std::forward_as_tuple(std::move(k)),
             std::forward_as_tuple(std::forward<ArgsT>(args)...)
-        ).first;
+        ).position;
     }
 
     template <class _Vp>
-    std::pair<iterator, bool> insert_or_assign(const key_type& k, _Vp&& v) {
+    insert_return_type insert_or_assign(const key_type& k, _Vp&& v) {
         auto result = tree_.emplaceUnique(k, std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
@@ -342,7 +352,7 @@ public:
     }
 
     template <class _Vp>
-    std::pair<iterator, bool> insert_or_assign(key_type&& k, _Vp&& v) {
+    insert_return_type insert_or_assign(key_type&& k, _Vp&& v) {
         auto result = tree_.emplaceUnique(std::move(k), std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
@@ -553,7 +563,7 @@ map(RangeT&&, AllocatorT)
    >;
 
 template<class KeyT, class ValueT, Allocator AllocatorT>
-map(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
+map(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 -> map<
        std::remove_const_t<KeyT>
      , ValueT
@@ -603,7 +613,12 @@ erase_if(map<KeyT, ValueT, CompareT, AllocatorT>& container, PredicateT pred) {
     return mstd::erase_if_container(container, pred);
 }
 
-template <class KeyT, class ValueT, class CompareT, class AllocatorT>
+template <
+    class KeyT
+  , class ValueT
+  , OrdersAtLeastWeakly<KeyT> CompareT
+  , Allocator AllocatorT
+>
 class multimap {
 public:
     using key_type        = KeyT;
@@ -639,9 +654,9 @@ public:
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
 
-    template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
+    template <class KeyT2, class /*Value*/, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT2>
     friend class map;
-    template <class /*Key*/, class /*Value*/, class /*Comp*/, class /*Alloc*/>
+    template <class KeyT2, class /*Value*/, OrdersAtLeastWeakly<KeyT2> CompareT2, Allocator AllocatorT2>
     friend class multimap;
 
     multimap() noexcept(
@@ -982,7 +997,7 @@ template <
   , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
   , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
-multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
+multimap(std::initializer_list<MapValue<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<std::remove_const_t<KeyT>, ValueT, CompareT, AllocatorT>;
 
 template <
@@ -1008,7 +1023,7 @@ multimap(RangeT&&, AllocatorT)
    >;
 
 template <class KeyT, class ValueT, Allocator AllocatorT>
-multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
+multimap(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 -> multimap<
        std::remove_const_t<KeyT>
      , ValueT

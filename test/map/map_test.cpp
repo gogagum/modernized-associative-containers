@@ -3,7 +3,6 @@
 #include <counter_type.hpp>
 
 #include <map.hpp>
-#include <string>
 
 TEST(MapFromVector, Test1)
 {
@@ -107,16 +106,16 @@ TEST(MapEmplaceTest, Test1)
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
 
     auto ret = m.emplace('a', coord1);
-    EXPECT_TRUE(ret.second);
+    EXPECT_TRUE(ret.inserted);
     EXPECT_EQ(m.size(), 1);
-    EXPECT_EQ(ret.first->key(), 'a');
+    EXPECT_EQ(ret.position->key(), 'a');
 
     coord1[0] = 3.0;
     ret = m.emplace('a', coord1);
-    EXPECT_TRUE(!ret.second);
+    EXPECT_TRUE(!ret.inserted);
     EXPECT_EQ(m.size(), 1);
-    EXPECT_EQ(ret.first->key(), 'a');
-    EXPECT_EQ(ret.first->value()[0], 0.0);
+    EXPECT_EQ(ret.position->key(), 'a');
+    EXPECT_EQ(ret.position->value()[0], 0.0);
 
     auto it = m.emplace_hint(m.begin(), 'b', coord1);
     EXPECT_NE(it, m.end());
@@ -125,9 +124,9 @@ TEST(MapEmplaceTest, Test1)
 
     double *px = &coord1[0];
     ret = m.emplace('c', std::move(coord1));
-    EXPECT_TRUE(ret.second);
-    EXPECT_EQ(ret.first->key(), 'c');
-    EXPECT_EQ(&(ret.first->value()[0]), px);
+    EXPECT_TRUE(ret.inserted);
+    EXPECT_EQ(ret.position->key(), 'c');
+    EXPECT_EQ(&(ret.position->value()[0]), px);
 }
 
 TEST(MapAtTest, Test1)
@@ -150,17 +149,17 @@ TEST(MapEmplaceTest, Test2)
 
     auto ret = m.emplace(std::piecewise_construct,
                          std::tuple('a'), std::tuple('a', coord1));
-    EXPECT_TRUE(ret.second);
+    EXPECT_TRUE(ret.inserted);
     EXPECT_EQ(m.size(), 1);
-    EXPECT_EQ(ret.first->key(), 'a');
+    EXPECT_EQ(ret.position->key(), 'a');
 
     coord1[0] = 3.0;
     ret = m.emplace(std::piecewise_construct,
                     std::tuple('a'), std::tuple('b', coord1));
-    EXPECT_TRUE(!ret.second);
+    EXPECT_TRUE(!ret.inserted);
     EXPECT_EQ(m.size(), 1);
-    EXPECT_EQ(ret.first->key(), 'a');
-    EXPECT_EQ(ret.first->value().getCoords()[0], 0.0);
+    EXPECT_EQ(ret.position->key(), 'a');
+    EXPECT_EQ(ret.position->value().getCoords()[0], 0.0);
 
     auto it = m.emplace_hint(m.begin(), std::piecewise_construct,
                              std::tuple('b'), std::tuple('c', coord1));
@@ -171,9 +170,9 @@ TEST(MapEmplaceTest, Test2)
     double *px = &coord1[0];
     ret = m.emplace(std::piecewise_construct,
                     std::tuple('c'), std::tuple('d', std::move(coord1)));
-    EXPECT_TRUE(ret.second);
-    EXPECT_EQ(ret.first->key(), 'c');
-    EXPECT_EQ(&(ret.first->value().getCoords()[0]), px);
+    EXPECT_TRUE(ret.inserted);
+    EXPECT_EQ(ret.position->key(), 'c');
+    EXPECT_EQ(&(ret.position->value().getCoords()[0]), px);
 }
 
 TEST(MapInsertTest, Test2)
@@ -182,7 +181,7 @@ TEST(MapInsertTest, Test2)
     Map M;
     Map::iterator hint;
 
-    hint = M.insert(Map::value_type(7, 0)).first;
+    hint = M.insert(Map::value_type(7, 0)).position;
 
     M.insert(hint, Map::value_type(8, 1));
     M.insert(M.begin(), Map::value_type(9, 2));
@@ -228,23 +227,23 @@ TEST(MapInsertOrAssignTest, Test1)
     typedef mstd::map<int, Val> Map;
     Map m;
     auto res1 = m.insert_or_assign(0, Val(5));
-    EXPECT_TRUE(res1.second);
-    EXPECT_NE(res1.first, m.end());
+    EXPECT_TRUE(res1.inserted);
+    EXPECT_NE(res1.position, m.end());
     EXPECT_EQ(m[0].val, 5);
     Val v1{6};
     EXPECT_EQ(m.size(), 1);
     auto res2 = m.insert_or_assign(0, std::move(v1));
-    EXPECT_FALSE(res2.second);
-    EXPECT_EQ(res2.first, res1.first);
+    EXPECT_FALSE(res2.inserted);
+    EXPECT_EQ(res2.position, res1.position);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_FALSE(v1.moved_from_ctor);
     EXPECT_TRUE(v1.moved_from_assign);
     EXPECT_EQ(m.size(), 1);
     v1.moved_from_assign = false;
     auto res3 = m.insert_or_assign(1, std::move(v1));
-    EXPECT_NE(res3.first, res1.first);
-    EXPECT_NE(res3.first, m.end());
-    EXPECT_TRUE(res3.second);
+    EXPECT_NE(res3.position, res1.position);
+    EXPECT_NE(res3.position, m.end());
+    EXPECT_TRUE(res3.inserted);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_EQ(m[1].val, 6);
     EXPECT_TRUE(v1.moved_from_ctor);
@@ -283,15 +282,15 @@ TEST(MapInsertOrAssignTest, Test3)
     typedef mstd::map<Val, Val> Map;
     Map m;
     auto res1 = m.insert_or_assign(0, Val(5));
-    EXPECT_TRUE(res1.second);
-    EXPECT_NE(res1.first, m.end());
+    EXPECT_TRUE(res1.inserted);
+    EXPECT_NE(res1.position, m.end());
     EXPECT_EQ(m[0].val, 5);
     Val k1{0};
     Val v1{6};
     EXPECT_EQ(m.size(), 1);
     auto res2 = m.insert_or_assign(std::move(k1), std::move(v1));
-    EXPECT_FALSE(res2.second);
-    EXPECT_EQ(res2.first, res1.first);
+    EXPECT_FALSE(res2.inserted);
+    EXPECT_EQ(res2.position, res1.position);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_FALSE(k1.moved_from_ctor);
     EXPECT_FALSE(k1.moved_from_assign);
@@ -301,9 +300,9 @@ TEST(MapInsertOrAssignTest, Test3)
     Val k2{1};
     v1.moved_from_assign = false;
     auto res3 = m.insert_or_assign(std::move(k2), std::move(v1));
-    EXPECT_NE(res3.first, res1.first);
-    EXPECT_NE(res3.first, m.end());
-    EXPECT_TRUE(res3.second);
+    EXPECT_NE(res3.position, res1.position);
+    EXPECT_NE(res3.position, m.end());
+    EXPECT_TRUE(res3.inserted);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_EQ(m[1].val, 6);
     EXPECT_TRUE(k2.moved_from_ctor);
@@ -350,22 +349,22 @@ TEST(MapInsertOrAssignTest, Test5)
     typedef mstd::map<int, Val> Map;
     Map m;
     auto res1 = m.insert_or_assign(0, Val(5));
-    EXPECT_TRUE(res1.second);
-    EXPECT_NE(res1.first, m.end());
+    EXPECT_TRUE(res1.inserted);
+    EXPECT_NE(res1.position, m.end());
     EXPECT_EQ(m[0].val, 5);
     Val v1{6};
     EXPECT_EQ(m.size(), 1);
     auto res2 = m.insert_or_assign(0, v1);
-    EXPECT_FALSE(res2.second);
-    EXPECT_EQ(res2.first, res1.first);
+    EXPECT_FALSE(res2.inserted);
+    EXPECT_EQ(res2.position, res1.position);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_FALSE(v1.moved_from_ctor);
     EXPECT_FALSE(v1.moved_from_assign);
     EXPECT_EQ(m.size(), 1);
     auto res3 = m.insert_or_assign(1, v1);
-    EXPECT_NE(res3.first, res1.first);
-    EXPECT_NE(res3.first, m.end());
-    EXPECT_TRUE(res3.second);
+    EXPECT_NE(res3.position, res1.position);
+    EXPECT_NE(res3.position, m.end());
+    EXPECT_TRUE(res3.inserted);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_EQ(m[1].val, 6);
     EXPECT_FALSE(v1.moved_from_ctor);
@@ -403,15 +402,15 @@ TEST(MapInsertOrAssignTest, Test7)
     typedef mstd::map<Val, Val> Map;
     Map m;
     auto res1 = m.insert_or_assign(0, Val(5));
-    EXPECT_TRUE(res1.second);
-    EXPECT_NE(res1.first, m.end());
+    EXPECT_TRUE(res1.inserted);
+    EXPECT_NE(res1.position, m.end());
     EXPECT_EQ(m[0].val, 5);
     Val k1{0};
     Val v1{6};
     EXPECT_EQ(m.size(), 1);
     auto res2 = m.insert_or_assign(k1, v1);
-    EXPECT_FALSE(res2.second);
-    EXPECT_EQ(res2.first, res1.first);
+    EXPECT_FALSE(res2.inserted);
+    EXPECT_EQ(res2.position, res1.position);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_FALSE(k1.moved_from_ctor);
     EXPECT_FALSE(k1.moved_from_assign);
@@ -420,9 +419,9 @@ TEST(MapInsertOrAssignTest, Test7)
     EXPECT_EQ(m.size(), 1);
     Val k2{1};
     auto res3 = m.insert_or_assign(k2, v1);
-    EXPECT_NE(res3.first, res1.first); 
-    EXPECT_NE(res3.first, m.end());
-    EXPECT_TRUE(res3.second);
+    EXPECT_NE(res3.position, res1.position); 
+    EXPECT_NE(res3.position, m.end());
+    EXPECT_TRUE(res3.inserted);
     EXPECT_EQ(m[0].val, 6);
     EXPECT_EQ(m[1].val, 6);
     EXPECT_FALSE(k2.moved_from_ctor);
@@ -468,21 +467,22 @@ TEST(MapTryEmplace, Test1)
   typedef mstd::map<int, Val> Map;
   Map m;
   auto res1 = m.try_emplace(0, Val(5));
-  EXPECT_TRUE(res1.second);
-  EXPECT_NE(res1.first, m.end());
+  EXPECT_TRUE(res1.inserted);
+  EXPECT_NE(res1.position, m.end());
   EXPECT_EQ(m[0].val, 5);
   Val v1{6};
   EXPECT_EQ(m.size(), 1);
   auto res2 = m.try_emplace(0, std::move(v1));
-  EXPECT_FALSE(res2.second);
-  EXPECT_EQ(res2.first, res1.first);
+  EXPECT_FALSE(res2.inserted);
+  EXPECT_EQ(res2.position, res1.position);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_FALSE(v1.moved_from_ctor);
   EXPECT_FALSE(v1.moved_from_assign);
   EXPECT_EQ(m.size(), 1);
   auto res3 = m.try_emplace(1, std::move(v1));
-  EXPECT_NE(res3.first, res1.first); EXPECT_NE(res3.first, m.end());
-  EXPECT_TRUE(res3.second);
+  EXPECT_NE(res3.position, res1.position);
+  EXPECT_NE(res3.position, m.end());
+  EXPECT_TRUE(res3.inserted);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_EQ(m[1].val, 6);
   EXPECT_TRUE(v1.moved_from_ctor);
@@ -519,15 +519,15 @@ TEST(MapTryEmplace, Test3)
   typedef mstd::map<Val, Val> Map;
   Map m;
   auto res1 = m.try_emplace(0, Val(5));
-  EXPECT_TRUE(res1.second);
-  EXPECT_NE(res1.first, m.end());
+  EXPECT_TRUE(res1.inserted);
+  EXPECT_NE(res1.position, m.end());
   EXPECT_EQ(m[0].val, 5);
   Val k1{0};
   Val v1{6};
   EXPECT_EQ(m.size(), 1);
   auto res2 = m.try_emplace(std::move(k1), std::move(v1));
-  EXPECT_FALSE(res2.second);
-  EXPECT_EQ(res2.first, res1.first);
+  EXPECT_FALSE(res2.inserted);
+  EXPECT_EQ(res2.position, res1.position);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_FALSE(k1.moved_from_ctor);
   EXPECT_FALSE(k1.moved_from_assign);
@@ -536,8 +536,9 @@ TEST(MapTryEmplace, Test3)
   EXPECT_EQ(m.size(), 1);
   Val k2{1};
   auto res3 = m.try_emplace(std::move(k2), std::move(v1));
-  EXPECT_NE(res3.first, res1.first); EXPECT_NE(res3.first, m.end());
-  EXPECT_TRUE(res3.second);
+  EXPECT_NE(res3.position, res1.position);
+  EXPECT_NE(res3.position, m.end());
+  EXPECT_TRUE(res3.inserted);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_EQ(m[1].val, 6);
   EXPECT_TRUE(k2.moved_from_ctor);
@@ -582,21 +583,22 @@ TEST(MapTryEmplace, Test5)
   typedef mstd::map<int, Val> Map;
   Map m;
   auto res1 = m.try_emplace(0, Val(5));
-  EXPECT_TRUE(res1.second);
-  EXPECT_NE(res1.first, m.end());
+  EXPECT_TRUE(res1.inserted);
+  EXPECT_NE(res1.position, m.end());
   EXPECT_EQ(m[0].val, 5);
   Val v1{6};
   EXPECT_EQ(m.size(), 1);
   auto res2 = m.try_emplace(0, v1);
-  EXPECT_FALSE(res2.second);
-  EXPECT_EQ(res2.first, res1.first);
+  EXPECT_FALSE(res2.inserted);
+  EXPECT_EQ(res2.position, res1.position);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_FALSE(v1.moved_from_ctor);
   EXPECT_FALSE(v1.moved_from_assign);
   EXPECT_EQ(m.size(), 1);
   auto res3 = m.try_emplace(1, v1);
-  EXPECT_NE(res3.first, res1.first); EXPECT_NE(res3.first, m.end());
-  EXPECT_TRUE(res3.second);
+  EXPECT_NE(res3.position, res1.position);
+  EXPECT_NE(res3.position, m.end());
+  EXPECT_TRUE(res3.inserted);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_EQ(m[1].val, 6);
   EXPECT_FALSE(v1.moved_from_ctor);
@@ -633,15 +635,15 @@ TEST(MapTryEmplace, Test7)
   typedef mstd::map<Val, Val> Map;
   Map m;
   auto res1 = m.try_emplace(0, Val(5));
-  EXPECT_TRUE(res1.second);
-  EXPECT_NE(res1.first, m.end());
+  EXPECT_TRUE(res1.inserted);
+  EXPECT_NE(res1.position, m.end());
   EXPECT_EQ(m[0].val, 5);
   Val k1{0};
   Val v1{6};
   EXPECT_EQ(m.size(), 1);
   auto res2 = m.try_emplace(k1, v1);
-  EXPECT_FALSE(res2.second);
-  EXPECT_EQ(res2.first, res1.first);
+  EXPECT_FALSE(res2.inserted);
+  EXPECT_EQ(res2.position, res1.position);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_FALSE(k1.moved_from_ctor);
   EXPECT_FALSE(k1.moved_from_assign);
@@ -650,8 +652,9 @@ TEST(MapTryEmplace, Test7)
   EXPECT_EQ(m.size(), 1);
   Val k2{1};
   auto res3 = m.try_emplace(k2, v1);
-  EXPECT_NE(res3.first, res1.first); EXPECT_NE(res3.first, m.end());
-  EXPECT_TRUE(res3.second);
+  EXPECT_NE(res3.position, res1.position);
+  EXPECT_NE(res3.position, m.end());
+  EXPECT_TRUE(res3.inserted);
   EXPECT_EQ(m[0].val, 5);
   EXPECT_EQ(m[1].val, 6);
   EXPECT_FALSE(k2.moved_from_ctor);

@@ -884,6 +884,8 @@ public:
     using iterator       = TreeIterator<ValueT, node_pointer, difference_type>;
     using const_iterator = TreeConstIterator<ValueT, node_pointer, difference_type>;
 
+    using insert_return_type = InsertReturnType<iterator>;
+
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
 
@@ -987,9 +989,9 @@ public:
             begin_node_ = endNode();
         } else {
             endNode()->left_->parent_ = static_cast<end_node_pointer>(endNode());
-            other.begin_node_           = other.endNode();
-            other.endNode()->left_      = nullptr;
-            other.size_                 = 0;
+            other.begin_node_         = other.endNode();
+            other.endNode()->left_    = nullptr;
+            other.size_               = 0;
         }
     }
 
@@ -1026,14 +1028,23 @@ public:
     }
 
     Tree& operator=(Tree&& other) 
-    noexcept(std::is_nothrow_move_assignable<key_compare>::value && std::is_nothrow_move_assignable<node_allocator>::value)
-    requires (!node_traits::is_always_equal::value && node_traits::propagate_on_container_move_assignment::value) {
+    noexcept(
+        std::is_nothrow_move_assignable<key_compare>::value
+     && std::is_nothrow_move_assignable<node_allocator>::value
+    )
+    requires (
+        !node_traits::is_always_equal::value
+     && node_traits::propagate_on_container_move_assignment::value
+    ) {
         moveAssignRelinking_(other);
         return *this;
     }
 
     Tree& operator=(Tree&& other)
-    requires (!node_traits::is_always_equal::value && !node_traits::propagate_on_container_move_assignment::value) {
+    requires (
+        !node_traits::is_always_equal::value
+     && !node_traits::propagate_on_container_move_assignment::value
+    ) {
         if (nodeAlloc() == other.nodeAlloc()) {
             moveAssignRelinking_(other);
         } else {
@@ -1043,7 +1054,10 @@ public:
     }
 
     ~Tree() {
-        static_assert(std::is_copy_constructible<key_compare>::value, "Comparator must be copy-constructible.");
+        static_assert(
+            std::is_copy_constructible<key_compare>::value,
+            "Comparator must be copy-constructible."
+        );
         destroy_(root());
     }
 
@@ -1110,7 +1124,7 @@ public:
     }
 
     template <class... ArgsT>
-    std::pair<iterator, bool> emplaceUnique(ArgsT&&... args) {
+    insert_return_type emplaceUnique(ArgsT&&... args) {
         return mstd::try_key_extraction<KeyType_>(
             [this](const KeyType_& key, ArgsT&&... args2) {
                 auto [parent, child] = find_equivalent(key);
@@ -1122,7 +1136,10 @@ public:
                     ret      = holder.release();
                     inserted = true;
                 }
-                return std::pair{iterator(ret), inserted};
+                return insert_return_type{
+                    .position = iterator(ret),
+                    .inserted = inserted,
+                };
             },
             [this](ArgsT&&... args2) {
                 node_holder holder = constructNode_(std::forward<ArgsT>(args2)...);
@@ -1135,13 +1152,16 @@ public:
                     ret      = holder.release();
                     inserted = true;
                 }
-                return std::pair{iterator(ret), inserted};
+                return insert_return_type{
+                    .position = iterator(ret),
+                    .inserted = inserted,
+                };
             },
             std::forward<ArgsT>(args)...);
     }
 
     template <class... ArgsT>
-    std::pair<iterator, bool> emplaceHintUnique(const_iterator pos, ArgsT&&... args) {
+    insert_return_type emplaceHintUnique(const_iterator pos, ArgsT&&... args) {
         return mstd::try_key_extraction<KeyType_>(
             [this, pos](const KeyType_& key, ArgsT&&... args2) {
                 node_base_pointer dummy;
@@ -1154,9 +1174,9 @@ public:
                     ret        = holder.release();
                     inserted = true;
                 }
-                return std::pair{
-                    iterator(ret),
-                    inserted,
+                return insert_return_type{
+                    .position = iterator(ret),
+                    .inserted = inserted,
                 };
             },
             [this, pos](ArgsT&&... args2) {
@@ -1169,9 +1189,9 @@ public:
                     insertNodeAt(parent, child, static_cast<node_base_pointer>(holder.get()));
                     ret = holder.release();
                 }
-                return std::pair{
-                    iterator(ret),
-                    child == nullptr,
+                return insert_return_type{
+                    .position = iterator(ret),
+                    .inserted = (child == nullptr),
                 };
             },
             std::forward<ArgsT>(args)...);
@@ -1279,7 +1299,8 @@ public:
     }
 
     template <class NodeHandleT>
-    NodeHandleInsertReturnType<iterator, NodeHandleT> nodeHandleInsertUnique(NodeHandleT&& nh) {
+    NodeHandleInsertReturnType<iterator, NodeHandleT>
+    nodeHandleInsertUnique(NodeHandleT&& nh) {
         if (nh.empty()) {
             return NodeHandleInsertReturnType{
                 .position = end(),
