@@ -1081,7 +1081,7 @@ public:
     // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
     // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
     template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key)
+    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key) const
     requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT> {
         auto node_ptr = root();
 
@@ -1122,12 +1122,6 @@ public:
                 };
             }
         }
-    }
-
-    template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key) const
-    requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT> {
-        return const_cast<Tree*>(this)->find_equivalent(key);
     }
 
     // Find key
