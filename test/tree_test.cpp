@@ -25,7 +25,7 @@ TEST(TreeRotate, Right1) {
   y.left_    = 0;
   y.right_   = 0;
   y.parent_  = &x;
-  mstd::tree_right_rotate(&x);
+  mstd::detail::tree_right_rotate(&x);
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &y);
   EXPECT_EQ(root.right_, nullptr);
@@ -54,7 +54,7 @@ TEST(TreeRotate, Right2) {
   a.parent_  = &y;
   b.parent_  = &y;
   c.parent_  = &x;
-  mstd::tree_right_rotate(&x);
+  mstd::detail::tree_right_rotate(&x);
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &y);
   EXPECT_EQ(root.right_, nullptr);
@@ -86,7 +86,7 @@ TEST(TreeRotate, Left1) {
   y.left_    = 0;
   y.right_   = 0;
   y.parent_  = &x;
-  mstd::tree_left_rotate(&x);
+  mstd::detail::tree_left_rotate(&x);
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &y);
   EXPECT_EQ(root.right_, nullptr);
@@ -115,7 +115,7 @@ TEST(TreeRotate, Left2) {
   a.parent_  = &x;
   b.parent_  = &y;
   c.parent_  = &y;
-  mstd::tree_left_rotate(&x);
+  mstd::detail::tree_left_rotate(&x);
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &y);
   EXPECT_EQ(root.right_, nullptr);
@@ -174,8 +174,8 @@ TEST(TreeRemove, Test1) {
     e.right_    = 0;
     e.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &y);
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    mstd::detail::tree_remove(root.left_, &y);
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &d);
@@ -239,8 +239,8 @@ TEST(TreeRemove, Test1) {
     e.left_     = 0;
     e.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &y);
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    mstd::detail::tree_remove(root.left_, &y);
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &d);
@@ -310,8 +310,8 @@ TEST(TreeRemove, Test1) {
     f.right_    = 0;
     f.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &y);
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    mstd::detail::tree_remove(root.left_, &y);
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &d);
@@ -386,8 +386,8 @@ TEST(TreeRemove, Test1) {
     f.left_     = 0;
     f.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &y);
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    mstd::detail::tree_remove(root.left_, &y);
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &d);
@@ -445,74 +445,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
-
-    EXPECT_EQ(root.parent_, nullptr);
-    EXPECT_EQ(root.left_, &b);
-    EXPECT_EQ(root.right_, nullptr);
-    EXPECT_EQ(root.is_black_, false);
-
-    EXPECT_EQ(b.parent_, &root);
-    EXPECT_EQ(b.left_, nullptr);
-    EXPECT_EQ(b.right_, &c);
-    EXPECT_EQ(b.is_black_, true);
-
-    EXPECT_EQ(c.parent_, &b);
-    EXPECT_EQ(c.left_, nullptr);
-    EXPECT_EQ(c.right_, nullptr);
-    EXPECT_EQ(c.is_black_, false);
-
-    mstd::tree_remove(root.left_, &b);
-
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
-
-    EXPECT_EQ(root.parent_, nullptr);
-    EXPECT_EQ(root.left_, &c);
-    EXPECT_EQ(root.right_, nullptr);
-    EXPECT_EQ(root.is_black_, false);
-
-    EXPECT_EQ(c.parent_, &root);
-    EXPECT_EQ(c.left_, nullptr);
-    EXPECT_EQ(c.right_, nullptr);
-    EXPECT_EQ(c.is_black_, true);
-
-    mstd::tree_remove(root.left_, &c);
-
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
-
-    EXPECT_EQ(root.parent_, nullptr);
-    EXPECT_EQ(root.left_, nullptr);
-    EXPECT_EQ(root.right_, nullptr);
-    EXPECT_EQ(root.is_black_, false);
-  }
-  {
-    Node root;
-    Node a;
-    Node b;
-    Node c;
-
-    root.left_ = &b;
-
-    b.parent_   = &root;
-    b.left_     = &a;
-    b.right_    = &c;
-    b.is_black_ = true;
-
-    a.parent_   = &b;
-    a.left_     = 0;
-    a.right_    = 0;
-    a.is_black_ = false;
-
-    c.parent_   = &b;
-    c.left_     = 0;
-    c.right_    = 0;
-    c.is_black_ = false;
-
-    mstd::tree_remove(root.left_, &a);
-
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -529,9 +464,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, false);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -543,9 +478,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -568,16 +503,16 @@ TEST(TreeRemove, Test2) {
     a.parent_   = &b;
     a.left_     = 0;
     a.right_    = 0;
-    a.is_black_ = true;
+    a.is_black_ = false;
 
     c.parent_   = &b;
     c.left_     = 0;
     c.right_    = 0;
-    c.is_black_ = true;
+    c.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -594,23 +529,23 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, false);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
-    EXPECT_EQ(root.left_, &b);
+    EXPECT_EQ(root.left_, &c);
     EXPECT_EQ(root.right_, nullptr);
     EXPECT_EQ(root.is_black_, false);
 
-    EXPECT_EQ(b.parent_, &root);
-    EXPECT_EQ(b.left_, nullptr);
-    EXPECT_EQ(b.right_, nullptr);
-    EXPECT_EQ(b.is_black_, true);
+    EXPECT_EQ(c.parent_, &root);
+    EXPECT_EQ(c.left_, nullptr);
+    EXPECT_EQ(c.right_, nullptr);
+    EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -633,16 +568,16 @@ TEST(TreeRemove, Test2) {
     a.parent_   = &b;
     a.left_     = 0;
     a.right_    = 0;
-    a.is_black_ = false;
+    a.is_black_ = true;
 
     c.parent_   = &b;
     c.left_     = 0;
     c.right_    = 0;
-    c.is_black_ = false;
+    c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -659,9 +594,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, false);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -673,9 +608,74 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
+
+    EXPECT_EQ(root.parent_, nullptr);
+    EXPECT_EQ(root.left_, nullptr);
+    EXPECT_EQ(root.right_, nullptr);
+    EXPECT_EQ(root.is_black_, false);
+  }
+  {
+    Node root;
+    Node a;
+    Node b;
+    Node c;
+
+    root.left_ = &b;
+
+    b.parent_   = &root;
+    b.left_     = &a;
+    b.right_    = &c;
+    b.is_black_ = true;
+
+    a.parent_   = &b;
+    a.left_     = 0;
+    a.right_    = 0;
+    a.is_black_ = false;
+
+    c.parent_   = &b;
+    c.left_     = 0;
+    c.right_    = 0;
+    c.is_black_ = false;
+
+    mstd::detail::tree_remove(root.left_, &a);
+
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
+
+    EXPECT_EQ(root.parent_, nullptr);
+    EXPECT_EQ(root.left_, &b);
+    EXPECT_EQ(root.right_, nullptr);
+    EXPECT_EQ(root.is_black_, false);
+
+    EXPECT_EQ(b.parent_, &root);
+    EXPECT_EQ(b.left_, nullptr);
+    EXPECT_EQ(b.right_, &c);
+    EXPECT_EQ(b.is_black_, true);
+
+    EXPECT_EQ(c.parent_, &b);
+    EXPECT_EQ(c.left_, nullptr);
+    EXPECT_EQ(c.right_, nullptr);
+    EXPECT_EQ(c.is_black_, false);
+
+    mstd::detail::tree_remove(root.left_, &c);
+
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
+
+    EXPECT_EQ(root.parent_, nullptr);
+    EXPECT_EQ(root.left_, &b);
+    EXPECT_EQ(root.right_, nullptr);
+    EXPECT_EQ(root.is_black_, false);
+
+    EXPECT_EQ(b.parent_, &root);
+    EXPECT_EQ(b.left_, nullptr);
+    EXPECT_EQ(b.right_, nullptr);
+    EXPECT_EQ(b.is_black_, true);
+
+    mstd::detail::tree_remove(root.left_, &b);
+
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -705,9 +705,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -724,9 +724,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -738,9 +738,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -770,9 +770,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -789,9 +789,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -803,9 +803,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -835,9 +835,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -854,9 +854,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &a);
@@ -868,9 +868,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(a.right_, nullptr);
     EXPECT_EQ(a.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -900,9 +900,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &c);
@@ -919,9 +919,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(c.right_, nullptr);
     EXPECT_EQ(c.is_black_, true);
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &a);
@@ -933,9 +933,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(a.right_, nullptr);
     EXPECT_EQ(a.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -965,9 +965,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -984,9 +984,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &a);
@@ -998,9 +998,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(a.right_, nullptr);
     EXPECT_EQ(a.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -1030,9 +1030,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -1049,9 +1049,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &a);
@@ -1063,9 +1063,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(a.right_, nullptr);
     EXPECT_EQ(a.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -1095,9 +1095,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = true;
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -1114,9 +1114,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -1128,9 +1128,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -1160,9 +1160,9 @@ TEST(TreeRemove, Test2) {
     c.right_    = 0;
     c.is_black_ = false;
 
-    mstd::tree_remove(root.left_, &c);
+    mstd::detail::tree_remove(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -1179,9 +1179,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &a);
+    mstd::detail::tree_remove(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, &b);
@@ -1193,9 +1193,9 @@ TEST(TreeRemove, Test2) {
     EXPECT_EQ(b.right_, nullptr);
     EXPECT_EQ(b.is_black_, true);
 
-    mstd::tree_remove(root.left_, &b);
+    mstd::detail::tree_remove(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.parent_, nullptr);
     EXPECT_EQ(root.left_, nullptr);
@@ -1257,11 +1257,11 @@ TEST(TreeRemove, Test3) {
   a.right_    = 0;
   a.is_black_ = false;
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
-  mstd::tree_remove(root.left_, &h);
+  mstd::detail::tree_remove(root.left_, &h);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &e);
@@ -1303,9 +1303,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(f.right_, nullptr);
   EXPECT_EQ(f.is_black_, false);
 
-  mstd::tree_remove(root.left_, &g);
+  mstd::detail::tree_remove(root.left_, &g);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &e);
@@ -1342,9 +1342,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(f.right_, nullptr);
   EXPECT_EQ(f.is_black_, true);
 
-  mstd::tree_remove(root.left_, &f);
+  mstd::detail::tree_remove(root.left_, &f);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &c);
@@ -1376,9 +1376,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(d.right_, nullptr);
   EXPECT_EQ(d.is_black_, false);
 
-  mstd::tree_remove(root.left_, &e);
+  mstd::detail::tree_remove(root.left_, &e);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &c);
@@ -1405,9 +1405,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(d.right_, nullptr);
   EXPECT_EQ(d.is_black_, true);
 
-  mstd::tree_remove(root.left_, &d);
+  mstd::detail::tree_remove(root.left_, &d);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -1429,9 +1429,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(c.right_, nullptr);
   EXPECT_EQ(c.is_black_, true);
 
-  mstd::tree_remove(root.left_, &c);
+  mstd::detail::tree_remove(root.left_, &c);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -1448,9 +1448,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(a.right_, nullptr);
   EXPECT_EQ(a.is_black_, false);
 
-  mstd::tree_remove(root.left_, &b);
+  mstd::detail::tree_remove(root.left_, &b);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &a);
@@ -1462,9 +1462,9 @@ TEST(TreeRemove, Test3) {
   EXPECT_EQ(a.right_, nullptr);
   EXPECT_EQ(a.is_black_, true);
 
-  mstd::tree_remove(root.left_, &a);
+  mstd::detail::tree_remove(root.left_, &a);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, nullptr);
@@ -1525,11 +1525,11 @@ TEST(TreeRemove, Test4) {
   h.right_    = 0;
   h.is_black_ = false;
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
-  mstd::tree_remove(root.left_, &a);
+  mstd::detail::tree_remove(root.left_, &a);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &d);
@@ -1571,9 +1571,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, false);
 
-  mstd::tree_remove(root.left_, &b);
+  mstd::detail::tree_remove(root.left_, &b);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &d);
@@ -1610,9 +1610,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, false);
 
-  mstd::tree_remove(root.left_, &c);
+  mstd::detail::tree_remove(root.left_, &c);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &f);
@@ -1644,9 +1644,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, false);
 
-  mstd::tree_remove(root.left_, &d);
+  mstd::detail::tree_remove(root.left_, &d);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &f);
@@ -1673,9 +1673,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, false);
 
-  mstd::tree_remove(root.left_, &e);
+  mstd::detail::tree_remove(root.left_, &e);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -1697,9 +1697,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, true);
 
-  mstd::tree_remove(root.left_, &f);
+  mstd::detail::tree_remove(root.left_, &f);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -1716,9 +1716,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, false);
 
-  mstd::tree_remove(root.left_, &g);
+  mstd::detail::tree_remove(root.left_, &g);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &h);
@@ -1730,9 +1730,9 @@ TEST(TreeRemove, Test4) {
   EXPECT_EQ(h.right_, nullptr);
   EXPECT_EQ(h.is_black_, true);
 
-  mstd::tree_remove(root.left_, &h);
+  mstd::detail::tree_remove(root.left_, &h);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, nullptr);
@@ -1770,9 +1770,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     a.right_    = 0;
     a.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -1825,9 +1825,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     a.right_    = 0;
     a.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -1880,9 +1880,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     a.right_    = 0;
     a.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -1935,9 +1935,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     a.right_    = 0;
     a.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -2010,9 +2010,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     i.parent_   = &d;
     i.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -2085,9 +2085,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     i.parent_   = &d;
     i.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -2160,9 +2160,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     i.parent_   = &d;
     i.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -2235,9 +2235,9 @@ TEST(TreeBalanceAfterInsert, Test1) {
     i.parent_   = &d;
     i.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &c);
 
@@ -2287,9 +2287,9 @@ TEST(TreeBalanceAfterInsert, Test2) {
     b.right_    = 0;
     b.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &b);
+    mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2331,9 +2331,9 @@ TEST(TreeBalanceAfterInsert, Test2) {
     b.right_    = 0;
     b.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &b);
+    mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2391,9 +2391,9 @@ TEST(TreeBalanceAfterInsert, Test2) {
     g.parent_   = &c;
     g.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &b);
+    mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2463,9 +2463,9 @@ TEST(TreeBalanceAfterInsert, Test2) {
     g.parent_   = &c;
     g.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &b);
+    mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2522,9 +2522,9 @@ TEST(TreeBalanceAfterInsert, Test3) {
     a.right_    = 0;
     a.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2566,9 +2566,9 @@ TEST(TreeBalanceAfterInsert, Test3) {
     c.right_    = 0;
     c.is_black_ = false;
 
-    mstd::tree_balance_after_insert(root.left_, &c);
+    mstd::detail::tree_balance_after_insert(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2626,9 +2626,9 @@ TEST(TreeBalanceAfterInsert, Test3) {
     g.parent_   = &c;
     g.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &a);
+    mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2698,9 +2698,9 @@ TEST(TreeBalanceAfterInsert, Test3) {
     g.parent_   = &c;
     g.is_black_ = true;
 
-    mstd::tree_balance_after_insert(root.left_, &c);
+    mstd::detail::tree_balance_after_insert(root.left_, &c);
 
-    EXPECT_TRUE(mstd::tree_invariant(root.left_));
+    EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
     EXPECT_EQ(root.left_, &b);
 
@@ -2747,9 +2747,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   root.left_ = &a;
   a.parent_  = &root;
 
-  mstd::tree_balance_after_insert(root.left_, &a);
+  mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &a);
@@ -2764,9 +2764,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   a.right_  = &b;
   b.parent_ = &a;
 
-  mstd::tree_balance_after_insert(root.left_, &b);
+  mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &a);
@@ -2786,9 +2786,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   b.right_  = &c;
   c.parent_ = &b;
 
-  mstd::tree_balance_after_insert(root.left_, &c);
+  mstd::detail::tree_balance_after_insert(root.left_, &c);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -2813,9 +2813,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   c.right_  = &d;
   d.parent_ = &c;
 
-  mstd::tree_balance_after_insert(root.left_, &d);
+  mstd::detail::tree_balance_after_insert(root.left_, &d);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -2845,9 +2845,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   d.right_  = &e;
   e.parent_ = &d;
 
-  mstd::tree_balance_after_insert(root.left_, &e);
+  mstd::detail::tree_balance_after_insert(root.left_, &e);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -2882,9 +2882,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   e.right_  = &f;
   f.parent_ = &e;
 
-  mstd::tree_balance_after_insert(root.left_, &f);
+  mstd::detail::tree_balance_after_insert(root.left_, &f);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -2924,9 +2924,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   f.right_  = &g;
   g.parent_ = &f;
 
-  mstd::tree_balance_after_insert(root.left_, &g);
+  mstd::detail::tree_balance_after_insert(root.left_, &g);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &b);
@@ -2971,9 +2971,9 @@ TEST(TreeBalanceAfterInsert, Test4) {
   g.right_  = &h;
   h.parent_ = &g;
 
-  mstd::tree_balance_after_insert(root.left_, &h);
+  mstd::detail::tree_balance_after_insert(root.left_, &h);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &d);
@@ -3035,9 +3035,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   root.left_ = &h;
   h.parent_  = &root;
 
-  mstd::tree_balance_after_insert(root.left_, &h);
+  mstd::detail::tree_balance_after_insert(root.left_, &h);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &h);
@@ -3052,9 +3052,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   h.left_   = &g;
   g.parent_ = &h;
 
-  mstd::tree_balance_after_insert(root.left_, &g);
+  mstd::detail::tree_balance_after_insert(root.left_, &g);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &h);
@@ -3074,9 +3074,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   g.left_   = &f;
   f.parent_ = &g;
 
-  mstd::tree_balance_after_insert(root.left_, &f);
+  mstd::detail::tree_balance_after_insert(root.left_, &f);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -3101,9 +3101,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   f.left_   = &e;
   e.parent_ = &f;
 
-  mstd::tree_balance_after_insert(root.left_, &e);
+  mstd::detail::tree_balance_after_insert(root.left_, &e);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -3133,9 +3133,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   e.left_   = &d;
   d.parent_ = &e;
 
-  mstd::tree_balance_after_insert(root.left_, &d);
+  mstd::detail::tree_balance_after_insert(root.left_, &d);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -3170,9 +3170,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   d.left_   = &c;
   c.parent_ = &d;
 
-  mstd::tree_balance_after_insert(root.left_, &c);
+  mstd::detail::tree_balance_after_insert(root.left_, &c);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -3212,9 +3212,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   c.left_   = &b;
   b.parent_ = &c;
 
-  mstd::tree_balance_after_insert(root.left_, &b);
+  mstd::detail::tree_balance_after_insert(root.left_, &b);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &g);
@@ -3259,9 +3259,9 @@ TEST(TreeBalanceAfterInsert, Test5) {
   b.left_   = &a;
   a.parent_ = &b;
 
-  mstd::tree_balance_after_insert(root.left_, &a);
+  mstd::detail::tree_balance_after_insert(root.left_, &a);
 
-  EXPECT_TRUE(mstd::tree_invariant(root.left_));
+  EXPECT_TRUE(mstd::detail::tree_invariant(root.left_));
 
   EXPECT_EQ(root.parent_, nullptr);
   EXPECT_EQ(root.left_, &e);
