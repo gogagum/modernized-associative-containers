@@ -23,7 +23,8 @@ class NodeHandle {
   friend class Tree;
 
   using AllocTraits_ = std::allocator_traits<AllocT>;
-  using NodePointerType_ = std::pointer_traits<typename AllocTraits_::void_pointer>::template rebind<NodeT>;
+  using VoidPointer_ = typename AllocTraits_::void_pointer;
+  using NodePointerType_ = std::pointer_traits<VoidPointer_>::template rebind<NodeT>;
 
 public:
   using allocator_type = AllocT;
@@ -56,16 +57,18 @@ public:
   }
 
   NodeHandle& operator=(NodeHandle&& other) {
+    constexpr static bool propagate_on_move //
+        = AllocTraits_::propagate_on_container_move_assignment::value;
+
     MSTD_ASSERT_COMPATIBLE_ALLOCATOR(
-        !alloc_.has_value() || AllocTraits_::propagate_on_container_move_assignment::value ||
-            alloc_ == other.alloc_,
+        !alloc_.has_value() || propagate_on_move || alloc_ == other.alloc_,
         "node_type with incompatible allocator passed to "
         "node_type::operator=(node_type&&)");
 
     destroyNodePointer_();
     ptr_ = other.ptr_;
 
-    if (AllocTraits_::propagate_on_container_move_assignment::value || alloc_ == std::nullopt) {
+    if (propagate_on_move || !alloc_.has_value()) {
       alloc_ = std::move(other.alloc_);
     }
 
