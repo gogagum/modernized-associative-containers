@@ -69,6 +69,7 @@ public:
     using difference_type        = Tree_::difference_type;
     using iterator               = Tree_::iterator;
     using const_iterator         = Tree_::const_iterator;
+    using sentinel               = Tree_::sentinel;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     template <class Self>
@@ -182,9 +183,8 @@ public:
         return self.tree_.begin();
     }
 
-    template <class Self>
-    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
-        return self.tree_.end();
+    [[nodiscard]] sentinel end() const noexcept {
+        return tree_.end();
     }
 
     template <class Self>
@@ -450,13 +450,20 @@ set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, CompareThreeWay, Alloc
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
 operator==(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT, AllocatorT>& rhs) {
-    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::ranges::equal(lhs, rhs);
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
 auto
 operator<=>(const set<KeyT, CompareT, AllocatorT>& lhs, const set<KeyT, CompareT, AllocatorT>& rhs) {
-    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), CompareT{});
+    auto lhs_common_range = std::ranges::common_view(lhs);
+    auto rhs_common_range = std::ranges::common_view(rhs);
+
+    return std::lexicographical_compare_three_way(
+        lhs_common_range.begin(), lhs_common_range.end(),
+        rhs_common_range.begin(), rhs_common_range.end(),
+        CompareT{}
+    );
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
@@ -501,6 +508,7 @@ public:
     using size_type              = Tree_::size_type;
     using difference_type        = Tree_::difference_type;
     using iterator               = Tree_::const_iterator;
+    using sentinel               = Tree_::sentinel;
     using const_iterator         = Tree_::const_iterator;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
@@ -615,9 +623,8 @@ public:
         return self.tree_.begin();
     }
 
-    template <class Self>
-    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
-        return self.tree_.end();
+    [[nodiscard]] sentinel end() const noexcept {
+        return tree_.end();
     }
 
     template <class Self>
@@ -852,13 +859,20 @@ multiset(std::initializer_list<KeyT>, AllocatorT)
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
 operator==(const multiset<KeyT, CompareT, AllocatorT>& lhs, const multiset<KeyT, CompareT, AllocatorT>& rhs) {
-    return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    return std::ranges::equal(lhs, rhs);
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
 auto
 operator<=>(const multiset<KeyT, CompareT, AllocatorT>& lhs, const multiset<KeyT, CompareT, AllocatorT>& rhs) {
-    return std::lexicographical_compare_three_way(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), CompareT{});
+    auto lhs_common_range = std::ranges::common_view(lhs);
+    auto rhs_common_range = std::ranges::common_view(rhs);
+
+    return std::lexicographical_compare_three_way(
+        lhs_common_range.begin(), lhs_common_range.end(),
+        rhs_common_range.begin(), rhs_common_range.end(),
+        CompareT{}
+    );
 }
 
 template <class KeyT, class CompareT, class AllocatorT>
