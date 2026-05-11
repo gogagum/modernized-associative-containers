@@ -180,8 +180,15 @@ public:
     using node_base         = NodeBase;
     using node_base_pointer = void_pointer_traits::template rebind<node_base>;
 
-    using end_node_t       = EndNode;
-    using end_node_pointer = void_pointer_traits::template rebind<end_node_t>;
+    using end_node_t             = EndNode;
+    using end_node_pointer       = void_pointer_traits::template rebind<end_node_t>;
+    using const_end_node_pointer = void_pointer_traits::template rebind<const end_node_t>;
+
+    template <class Self>
+    using SelfEndNodePointer = std::conditional_t<std::is_const_v<Self>, const_end_node_pointer, end_node_pointer>;
+
+    template <class Self>
+    using SelfNodeBasePointerRef = std::conditional_t<std::is_const_v<Self>, const node_base_pointer, node_base_pointer>&;
 
     using node_allocator = AllocTraits_::template rebind_alloc<node>;
     using node_traits    = std::allocator_traits<node_allocator>;
@@ -255,6 +262,8 @@ private:
     private:
         explicit TreeIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
         explicit TreeIterator(end_node_pointer ptr) noexcept : ptr_(ptr) {}
+        // TODO(gogagum): const_cast should be removed if end method will start to return some sentinel iterator.
+        explicit TreeIterator(const_end_node_pointer ptr) noexcept requires is_const: ptr_(const_cast<end_node_pointer>(ptr)) {}
         node_pointer __get_np() const {
             return static_cast<node_pointer>(ptr_);
         }
@@ -275,12 +284,11 @@ private:
 
 
 public:
-    end_node_pointer endNode() noexcept {
-        return std::pointer_traits<end_node_pointer>::pointer_to(end_node_);
+    template <class Self>
+    SelfEndNodePointer<Self> endNode(this Self& self) noexcept {
+        return std::pointer_traits<SelfEndNodePointer<Self>>::pointer_to(self.end_node_);
     }
-    end_node_pointer endNode() const noexcept {
-        return std::pointer_traits<end_node_pointer>::pointer_to(const_cast<end_node_t&>(end_node_));
-    }
+
     node_allocator& nodeAlloc() noexcept { return node_alloc_; }
 
 private:
@@ -297,7 +305,11 @@ public:
         return static_cast<node_pointer>(endNode()->left_);
     }
 
-    node_base_pointer* root_ptr() const noexcept {
+    const node_base_pointer* root_ptr() const noexcept {
+        return std::addressof(endNode()->left_);
+    }
+
+    node_base_pointer* root_ptr() noexcept {
         return std::addressof(endNode()->left_);
     }
 
@@ -963,13 +975,14 @@ private:
         return result;
     }
 
-    template <bool lower_bound, class KeyT>
-    end_node_pointer lowerUpperBoundMultiImpl_(const KeyT& key, node_pointer root_node, end_node_pointer result) const {
+    template <bool lower_bound, class Self, class KeyT>
+    SelfEndNodePointer<Self>
+    lowerUpperBoundMultiImpl_(this Self& self, const KeyT& key, node_pointer root_node, SelfEndNodePointer<Self> result) {
         while (root_node != nullptr) {
-            const auto& root_key = key_proj_(root_node->get_value());
-            const auto comp_res = key_comp_(key, root_key);
+            const auto& root_key = self.key_proj_(root_node->get_value());
+            const auto comp_res = self.key_comp_(key, root_key);
             if (lower_bound ? (comp_res <= 0) : (comp_res < 0)) {
-                result    = static_cast<end_node_pointer>(root_node);
+                result    = static_cast<SelfEndNodePointer<Self>>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else {
                 root_node = static_cast<node_pointer>(root_node->right_);
@@ -1077,27 +1090,28 @@ public:
     // Find key
     // If key exists, return the parent of the node of key and a reference to the pointer to the node of key.
     // If key doesn't exist, return the parent of the null leaf and a reference to the pointer to the null leaf.
-    template <class KeyT>
-    std::pair<end_node_pointer, node_base_pointer&> find_equivalent(const KeyT& key) const
+    template <class Self, class KeyT>
+    std::pair<SelfEndNodePointer<Self>, SelfNodeBasePointerRef<Self>>
+    find_equivalent(this Self& self, const KeyT& key)
     requires OrdersWithAtLeastWeakly<key_compare, KeyType_, KeyT> {
-        auto node_ptr = root();
+        auto node_ptr = self.root();
 
         if (node_ptr == nullptr) {
-            auto end = endNode();
+            SelfEndNodePointer<Self> end = self.endNode();
             return {
                 end,
                 end->left_,
             };
         }
 
-        auto* node_base_ptr = root_ptr();
+        auto* node_base_ptr = self.root_ptr();
     
         while (true) {
-            const std::weak_ordering comp_res = key_comp_(key, key_proj_(node_ptr->get_value()));
+            const std::weak_ordering comp_res = self.key_comp_(key, self.key_proj_(node_ptr->get_value()));
             if (std::is_lt(comp_res)) {
                 if (node_ptr->left_ == nullptr) {
                     return {
-                        static_cast<end_node_pointer>(node_ptr),
+                        static_cast<SelfEndNodePointer<Self>>(node_ptr),
                         node_ptr->left_,
                     };
                 }
@@ -1106,7 +1120,7 @@ public:
             } else if (std::is_gt(comp_res)) {
                 if (node_ptr->right_ == nullptr) {
                     return {
-                        static_cast<end_node_pointer>(node_ptr),
+                        static_cast<SelfEndNodePointer<Self>>(node_ptr),
                         node_ptr->right_,
                     };
                 }
@@ -1114,7 +1128,7 @@ public:
                 node_ptr      = static_cast<node_pointer>(node_ptr->right_);
             } else {
                 return {
-                    static_cast<end_node_pointer>(node_ptr),
+                    static_cast<SelfEndNodePointer<Self>>(node_ptr),
                     *node_base_ptr,
                 };
             }
