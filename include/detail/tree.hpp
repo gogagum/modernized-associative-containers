@@ -81,12 +81,12 @@ public:
 
 private:
 
-    class TreeEndNode;
+    class EndNode;
 
-    class TreeNodeBase : public TreeEndNode {
+    class NodeBase : public EndNode {
     public:
-        using pointer          = void_pointer_traits::template rebind<TreeNodeBase>;
-        using end_node_pointer = void_pointer_traits::template rebind<TreeEndNode>;
+        using pointer          = void_pointer_traits::template rebind<NodeBase>;
+        using end_node_pointer = void_pointer_traits::template rebind<EndNode>;
     
         pointer right_;
         end_node_pointer parent_;
@@ -98,20 +98,20 @@ private:
             parent_ = static_cast<end_node_pointer>(parent);
         }
     
-        TreeNodeBase()             = default;
-        TreeNodeBase(TreeNodeBase const&)            = delete;
-        TreeNodeBase& operator=(TreeNodeBase const&) = delete;
+        NodeBase()             = default;
+        NodeBase(NodeBase const&)            = delete;
+        NodeBase& operator=(NodeBase const&) = delete;
     };
 
-    class TreeEndNode {
+    class EndNode {
     public:
-        using pointer = typename void_pointer_traits::template rebind<TreeNodeBase>;
+        using pointer = typename void_pointer_traits::template rebind<NodeBase>;
         pointer left_;
     
-        TreeEndNode() noexcept : left_() {}
+        EndNode() noexcept : left_() {}
     };
 
-    class TreeNode : public TreeNodeBase {
+    class Node : public NodeBase {
     public:
         // We use a union to avoid initialization during member initialization, which allows us
         // to use the allocator from the container to construct the `node_value_type` in the
@@ -158,12 +158,12 @@ private:
         const ValueT& get_value() const { return value_; }
     
         template <class AllocT, class... ArgsT>
-        explicit TreeNode(AllocT& node_alloc, ArgsT&&... args) {
+        explicit Node(AllocT& node_alloc, ArgsT&&... args) {
             std::allocator_traits<AllocT>::construct(node_alloc, std::addressof(get_value()), std::forward<ArgsT>(args)...);
         }
-        ~TreeNode()                          = delete;
-        TreeNode(TreeNode const&)            = delete;
-        TreeNode& operator=(TreeNode const&) = delete;
+        ~Node()                      = delete;
+        Node(Node const&)            = delete;
+        Node& operator=(Node const&) = delete;
     
         template <class, class>
         friend class BasicNodeHandle;
@@ -174,13 +174,13 @@ private:
 
 public:
 
-    using node         = TreeNode;
+    using node         = Node;
     using node_pointer = void_pointer_traits::template rebind<node>;
 
-    using node_base         = TreeNodeBase;
+    using node_base         = NodeBase;
     using node_base_pointer = void_pointer_traits::template rebind<node_base>;
 
-    using end_node_t       = TreeEndNode;
+    using end_node_t       = EndNode;
     using end_node_pointer = void_pointer_traits::template rebind<end_node_t>;
 
     using node_allocator = AllocTraits_::template rebind_alloc<node>;
@@ -258,7 +258,9 @@ private:
     private:
         explicit TreeIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
         explicit TreeIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
-        node_pointer __get_np() const { return static_cast<node_pointer>(ptr_); }
+        node_pointer __get_np() const {
+            return static_cast<node_pointer>(ptr_);
+        }
         template <class, class, class, class>
         friend class Tree;
     
@@ -832,10 +834,12 @@ public:
     }
 
     iterator erase(const_iterator pos) {
-        auto node_ptr        = pos.__get_np();
-        auto ret             = removeNodePointer(node_ptr);
-        auto& node_allocator = nodeAlloc();
-        node_traits::destroy(node_allocator, std::addressof(const_cast<value_type&>(*pos)));
+        node_pointer node_ptr = pos.__get_np();
+        iterator ret          = removeNodePointer(node_ptr);
+        auto& node_allocator  = nodeAlloc();
+        // Node value must be destroyed after the node is removed, 
+        // while node is not destroyable itself.
+        node_traits::destroy(node_allocator, std::addressof(node_ptr->get_value()));
         node_traits::deallocate(node_allocator, node_ptr, 1);
         return ret;
     }
