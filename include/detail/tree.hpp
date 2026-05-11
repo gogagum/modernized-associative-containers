@@ -199,10 +199,7 @@ private:
 
     template<bool is_const>
     class TreeIterator {
-        using NodeBasePointer_ = Tree::node_base_pointer;
-        using EndNodePointer_  = Tree::end_node_pointer;
-    
-        EndNodePointer_ ptr_;
+        end_node_pointer ptr_;
     
     public:
         using iterator_category = std::bidirectional_iterator_tag;
@@ -226,7 +223,7 @@ private:
         }
     
         TreeIterator& operator++() {
-            ptr_ = mstd::detail::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
+            ptr_ = mstd::detail::tree_next_iter<end_node_pointer>(static_cast<node_base_pointer>(ptr_));
             return *this;
         }
     
@@ -237,7 +234,7 @@ private:
         }
     
         TreeIterator& operator--() {
-            ptr_ = static_cast<EndNodePointer_>(mstd::detail::tree_prev_iter<NodeBasePointer_>(ptr_));
+            ptr_ = static_cast<end_node_pointer>(mstd::detail::tree_prev_iter<node_base_pointer>(ptr_));
             return *this;
         }
     
@@ -257,7 +254,7 @@ private:
 
     private:
         explicit TreeIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
-        explicit TreeIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
+        explicit TreeIterator(end_node_pointer ptr) noexcept : ptr_(ptr) {}
         node_pointer __get_np() const {
             return static_cast<node_pointer>(ptr_);
         }
