@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <iterator>
 #include <rval_struct.hpp>
 
 #include <set.hpp>
@@ -13,6 +14,9 @@ TEST(SetFromVector, Test1)
 TEST(SetCompare, Test1)
 {
     mstd::set<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};
+
+    static_assert(std::sentinel_for<mstd::set<int>::sentinel, typename mstd::set<int>::iterator>);
+
     EXPECT_EQ(c1, c1);
     EXPECT_TRUE(std::is_eq(c1 <=> c1));
     EXPECT_LT(c1, c2);
@@ -330,7 +334,7 @@ TEST(SetInsert, Test2)
     auto p = s.insert(rvalstruct(1));
     EXPECT_TRUE(p.inserted);
     EXPECT_EQ(s.size(), 1);
-    EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
+    EXPECT_EQ(std::ranges::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(p.position, s.begin());
     EXPECT_EQ((*p.position).val, 1);
 }
@@ -358,7 +362,7 @@ TEST(SetInsert, Test4)
 
     Set::iterator p = s.insert(s.begin(), rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
-    EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
+    EXPECT_EQ(std::ranges::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(p, s.begin());
     EXPECT_EQ(p->val, 1);
 }

@@ -76,6 +76,7 @@ public:
     using difference_type        = Tree_::difference_type;
     using iterator               = Tree_::iterator;
     using const_iterator         = Tree_::const_iterator;
+    using sentinel               = Tree_::sentinel;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     template <class Self>
@@ -190,9 +191,8 @@ public:
         return self.tree_.begin();
     }
 
-    template <class Self>
-    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
-        return self.tree_.end();
+    [[nodiscard]] sentinel end() const noexcept {
+        return tree_.end();
     }
 
     template <class Self>
@@ -645,6 +645,7 @@ public:
     using difference_type        = Tree_::difference_type;
     using iterator               = Tree_::iterator;
     using const_iterator         = Tree_::const_iterator;
+    using sentinel               = Tree_::sentinel;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     using node_type = NodeHandle<typename Tree_::node, allocator_type>;
@@ -764,9 +765,8 @@ public:
         return self.tree_.begin();
     }
 
-    template <class Self>
-    [[nodiscard]] SelfIterator<Self> end(this Self& self) noexcept {
-        return self.tree_.end();
+    [[nodiscard]] sentinel end() const noexcept {
+        return tree_.end();
     }
 
     template <class Self>
@@ -1044,10 +1044,16 @@ operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
             const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
     using Map = multimap<KeyT, ValueT, CompareT, AllocatorT>;
 
-    return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), [](const Map::value_type& val1, const Map::value_type& val2) {
-        const auto key_cmp = CompareT{}(val1.key(), val2.key());
-        using CmpRes = decltype(key_cmp);
-        if (key_cmp == 0) {
+    auto lhs_common_range = std::ranges::common_view(x);
+    auto rhs_common_range = std::ranges::common_view(y);
+
+    return std::lexicographical_compare_three_way(
+        lhs_common_range.begin(), lhs_common_range.end(),
+        rhs_common_range.begin(), rhs_common_range.end(),
+        [](const Map::value_type& val1, const Map::value_type& val2) {
+            const auto key_cmp = CompareT{}(val1.key(), val2.key());
+            using CmpRes = decltype(key_cmp);
+            if (key_cmp == 0) {
             if (val1.value() < val2.value()) {
                 return CmpRes::less;
             } else if (val2.value() < val1.value()) {

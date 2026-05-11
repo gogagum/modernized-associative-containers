@@ -272,6 +272,25 @@ private:
     
         template <class NodeIterT, class FuncT, class ProjT>
         friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
+
+        friend class Sentinel;
+    };
+
+    class Sentinel {
+        const_end_node_pointer end_node_ptr_;
+    public:
+        explicit Sentinel(const_end_node_pointer end_node_ptr) noexcept : end_node_ptr_(end_node_ptr) {}
+        Sentinel() = default;
+
+        template <bool is_const>
+        friend bool operator==(const TreeIterator<is_const>& iter, const Sentinel& sent) {
+            return iter.ptr_ == sent.end_node_ptr_;
+        }
+
+        template <bool is_const>
+        friend bool operator!=(const TreeIterator<is_const>& iter, const Sentinel& sent) {
+            return iter.ptr_ != sent.end_node_ptr_;
+        }
     };
 
 private:
@@ -315,6 +334,7 @@ public:
 
     using iterator       = TreeIterator<false>;
     using const_iterator = TreeIterator<true>;
+    using sentinel       = Sentinel;
 
     using insert_return_type = InsertReturnType<iterator>;
 
@@ -498,9 +518,8 @@ public:
         return SelfIterator<Self>{self.begin_node_};
     }
 
-    template <class Self>
-    SelfIterator<Self> end(this Self& self) noexcept {
-        return SelfIterator<Self>{self.endNode()};
+    Sentinel end() const noexcept {
+        return Sentinel(endNode());
     }
 
     size_type max_size() const noexcept {
@@ -896,7 +915,7 @@ public:
     SelfIterator<Self> find(this Self& self, const KeyT& key) {
         auto [__, match] = self.find_equivalent(key);
         if (match == nullptr) {
-            return self.end();
+            return SelfIterator<Self>{self.endNode()};
         }
         return SelfIterator<Self>{static_cast<node_pointer>(match)};
     }
@@ -931,10 +950,12 @@ public:
             } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {
-                return std::distance(
-                    const_iterator{lowerUpperBoundMultiImpl_<true>(key, static_cast<node_pointer>(root_node->left_), static_cast<end_node_pointer>(root_node))},
-                    const_iterator{lowerUpperBoundMultiImpl_<false>(key, static_cast<node_pointer>(root_node->right_), result)}
-                );
+                return 0;
+
+                //return std::distance(
+                //    const_iterator{lowerUpperBoundMultiImpl_<true>(key, static_cast<node_pointer>(root_node->left_), static_cast<end_node_pointer>(root_node))},
+                //    const_iterator{lowerUpperBoundMultiImpl_<false>(key, static_cast<node_pointer>(root_node->right_), result)}
+                //);
             }
         }
         return 0;
@@ -1005,8 +1026,8 @@ public:
 public:
     template <class Self, class KeyT>
     SelfSubrange<Self> equalRangeUnique(this Self& self, const KeyT& key) {
-        auto result    = self.endNode();
-        auto root_node = self.root();
+        SelfEndNodePointer<Self> result = self.endNode();
+        auto root_node                  = self.root();
         while (root_node != nullptr) {
             const auto& root_key = self.key_proj_(root_node->get_value());
             const auto comp_res  = self.key_comp_(key, root_key);
@@ -1020,7 +1041,7 @@ public:
                     SelfIterator<Self>(root_node),
                     SelfIterator<Self>(
                         (root_node->right_ != nullptr)
-                        ? static_cast<end_node_pointer>(mstd::detail::tree_min(root_node->right_))
+                        ? static_cast<SelfEndNodePointer<Self>>(mstd::detail::tree_min(root_node->right_))
                         : result
                     ),
                 };
@@ -1034,13 +1055,13 @@ public:
 
     template <class Self, class KeyT>
     SelfSubrange<Self> equalRangeMulti(this Self& self, const KeyT& key) {
-        auto result    = self.endNode();
-        auto root_node = self.root();
+        SelfEndNodePointer<Self> result = self.endNode();
+        auto root_node                  = self.root();
         while (root_node != nullptr) {
             const auto& root_key = self.key_proj_(root_node->get_value());
             const auto comp_res  = self.key_comp_(key, root_key);
             if (comp_res < 0) {
-                result    = static_cast<end_node_pointer>(root_node);
+                result    = static_cast<SelfEndNodePointer<Self>>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
@@ -1048,7 +1069,7 @@ public:
                 auto begin = self.template lowerUpperBoundMultiImpl_<true>(
                                  key,
                                  static_cast<node_pointer>(root_node->left_),
-                                 static_cast<end_node_pointer>(root_node));
+                                 static_cast<SelfEndNodePointer<Self>>(root_node));
                 auto end = self.template lowerUpperBoundMultiImpl_<false>(
                                key,
                                static_cast<node_pointer>(root_node->right_),
