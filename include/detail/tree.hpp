@@ -658,143 +658,6 @@ void tree_iterate_subrange(NodeIterT begin, NodeIterT end, FuncT& func, ProjT& p
     }
 }
 
-template <class _Tp, class NodePtrT, class DiffTypeT>
-class TreeIterator {
-    using NodeTypes_       = __tree_node_types<NodePtrT>;
-    using NodePointer_     = NodePtrT;
-    using NodeBasePointer_ = NodeTypes_::node_base_pointer;
-    using EndNodePointer_  = NodeTypes_::end_node_pointer;
-
-    EndNodePointer_ ptr_;
-
-public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using value_type        = _Tp;
-    using difference_type   = DiffTypeT;
-    using reference         = value_type&;
-    using pointer           = std::pointer_traits<NodePtrT>::template rebind<value_type>;
-
-    TreeIterator() noexcept : ptr_(nullptr) {}
-
-    reference operator*() const {
-        return __get_np()->get_value();
-    }
-
-    pointer operator->() const {
-        return std::pointer_traits<pointer>::pointer_to(__get_np()->get_value());
-    }
-
-    TreeIterator& operator++() {
-        ptr_ = mstd::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
-        return *this;
-    }
-
-    TreeIterator operator++(int) {
-        TreeIterator iter(*this);
-        ++(*this);
-        return iter;
-    }
-
-    TreeIterator& operator--() {
-        ptr_ = static_cast<EndNodePointer_>(mstd::tree_prev_iter<NodeBasePointer_>(ptr_));
-        return *this;
-    }
-
-    TreeIterator operator--(int) {
-        TreeIterator iter(*this);
-        --(*this);
-        return iter;
-    }
-
-    friend bool operator==(const TreeIterator& lhs, const TreeIterator& rhs) {
-        return lhs.ptr_ == rhs.ptr_;
-    }
-
-    friend bool operator!=(const TreeIterator& lhs, const TreeIterator& rhs) {
-        return !(lhs == rhs);
-    }
-
-private:
-    explicit TreeIterator(NodePointer_ ptr) noexcept : ptr_(ptr) {}
-    explicit TreeIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
-    NodePointer_ __get_np() const { return static_cast<NodePointer_>(ptr_); }
-    template <class, class, class, class>
-    friend class Tree;
-    template <class, class, class>
-    friend class TreeConstIterator;
-
-    template <class NodeIterT, class FuncT, class ProjT>
-    friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
-};
-
-template <class _Tp, class NodePtrT, class DiffTypeT>
-class TreeConstIterator {
-    using NodeTypes_       = __tree_node_types<NodePtrT>;
-    using NodePointer_     = NodePtrT;
-    using NodeBasePointer_ = NodeTypes_::node_base_pointer;
-    using EndNodePointer_  = NodeTypes_::end_node_pointer;
-
-    EndNodePointer_ ptr_;
-
-public:
-    using iterator_category  = std::bidirectional_iterator_tag;
-    using value_type         = _Tp;
-    using difference_type    = DiffTypeT;
-    using reference          = const value_type&;
-    using pointer            = std::pointer_traits<NodePtrT>::template rebind<const value_type>;
-    using non_const_iterator = TreeIterator<_Tp, NodePointer_, difference_type>;
-
-    TreeConstIterator() noexcept : ptr_(nullptr) {}
-
-    TreeConstIterator(non_const_iterator non_const_iter) noexcept : ptr_(non_const_iter.ptr_) {}
-
-    reference operator*() const { return __get_np()->get_value(); }
-    pointer operator->() const {
-        return std::pointer_traits<pointer>::pointer_to(__get_np()->get_value());
-    }
-
-    TreeConstIterator& operator++() {
-        ptr_ = mstd::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
-        return *this;
-    }
-
-    TreeConstIterator operator++(int) {
-        TreeConstIterator ret(*this);
-        ++(*this);
-        return ret;
-    }
-
-    TreeConstIterator& operator--() {
-        ptr_ = static_cast<EndNodePointer_>(mstd::tree_prev_iter<NodeBasePointer_>(ptr_));
-        return *this;
-    }
-
-    TreeConstIterator operator--(int) {
-        TreeConstIterator ret(*this);
-        --(*this);
-        return ret;
-    }
-
-    friend bool operator==(const TreeConstIterator& lhs, const TreeConstIterator& rhs) {
-        return lhs.ptr_ == rhs.ptr_;
-    }
-
-    friend bool operator!=(const TreeConstIterator& lhs, const TreeConstIterator& rhs) {
-        return !(lhs == rhs);
-    }
-
-private:
-    explicit TreeConstIterator(NodePointer_ ptr) noexcept : ptr_(ptr) {}
-    explicit TreeConstIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
-    NodePointer_ __get_np() const { return static_cast<NodePointer_>(ptr_); }
-
-    template <class, class, class, class>
-    friend class Tree;
-
-    template <class NodeIterT, class FuncT, class ProjT>
-    friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
-};
-
 template <
     class ValueT
   , class KeyProj
@@ -845,6 +708,76 @@ private:
     static_assert(std::is_same_v<node_base_pointer, typename NodeBaseTraits_::pointer>,
                   "Allocator does not rebind pointers in a sane manner.");
 
+    template<bool is_const>
+    class TreeIterator {
+        using NodeTypes_       = __tree_node_types<node_pointer>;
+        using NodeBasePointer_ = NodeTypes_::node_base_pointer;
+        using EndNodePointer_  = NodeTypes_::end_node_pointer;
+    
+        EndNodePointer_ ptr_;
+    
+    public:
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type        = Tree::value_type;
+        using difference_type   = Tree::difference_type;
+        using reference         = std::conditional_t<is_const, const value_type&, value_type&>;
+        using pointer           = std::pointer_traits<node_pointer>::template rebind<value_type>;
+    
+        TreeIterator() noexcept : ptr_(nullptr) {}
+
+        template <bool other_is_const>
+        TreeIterator(TreeIterator<other_is_const> non_const_iter) noexcept requires (is_const || (other_is_const == is_const))
+            : ptr_(non_const_iter.ptr_) {}
+    
+        reference operator*() const {
+            return __get_np()->get_value();
+        }
+    
+        pointer operator->() const {
+            return std::pointer_traits<pointer>::pointer_to(__get_np()->get_value());
+        }
+    
+        TreeIterator& operator++() {
+            ptr_ = mstd::tree_next_iter<EndNodePointer_>(static_cast<NodeBasePointer_>(ptr_));
+            return *this;
+        }
+    
+        TreeIterator operator++(int) {
+            TreeIterator iter(*this);
+            ++(*this);
+            return iter;
+        }
+    
+        TreeIterator& operator--() {
+            ptr_ = static_cast<EndNodePointer_>(mstd::tree_prev_iter<NodeBasePointer_>(ptr_));
+            return *this;
+        }
+    
+        TreeIterator operator--(int) {
+            TreeIterator iter(*this);
+            --(*this);
+            return iter;
+        }
+    
+        friend bool operator==(const TreeIterator& lhs, const TreeIterator& rhs) {
+            return lhs.ptr_ == rhs.ptr_;
+        }
+
+        friend bool operator!=(const TreeIterator& lhs, const TreeIterator& rhs) {
+            return !(lhs == rhs);
+        }
+
+    private:
+        explicit TreeIterator(node_pointer ptr) noexcept : ptr_(ptr) {}
+        explicit TreeIterator(EndNodePointer_ ptr) noexcept : ptr_(ptr) {}
+        node_pointer __get_np() const { return static_cast<node_pointer>(ptr_); }
+        template <class, class, class, class>
+        friend class Tree;
+    
+        template <class NodeIterT, class FuncT, class ProjT>
+        friend void tree_iterate_subrange(NodeIterT, NodeIterT, FuncT&, ProjT&);
+    };
+
 private:
     end_node_pointer begin_node_;
     end_node_t end_node_;
@@ -881,8 +814,8 @@ public:
         return std::addressof(endNode()->left_);
     }
 
-    using iterator       = TreeIterator<ValueT, node_pointer, difference_type>;
-    using const_iterator = TreeConstIterator<ValueT, node_pointer, difference_type>;
+    using iterator       = TreeIterator<false>;
+    using const_iterator = TreeIterator<true>;
 
     using insert_return_type = InsertReturnType<iterator>;
 
