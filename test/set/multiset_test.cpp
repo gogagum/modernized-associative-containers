@@ -219,6 +219,26 @@ TEST(MultisetCompareTest, Test2)
     EXPECT_TRUE(m.contains(One{}));
 }
 
+TEST(MultisetReverseTest, Test1) {
+    auto s = mstd::multiset{1, 2, 4};
+
+    auto r = s | std::views::reverse;
+    auto e = std::vector{4, 2, 1};
+
+    EXPECT_TRUE(std::ranges::equal(r, e));
+}
+
+TEST(MultisetReverseTest, Test2) {
+    auto s = mstd::multiset{1, 2, 4};
+
+    auto r = std::vector<int>{};
+    std::ranges::copy(s.rbegin(), s.rend(), std::back_inserter(r));
+
+    auto e = std::vector{4, 2, 1};
+
+    EXPECT_TRUE(std::ranges::equal(r, e));
+}
+
 TEST(MultisetCountTest, Test1)
 {
     using namespace std;
