@@ -4,6 +4,14 @@
 
 #include <set.hpp>
 
+TEST(MultisetConstructorTests, FromVector)
+{
+    std::vector nums{1, 2, 2, 3};
+    auto c1 = mstd::multiset(nums.begin(), nums.end());
+    auto c2 = mstd::multiset(nums);
+    auto c3 = nums | std::ranges::to<mstd::multiset>();
+}
+
 TEST(MultisetCompare, Test1)
 {
     mstd::multiset<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};

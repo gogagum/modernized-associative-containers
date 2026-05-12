@@ -4,14 +4,115 @@
 
 #include <map.hpp>
 
-TEST(MapFromVector, Test1)
+TEST(MapConstructorTests, FromVectorOfPairs)
 {
     std::vector<std::pair<int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
     auto c1 = mstd::map(nums.begin(), nums.end());
-
-    std::vector<std::tuple<int, int>> nums2{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
-    auto c2 = mstd::map(nums2.begin(), nums2.end());
+    auto c2 = mstd::map(nums);
+    auto c3 = nums | std::ranges::to<mstd::map>();
 }
+
+TEST(MapConstructorTests, FromVectorOfTuples)
+{
+    std::vector<std::tuple<int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::map(nums.begin(), nums.end());
+    auto c2 = mstd::map(nums);
+    auto c3 = nums | std::ranges::to<mstd::map>();
+}
+
+TEST(MapConstructorTests, FromVectorOfPairsWithConstantKey)
+{
+    std::vector<std::pair<const int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::map(nums.begin(), nums.end());
+    auto c2 = mstd::map(nums);
+    auto c3 = nums | std::ranges::to<mstd::map>();
+}
+
+TEST(MapConstructorTests, FromVectorOfTuplesWithConstantKey)
+{
+    std::vector<std::tuple<const int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::map(nums.begin(), nums.end());
+    auto c2 = mstd::map(nums);
+    auto c3 = nums | std::ranges::to<mstd::map>();
+}
+
+TEST(MapTest, Compare1)
+{
+    mstd::map<int, int> c1{{1, 1}, {2, 1}, {3, 1}};
+    mstd::map<int, int> c2{{1, 1}, {2, 1}, {3, 1}, {4, 1}};
+    mstd::map<int, int> c3{{1, 1}, {2, 1}, {3, 2}};
+    EXPECT_EQ(c1, c1);
+    EXPECT_TRUE(std::is_eq(c1 <=> c1));
+    EXPECT_LT(c1, c2);
+    EXPECT_TRUE(std::is_lt(c1 <=> c2));
+    EXPECT_LT(c1, c3);
+    EXPECT_TRUE(std::is_lt(c1 <=> c3));
+    EXPECT_LT(c2, c3);
+    EXPECT_TRUE(std::is_lt(c2 <=> c3));
+
+    static_assert(std::totally_ordered<mstd::map<int, int>>);
+
+    static_assert(std::three_way_comparable<mstd::map<int, int>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<mstd::map<float, float, mstd::FpCompareThreeWay<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<mstd::map<float, float, mstd::FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<mstd::map<int, float>, std::partial_ordering>);
+
+    struct E
+    {
+        auto operator<=>(E) const noexcept { return std::weak_ordering::equivalent; }
+    };
+    static_assert(std::totally_ordered<mstd::map<E, int>>);
+    static_assert(!std::three_way_comparable<E>);
+    static_assert(std::three_way_comparable<mstd::map<E, int>>);
+}
+
+TEST(MapTest, Compare2)
+{
+    struct W
+    {
+        int value = 0;
+
+        bool operator==(W rhs) const noexcept
+        {
+            return (value | 1) == (rhs.value | 1);
+        }
+
+        std::weak_ordering
+        operator<=>(W rhs) const noexcept
+        {
+            return (value | 1) <=> (rhs.value | 1);
+        }
+    };
+
+    static_assert(std::totally_ordered<mstd::map<int, W>>);
+
+    mstd::map<W, W> c1{{1, 1}, {2, 2}, {3, 3}}, c2{{1, 0}, {3, 2}, {3, 3}};
+    static_assert(std::same_as<decltype(c1 <=> c1), std::weak_ordering>);
+    EXPECT_EQ(c1, c2);
+    EXPECT_TRUE(std::is_eq(c1 <=> c2));
+}
+
+TEST(MapTest, Compare3)
+{
+    struct L
+    {
+        int value = 0;
+
+        std::weak_ordering operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
+        bool operator==(const L&) const = default;
+    };
+
+    static_assert(std::totally_ordered<mstd::map<int, L>>);
+
+    mstd::map<L, L> c{{1, 1}, {2, 2}, {3, 3}}, d{{1, 1}, {2, 2}, {3, 4}};
+
+    static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
+    EXPECT_TRUE(std::is_lt(c <=> d));
+}
+
+// Associative container iterators are not random access
+static_assert(!std::totally_ordered<mstd::map<int, int>::iterator>);
+static_assert(!std::three_way_comparable<mstd::map<int, int>::iterator>);
 
 TEST(MapInsertTest, Test1)
 {

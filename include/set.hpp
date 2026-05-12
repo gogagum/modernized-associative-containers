@@ -567,7 +567,7 @@ public:
              const key_compare& comp = key_compare(),
              const allocator_type& alloc = allocator_type())
     : tree_(comp, alloc) {
-        insert_range(std::forward<RangeT>(range));
+        insert(std::forward<RangeT>(range));
     }
 
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -803,16 +803,17 @@ public:
 
 template <
     std::input_iterator IteratorT
+  , std::sentinel_for<IteratorT> SentinelT
   , OrdersAtLeastWeakly<std::iter_value_t<IteratorT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
+  , Allocator AllocatorT                                       = std::allocator<std::iter_value_t<IteratorT>>
 >
-multiset(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
+multiset(IteratorT, SentinelT, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<std::iter_value_t<IteratorT>, CompareT, AllocatorT>;
 
 template <
     std::ranges::input_range RangeT
   , OrdersAtLeastWeakly<std::ranges::range_value_t<RangeT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
+  , Allocator AllocatorT                                             = std::allocator<std::ranges::range_value_t<RangeT>>
 >
 multiset(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multiset<std::ranges::range_value_t<RangeT>, CompareT, AllocatorT>;
@@ -827,10 +828,10 @@ multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = Alloca
 
 template <
     std::input_iterator IteratorT
-  , std::sentinel_for<IteratorT> Sentinel
+  , std::sentinel_for<IteratorT> SentinelT
   , Allocator AllocatorT
 >
-multiset(IteratorT, Sentinel, AllocatorT)
+multiset(IteratorT, SentinelT, AllocatorT)
 -> multiset<
        std::iter_value_t<IteratorT>
      , CompareThreeWay

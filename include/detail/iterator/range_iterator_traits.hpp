@@ -10,21 +10,30 @@
 #ifndef MSTD_ITERATOR_RANGES_ITERATOR_TRAITS_HPP
 #define MSTD_ITERATOR_RANGES_ITERATOR_TRAITS_HPP
 
-#include <utility>
+#include <tuple>
 #include <type_traits>
 #include <ranges>
+
+#include <detail/map_value.hpp>
 
 namespace mstd {
 
 template <std::ranges::input_range RangeT>
-using __range_key_type = std::remove_const_t<typename std::ranges::range_value_t<RangeT>::first_type>;
+using __range_key_type
+    = std::remove_const_t<
+        std::tuple_element_t<0, std::ranges::range_value_t<RangeT>>
+      >;
 
 template <std::ranges::input_range RangeT>
-using __range_mapped_type = typename std::ranges::range_value_t<RangeT>::second_type;
+using __range_mapped_type
+    = std::tuple_element_t<1, std::ranges::range_value_t<RangeT>>;
 
 template <std::ranges::input_range RangeT>
-using __range_to_alloc_type =
-    std::pair<const typename std::ranges::range_value_t<RangeT>::first_type, typename std::ranges::range_value_t<RangeT>::second_type>;
+using __range_to_alloc_type
+    = MapValue<
+        std::remove_const_t<std::tuple_element_t<0, std::ranges::range_value_t<RangeT>>>,
+        std::tuple_element_t<1, std::ranges::range_value_t<RangeT>>
+      >;
 
 } // namespace mstd
 

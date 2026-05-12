@@ -497,12 +497,13 @@ public:
 
 template <
     std::input_iterator IteratorT
+  , std::sentinel_for<IteratorT> SentinelT
   , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = CompareThreeWay
   , Allocator AllocatorT                                     = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
 map(
     IteratorT,
-    IteratorT,
+    SentinelT,
     CompareT = CompareT(),
     AllocatorT = AllocatorT()
 ) -> map<
@@ -544,8 +545,11 @@ map(
        , AllocatorT
      >;
 
-template <std::input_iterator IteratorT, Allocator AllocatorT>
-map(IteratorT, IteratorT, AllocatorT)
+template <
+    std::input_iterator IteratorT,
+    std::sentinel_for<IteratorT> SentinelT,
+    Allocator AllocatorT>
+map(IteratorT, SentinelT, AllocatorT)
 -> map<
     __iter_key_type<IteratorT>
   , __iter_mapped_type<IteratorT>
@@ -967,8 +971,8 @@ public:
 template <
     std::input_iterator IteratorT
   , std::sentinel_for<IteratorT> Sentinel
-  , OrdersAtLeastWeakly<__iter_to_alloc_type<IteratorT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<__iter_to_alloc_type<IteratorT>>
+  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                     = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
 multimap(IteratorT, Sentinel, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<
@@ -980,8 +984,8 @@ multimap(IteratorT, Sentinel, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<__range_to_alloc_type<RangeT>> CompareT = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<__range_to_alloc_type<RangeT>>
+  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = CompareThreeWay
+  , Allocator AllocatorT                                   = std::allocator<__range_to_alloc_type<RangeT>>
 >
 multimap(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 -> multimap<

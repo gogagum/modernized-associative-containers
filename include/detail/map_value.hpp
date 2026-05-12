@@ -20,9 +20,18 @@ public:
         std::is_nothrow_move_constructible_v<KeyT> && std::is_nothrow_move_constructible_v<ValueT>
     ) = default;
     // TODO(gogagum): think of a constructor that gets key and value via structured binding
-    MapValue(const std::pair<KeyT, ValueT>& kv_pair) : key_(kv_pair.first), value_(kv_pair.second) {}
+    template <class KT, class VT>
+    MapValue(const std::pair<KT, VT>& kv_pair)
+    : key_(kv_pair.first)
+    , value_(kv_pair.second) {}
+    
     MapValue(std::pair<KeyT, ValueT>&& kv_pair) : key_(std::move(kv_pair.first)), value_(std::move(kv_pair.second)) {}
-    MapValue(const std::tuple<KeyT, ValueT>& kv_pair) : key_(std::get<0>(kv_pair)), value_(std::get<1>(kv_pair)) {}
+
+    template <class KT, class VT>
+    MapValue(const std::tuple<KT, VT>& kv_pair)
+    : key_(std::get<0>(kv_pair))
+    , value_(std::get<1>(kv_pair)) {}
+
     MapValue(std::tuple<KeyT, ValueT>&& kv_pair) : key_(std::move(std::get<0>(kv_pair))), value_(std::move(std::get<1>(kv_pair))) {}
 
     template <class KT, class VT>
@@ -73,6 +82,13 @@ private:
 
 template <class KT, class VT>
 MapValue(KT&& key, VT&& value) -> MapValue<std::remove_cvref_t<KT>, std::remove_cvref_t<VT>>;
+
+template <class KT, class VT>
+MapValue(const std::pair<KT, VT>& kv_pair) -> MapValue<std::remove_cvref_t<KT>, std::remove_cvref_t<VT>>;
+
+template <class KT, class VT>
+MapValue(const std::tuple<KT, VT>& kv_pair) -> MapValue<std::remove_cvref_t<KT>, std::remove_cvref_t<VT>>;
+
 
 }
 

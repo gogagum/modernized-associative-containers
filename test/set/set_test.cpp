@@ -3,6 +3,14 @@
 
 #include <set.hpp>
 
+TEST(SetConstructorTests, FromVector)
+{
+    std::vector nums{1, 2, 2, 3};
+    auto c1 = mstd::set(nums.begin(), nums.end());
+    auto c2 = mstd::set(nums);
+    auto c3 = nums | std::ranges::to<mstd::set>();
+}
+
 TEST(SetFromVector, Test1)
 {
     std::vector<int> nums{1, 2, 2, 3};

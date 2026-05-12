@@ -10,6 +10,38 @@
 #include <string>
 #include <compare>
 
+TEST(MultimapConstructorTests, FromVectorOfPairs)
+{
+    std::vector<std::pair<int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::multimap(nums.begin(), nums.end());
+    auto c2 = mstd::multimap(nums);
+    auto c3 = nums | std::ranges::to<mstd::multimap>();
+}
+
+TEST(MultimapConstructorTests, FromVectorOfTuples)
+{
+    std::vector<std::tuple<int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::multimap(nums.begin(), nums.end());
+    auto c2 = mstd::multimap(nums);
+    auto c3 = nums | std::ranges::to<mstd::multimap>();
+}
+
+TEST(MultimapConstructorTests, FromVectorOfPairsWithConstantKey)
+{
+    std::vector<std::pair<const int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::multimap(nums.begin(), nums.end());
+    auto c2 = mstd::multimap(nums);
+    auto c3 = nums | std::ranges::to<mstd::multimap>();
+}
+
+TEST(MultimapConstructorTests, FromVectorOfTuplesWithConstantKey)
+{
+    std::vector<std::tuple<const int, int>> nums{{1, 10}, {2, 20}, {2, 20}, {3, 30}};
+    auto c1 = mstd::multimap(nums.begin(), nums.end());
+    auto c2 = mstd::multimap(nums);
+    auto c3 = nums | std::ranges::to<mstd::multimap>();
+}
+
 TEST(MultimapTest, Compare1)
 {
     mstd::multimap<int, int> c1{{1, 1}, {2, 1}, {3, 1}};
@@ -84,7 +116,6 @@ TEST(MultimapTest, Compare3)
     static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
     EXPECT_TRUE(std::is_lt(c <=> d));
 }
-    
 
 // Associative container iterators are not random access
 static_assert(!std::totally_ordered<mstd::multimap<int, int>::iterator>);
@@ -92,18 +123,15 @@ static_assert(!std::three_way_comparable<mstd::multimap<int, int>::iterator>);
 
 TEST(MultimapOperationsTest, Test1)
 {
-    using namespace std;
+    mstd::multimap<int, int> mm0;
+    typedef mstd::multimap<int, int>::iterator iterator;
+    typedef mstd::multimap<int, int>::const_iterator const_iterator;
+    typedef mstd::multimap<int, int>::value_type value_type;
 
-    multimap<int, int> mm0;
-    typedef multimap<int, int>::iterator iterator;
-    typedef multimap<int, int>::const_iterator const_iterator;
-    pair<iterator, iterator> pp0;
-    typedef multimap<int, int>::value_type value_type;
-
-    pp0 = mm0.equal_range(1);
+    auto pp0 = mm0.equal_range(1);
     EXPECT_EQ(mm0.count(1), 0);
-    EXPECT_EQ(pp0.first, mm0.end());
-    EXPECT_EQ(pp0.second, mm0.end());
+    EXPECT_EQ(pp0.begin(), mm0.end());
+    EXPECT_EQ(pp0.end(), mm0.end());
 
     iterator iter0 = mm0.insert(value_type(1, 1));
     iterator iter1 = mm0.insert(value_type(2, 2));
@@ -111,11 +139,11 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(2);
     EXPECT_EQ(mm0.count(2), 1);
-    EXPECT_EQ(*pp0.first, value_type(2, 2));
-    EXPECT_EQ(*pp0.second, value_type(3, 3));
-    EXPECT_EQ(pp0.first, iter1);
-    EXPECT_EQ(--pp0.first, iter0);
-    EXPECT_EQ(pp0.second, iter2);
+    EXPECT_EQ(*pp0.begin(), value_type(2, 2));
+    EXPECT_EQ(*pp0.end(), value_type(3, 3));
+    EXPECT_EQ(pp0.begin(), iter1);
+    EXPECT_EQ(--pp0.begin(), iter0);
+    EXPECT_EQ(pp0.end(), iter2);
 
     mm0.insert(value_type(3, 4));
     iterator iter3 = mm0.insert(value_type(3, 5));
@@ -123,11 +151,11 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(3);
     EXPECT_EQ(mm0.count(3), 3);
-    EXPECT_EQ(*pp0.first, value_type(3, 3));
-    EXPECT_EQ(*pp0.second, value_type(4, 6));
-    EXPECT_EQ(pp0.first, iter2);
-    EXPECT_EQ(--pp0.first, iter1);
-    EXPECT_EQ(pp0.second, iter4);
+    EXPECT_EQ(*pp0.begin(), value_type(3, 3));
+    EXPECT_EQ(*pp0.end(), value_type(4, 6));
+    EXPECT_EQ(pp0.begin(), iter2);
+    EXPECT_EQ(--pp0.begin(), iter1);
+    EXPECT_EQ(pp0.end(), iter4);
 
     iterator iter5 = mm0.insert(value_type(0, 7));
     mm0.insert(value_type(1, 8));
@@ -136,11 +164,11 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(1);
     EXPECT_EQ(mm0.count(1), 4);
-    EXPECT_EQ(*pp0.first, value_type(1, 1));
-    EXPECT_EQ(*pp0.second, value_type(2, 2));
-    EXPECT_EQ(pp0.first, iter0);
-    EXPECT_EQ(--pp0.first, iter5);
-    EXPECT_EQ(pp0.second, iter1);
+    EXPECT_EQ(*pp0.begin(), value_type(1, 1));
+    EXPECT_EQ(*pp0.end(), value_type(2, 2));
+    EXPECT_EQ(pp0.begin(), iter0);
+    EXPECT_EQ(--pp0.begin(), iter5);
+    EXPECT_EQ(pp0.end(), iter1);
 
     iterator iter6 = mm0.insert(value_type(5, 11));
     mm0.insert(value_type(5, 12));
@@ -148,10 +176,10 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(5);
     EXPECT_EQ(mm0.count(5), 3);
-    EXPECT_EQ(*pp0.first, value_type(5, 11));
-    EXPECT_EQ(pp0.first, iter6);
-    EXPECT_EQ(--pp0.first, iter4);
-    EXPECT_EQ(pp0.second, mm0.end());
+    EXPECT_EQ(*pp0.begin(), value_type(5, 11));
+    EXPECT_EQ(pp0.begin(), iter6);
+    EXPECT_EQ(--pp0.begin(), iter4);
+    EXPECT_EQ(pp0.end(), mm0.end());
 
     mm0.insert(value_type(4, 14));
     mm0.insert(value_type(4, 15));
@@ -159,11 +187,11 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(4);
     EXPECT_EQ(mm0.count(4), 4);
-    EXPECT_EQ(*pp0.first, value_type(4, 6));
-    EXPECT_EQ(*pp0.second, value_type(5, 11));
-    EXPECT_EQ(pp0.first, iter4);
-    EXPECT_EQ(--pp0.first, iter3);
-    EXPECT_EQ(pp0.second, iter6);
+    EXPECT_EQ(*pp0.begin(), value_type(4, 6));
+    EXPECT_EQ(*pp0.end(), value_type(5, 11));
+    EXPECT_EQ(pp0.begin(), iter4);
+    EXPECT_EQ(--pp0.begin(), iter3);
+    EXPECT_EQ(pp0.end(), iter6);
 
     mm0.insert(value_type(0, 17));
     iterator iter7 = mm0.insert(value_type(0, 18));
@@ -171,20 +199,20 @@ TEST(MultimapOperationsTest, Test1)
 
     pp0 = mm0.equal_range(0);
     EXPECT_EQ(mm0.count(0), 3);
-    EXPECT_EQ(*pp0.first, value_type(0, 7));
-    EXPECT_EQ(*pp0.second, value_type(1, 1));
-    EXPECT_EQ(pp0.first, iter5);
-    EXPECT_EQ(pp0.first, mm0.begin());
-    EXPECT_EQ(pp0.second, iter0);
+    EXPECT_EQ(*pp0.begin(), value_type(0, 7));
+    EXPECT_EQ(*pp0.end(), value_type(1, 1));
+    EXPECT_EQ(pp0.begin(), iter5);
+    EXPECT_EQ(pp0.begin(), mm0.begin());
+    EXPECT_EQ(pp0.end(), iter0);
 
-    const multimap<int, int> &mm1 = mm0;
-    pair<const_iterator, const_iterator> pp1 = mm1.equal_range(1);
+    const mstd::multimap<int, int> &mm1 = mm0;
+    auto pp1 = mm1.equal_range(1);
     EXPECT_EQ(mm1.count(1), 5);
-    EXPECT_EQ(*pp1.first, value_type(1, 1));
-    EXPECT_EQ(*pp1.second, value_type(2, 2));
-    EXPECT_EQ(pp1.first, iter0);
-    EXPECT_EQ(--pp1.first, iter7);
-    EXPECT_EQ(pp1.second, iter1);
+    EXPECT_EQ(*pp1.begin(), value_type(1, 1));
+    EXPECT_EQ(*pp1.end(), value_type(2, 2));
+    EXPECT_EQ(pp1.begin(), iter0);
+    EXPECT_EQ(--pp1.begin(), iter7);
+    EXPECT_EQ(pp1.end(), iter1);
 }
 
 struct T
