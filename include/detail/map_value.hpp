@@ -1,6 +1,7 @@
 #ifndef MSTD_DETAIL_MAP_VALUE_HPP
 #define MSTD_DETAIL_MAP_VALUE_HPP
 
+#include <type_traits>
 #include <utility>
 #include <tuple>
 
@@ -15,7 +16,9 @@ public:
 
     MapValue() = default;
     MapValue(const MapValue&) = default;
-    MapValue(MapValue&&) = default; // TODO(gogagum): make this noexcept when possible
+    MapValue(MapValue&&) noexcept(
+        std::is_nothrow_move_constructible_v<KeyT> && std::is_nothrow_move_constructible_v<ValueT>
+    ) = default;
     MapValue(const KeyT& key, const ValueT& value) : key_(key), value_(value) {}
     // TODO(gogagum): think of a constructor that gets key and value via structured binding
     MapValue(const std::pair<KeyT, ValueT>& kv_pair) : key_(kv_pair.first), value_(kv_pair.second) {}
@@ -49,7 +52,9 @@ private:
     };
 
     MapValue& operator=(const MapValue&) = default;
-    MapValue& operator=(MapValue&&) = default; // TODO(gogagum): make this noexcept when possible
+    MapValue& operator=(MapValue&&) noexcept(
+        std::is_nothrow_move_assignable_v<KeyT> && std::is_nothrow_move_assignable_v<ValueT>
+    ) = default;
 
     KeyT key_;
     ValueT value_;
