@@ -19,15 +19,17 @@ public:
     MapValue(MapValue&&) noexcept(
         std::is_nothrow_move_constructible_v<KeyT> && std::is_nothrow_move_constructible_v<ValueT>
     ) = default;
-    MapValue(const KeyT& key, const ValueT& value) : key_(key), value_(value) {}
     // TODO(gogagum): think of a constructor that gets key and value via structured binding
     MapValue(const std::pair<KeyT, ValueT>& kv_pair) : key_(kv_pair.first), value_(kv_pair.second) {}
     MapValue(std::pair<KeyT, ValueT>&& kv_pair) : key_(std::move(kv_pair.first)), value_(std::move(kv_pair.second)) {}
     MapValue(const std::tuple<KeyT, ValueT>& kv_pair) : key_(std::get<0>(kv_pair)), value_(std::get<1>(kv_pair)) {}
     MapValue(std::tuple<KeyT, ValueT>&& kv_pair) : key_(std::move(std::get<0>(kv_pair))), value_(std::move(std::get<1>(kv_pair))) {}
-    MapValue(KeyT&& key, ValueT&& value) : key_(std::move(key)), value_(std::move(value)) {}
+
     template <class KT, class VT>
-    MapValue(KT&& key, VT&& value) : key_(std::forward<KT>(key)), value_(std::forward<VT>(value)) {}
+    MapValue(KT&& key, VT&& value)
+    : key_(std::forward<KT>(key))
+    , value_(std::forward<VT>(value)) {}
+
     template <class... KeyArgsT, class... ValueArgsT>
     MapValue(std::piecewise_construct_t, std::tuple<KeyArgsT...> key_args, std::tuple<ValueArgsT...> value_args)
         : key_(std::make_from_tuple<KeyT>(std::move(key_args)))
@@ -69,6 +71,8 @@ private:
     friend class Tree;
 };
 
+template <class KT, class VT>
+MapValue(KT&& key, VT&& value) -> MapValue<std::remove_cvref_t<KT>, std::remove_cvref_t<VT>>;
 
 }
 
