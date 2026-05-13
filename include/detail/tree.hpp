@@ -318,11 +318,15 @@ public:
 
     using insert_return_type = InsertReturnType<iterator>;
 
+private:
+
     template <class Self>
     using SelfIterator = std::conditional_t<std::is_const_v<Self>, const_iterator, iterator>;
 
     template <class Self>
     using SelfSubrange = std::ranges::subrange<SelfIterator<Self>>;
+
+public:
 
     explicit Tree(const key_compare& comp) noexcept(
         std::is_nothrow_default_constructible<node_allocator>::value
@@ -494,12 +498,12 @@ public:
     }
 
     template <class Self>
-    SelfIterator<Self> begin(this Self& self) noexcept {
+    auto begin(this Self& self) noexcept {
         return SelfIterator<Self>{self.begin_node_};
     }
 
     template <class Self>
-    SelfIterator<Self> end(this Self& self) noexcept {
+    auto end(this Self& self) noexcept {
         return SelfIterator<Self>{self.endNode()};
     }
 
@@ -893,7 +897,7 @@ public:
     }
 
     template <class Self, class KeyT>
-    SelfIterator<Self> find(this Self& self, const KeyT& key) {
+    auto find(this Self& self, const KeyT& key) {
         auto [__, match] = self.find_equivalent(key);
         if (match == nullptr) {
             return self.end();
@@ -941,12 +945,12 @@ public:
     }
 
     template <class Self, class KeyT>
-    SelfIterator<Self> lowerBoundUnique(this Self& self, const KeyT& key) {
+    auto lowerBoundUnique(this Self& self, const KeyT& key) {
         return SelfIterator<Self>{self.template lowerUpperBoundUniqueImpl_<true>(key)};
     }
 
     template <class Self, class KeyT>
-    SelfIterator<Self> upperBoundUnique(this Self& self, const KeyT& key) {
+    auto upperBoundUnique(this Self& self, const KeyT& key) {
         return SelfIterator<Self>(self.template lowerUpperBoundUniqueImpl_<false>(key));
     }
 
@@ -993,18 +997,18 @@ private:
 
 public:
     template <class Self, class KeyT>
-    SelfIterator<Self> lowerBoundMulti(this Self& self, const KeyT& key) {
+    auto lowerBoundMulti(this Self& self, const KeyT& key) {
         return SelfIterator<Self>{self.template lowerUpperBoundMultiImpl_<true>(key, self.root(), self.endNode())};
     }
     
     template <class Self, class KeyT>
-    SelfIterator<Self> upperBoundMulti(this Self& self, const KeyT& key) {
+    auto upperBoundMulti(this Self& self, const KeyT& key) {
         return SelfIterator<Self>{self.template lowerUpperBoundMultiImpl_<false>(key, self.root(), self.endNode())};
     }
 
 public:
     template <class Self, class KeyT>
-    SelfSubrange<Self> equalRangeUnique(this Self& self, const KeyT& key) {
+    auto equalRangeUnique(this Self& self, const KeyT& key) {
         auto result    = self.endNode();
         auto root_node = self.root();
         while (root_node != nullptr) {
@@ -1016,7 +1020,7 @@ public:
             } else if (comp_res > 0) {
                 root_node = static_cast<node_pointer>(root_node->right_);
             } else {
-                return {
+                return SelfSubrange<Self>{
                     SelfIterator<Self>(root_node),
                     SelfIterator<Self>(
                         (root_node->right_ != nullptr)
@@ -1026,14 +1030,14 @@ public:
                 };
             }
         }
-        return {
+        return SelfSubrange<Self>{
             SelfIterator<Self>(result),
             SelfIterator<Self>(result),
         };
     }
 
     template <class Self, class KeyT>
-    SelfSubrange<Self> equalRangeMulti(this Self& self, const KeyT& key) {
+    auto equalRangeMulti(this Self& self, const KeyT& key) {
         auto result    = self.endNode();
         auto root_node = self.root();
         while (root_node != nullptr) {
@@ -1053,13 +1057,13 @@ public:
                                key,
                                static_cast<node_pointer>(root_node->right_),
                                result);
-                return {
+                return SelfSubrange<Self>{
                     SelfIterator<Self>{begin},
                     SelfIterator<Self>{end},
                 };
             }
         }
-        return {
+        return SelfSubrange<Self>{
             SelfIterator<Self>(result),
             SelfIterator<Self>(result),
         };
