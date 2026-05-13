@@ -183,17 +183,16 @@ public:
     using end_node_t             = EndNode;
     using end_node_pointer       = void_pointer_traits::template rebind<end_node_t>;
     using const_end_node_pointer = void_pointer_traits::template rebind<const end_node_t>;
+    using node_allocator = AllocTraits_::template rebind_alloc<node>;
+    using node_traits    = std::allocator_traits<node_allocator>;
 
+private:
     template <class Self>
     using SelfEndNodePointer = std::conditional_t<std::is_const_v<Self>, const_end_node_pointer, end_node_pointer>;
 
     template <class Self>
     using SelfNodeBasePointerRef = std::conditional_t<std::is_const_v<Self>, const node_base_pointer, node_base_pointer>&;
 
-    using node_allocator = AllocTraits_::template rebind_alloc<node>;
-    using node_traits    = std::allocator_traits<node_allocator>;
-
-private:
     // check for sane allocator pointer rebinding semantics. Rebinding the
     // allocator for a new pointer type should be exactly the same as rebinding
     // the pointer using 'pointer_traits'.
@@ -285,7 +284,7 @@ private:
 
 public:
     template <class Self>
-    SelfEndNodePointer<Self> endNode(this Self& self) noexcept {
+    auto endNode(this Self& self) noexcept {
         return std::pointer_traits<SelfEndNodePointer<Self>>::pointer_to(self.end_node_);
     }
 
@@ -980,8 +979,7 @@ private:
     }
 
     template <bool lower_bound, class Self, class KeyT>
-    SelfEndNodePointer<Self>
-    lowerUpperBoundMultiImpl_(this Self& self, const KeyT& key, node_pointer root_node, SelfEndNodePointer<Self> result) {
+    auto lowerUpperBoundMultiImpl_(this Self& self, const KeyT& key, node_pointer root_node, SelfEndNodePointer<Self> result) {
         while (root_node != nullptr) {
             const auto& root_key = self.key_proj_(root_node->get_value());
             const auto comp_res = self.key_comp_(key, root_key);
