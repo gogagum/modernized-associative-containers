@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    struct KeyProj {
+    struct key_proj_ {
         KeyT& operator()(MapValue& mv) const {
             return mv.key_;
         }

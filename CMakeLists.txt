@@ -34,7 +34,8 @@ add_executable(map-test
     test/map/map_constructor.cpp
     test/map/map_insertion.cpp
     test/map/map_lookup.cpp
-    test/map/map_operations.cpp)
+    test/map/map_operations.cpp
+    test/src/tracker_allocator.cpp)
 
 target_include_directories(map-test PRIVATE test/include)
 target_link_libraries(map-test GTest::gtest_main modernized-associative-containers)

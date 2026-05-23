@@ -64,7 +64,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_         = mstd::Tree<value_type, typename value_type::KeyProj, key_compare, allocator_type>;
+    using Tree_         = mstd::Tree<value_type, typename value_type::key_proj_, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
@@ -630,7 +630,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_         = Tree<value_type, typename value_type::KeyProj, key_compare, allocator_type>;
+    using Tree_         = Tree<value_type, typename value_type::key_proj_, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;

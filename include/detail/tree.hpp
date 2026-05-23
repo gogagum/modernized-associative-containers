@@ -67,7 +67,7 @@ public:
 
 private:
     using AllocTraits_ = std::allocator_traits<allocator_type>;
-    using KeyType_     = std::remove_cvref_t<decltype(std::invoke(std::declval<const KeyProj&>(), std::declval<value_type&>()))>;
+    using KeyType_     = std::remove_cvref_t<decltype(std::invoke(std::declval<const key_proj&>(), std::declval<value_type&>()))>;
     static_assert(OrdersAtLeastWeakly<key_compare, KeyType_>, "key_compare must be at least a weak ordering on the projected key type");
 
 public:
