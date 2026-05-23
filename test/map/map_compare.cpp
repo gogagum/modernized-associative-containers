@@ -23,8 +23,8 @@ TEST(MapCompareTests, CompareNumeric)
     static_assert(std::totally_ordered<map<int, int>>);
 
     static_assert(std::three_way_comparable<map<int, int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<map<float, float, FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<map<float, float, FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(!std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::weak_ordering>);
     static_assert(std::three_way_comparable<map<int, float>, std::weak_ordering>);
 
     static_assert(std::totally_ordered<map<test::AllEqual, int>>);

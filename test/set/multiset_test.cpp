@@ -29,9 +29,9 @@ TEST(MultisetCompare, Test1)
     static_assert(std::totally_ordered<multiset<int>>);
 
     static_assert(std::three_way_comparable<multiset<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::partial_ordering>);
+    static_assert(!std::three_way_comparable<multiset<float, fp_compare_three_way<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<multiset<float, fp_compare_three_way<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<multiset<float, fp_compare_three_way<float>>, std::partial_ordering>);
 
     struct E
     {

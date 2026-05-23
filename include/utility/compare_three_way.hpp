@@ -8,7 +8,7 @@
 
 namespace mstd {
 
-    struct CompareThreeWay {
+    struct compare_three_way {
         template <class T, class U>
         auto operator()(T&& lhs, U&& rhs) const {
             return std::forward<T>(lhs) <=> std::forward<U>(rhs);
@@ -16,7 +16,7 @@ namespace mstd {
     };
 
     template <std::floating_point T>
-    struct FpCompareThreeWay {
+    struct fp_compare_three_way {
         std::weak_ordering operator()(T lhs, T rhs) const {
             assert(!std::isnan(lhs) && !std::isnan(rhs));
             if (lhs < rhs) {

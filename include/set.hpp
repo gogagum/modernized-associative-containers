@@ -23,7 +23,7 @@
 #include <detail/concepts/allocator_concept.hpp>
 #include <detail/concepts/compare_concepts.hpp>
 #include <detail/concepts/container_compatible_range.hpp>
-#include <detail/utility/compare_three_way.hpp>
+#include <utility/compare_three_way.hpp>
 #include <memory_resource>
 #include <utility>
 #include <version>
@@ -33,14 +33,14 @@ namespace mstd {
 
 template <
     class KeyT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<KeyT>
 >
 class multiset;
 
 template <
     class KeyT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT               = std::allocator<KeyT>
 >
 class set {
@@ -399,7 +399,7 @@ public:
 
 template <
     std::input_iterator IteratorT
-  , OrdersAtLeastWeakly<std::iter_value_t<IteratorT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<std::iter_value_t<IteratorT>> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<std::iter_value_t<IteratorT>>
 >
 set(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -407,7 +407,7 @@ set(IteratorT, IteratorT, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<std::ranges::range_value_t<RangeT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<std::ranges::range_value_t<RangeT>> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<std::ranges::range_value_t<RangeT>>
 >
 set(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -415,7 +415,7 @@ set(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     class KeyT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<KeyT>
 >
 set(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -427,14 +427,14 @@ template <
   , Allocator AllocatorT
 >
 set(IteratorT, Sentinel, AllocatorT)
--> set<std::iter_value_t<IteratorT>, CompareThreeWay, AllocatorT>;
+-> set<std::iter_value_t<IteratorT>, compare_three_way, AllocatorT>;
 
 template <std::ranges::input_range RangeT, Allocator AllocatorT>
 set(RangeT&&, AllocatorT)
--> set<std::ranges::range_value_t<RangeT>, CompareThreeWay, AllocatorT>;
+-> set<std::ranges::range_value_t<RangeT>, compare_three_way, AllocatorT>;
 
 template <class KeyT, Allocator AllocatorT>
-set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, CompareThreeWay, AllocatorT>;
+set(std::initializer_list<KeyT>, AllocatorT) -> set<KeyT, compare_three_way, AllocatorT>;
 
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
@@ -785,7 +785,7 @@ public:
 template <
     std::input_iterator IteratorT
   , std::sentinel_for<IteratorT> SentinelT
-  , OrdersAtLeastWeakly<std::iter_value_t<IteratorT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<std::iter_value_t<IteratorT>> CompareT = compare_three_way
   , Allocator AllocatorT                                       = std::allocator<std::iter_value_t<IteratorT>>
 >
 multiset(IteratorT, SentinelT, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -793,7 +793,7 @@ multiset(IteratorT, SentinelT, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<std::ranges::range_value_t<RangeT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<std::ranges::range_value_t<RangeT>> CompareT = compare_three_way
   , Allocator AllocatorT                                             = std::allocator<std::ranges::range_value_t<RangeT>>
 >
 multiset(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -801,7 +801,7 @@ multiset(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     class KeyT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<KeyT>
 >
 multiset(std::initializer_list<KeyT>, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -815,7 +815,7 @@ template <
 multiset(IteratorT, SentinelT, AllocatorT)
 -> multiset<
        std::iter_value_t<IteratorT>
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -823,13 +823,13 @@ template <std::ranges::input_range RangeT, Allocator AllocatorT>
 multiset(RangeT&&, AllocatorT)
 -> multiset<
        std::ranges::range_value_t<RangeT>
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
 template <class KeyT, Allocator AllocatorT>
 multiset(std::initializer_list<KeyT>, AllocatorT)
--> multiset<KeyT, CompareThreeWay, AllocatorT>;
+-> multiset<KeyT, compare_three_way, AllocatorT>;
 
 template <class KeyT, class CompareT, class AllocatorT>
 inline bool
@@ -856,10 +856,10 @@ erase_if(multiset<KeyT, CompareT, AllocatorT>& container, PredicateT pred) {
 }
 
 namespace pmr {
-    template <class _KeyT, class _CompareT = CompareThreeWay>
+    template <class _KeyT, class _CompareT = compare_three_way>
     using set = mstd::set<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 
-    template <class _KeyT, class _CompareT = CompareThreeWay>
+    template <class _KeyT, class _CompareT = compare_three_way>
     using multiset = mstd::multiset<_KeyT, _CompareT, std::pmr::polymorphic_allocator<_KeyT>>;
 } // namespace pmr
 } // namespace mstd

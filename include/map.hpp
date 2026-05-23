@@ -27,7 +27,7 @@
 #include <detail/concepts/container_compatible_range.hpp>
 #include <type_traits>
 #include <utility>
-#include <detail/utility/compare_three_way.hpp>
+#include <utility/compare_three_way.hpp>
 #include <tuple>
 #include <version>
 #include <initializer_list>
@@ -38,7 +38,7 @@ namespace mstd {
 template <
     class KeyT
   , class ValueT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
 class multimap;
@@ -46,7 +46,7 @@ class multimap;
 template <
     class KeyT
   , class ValueT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
 class map {
@@ -491,7 +491,7 @@ public:
 template <
     std::input_iterator IteratorT
   , std::sentinel_for<IteratorT> SentinelT
-  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = compare_three_way
   , Allocator AllocatorT                                     = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
 map(
@@ -508,7 +508,7 @@ map(
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = compare_three_way
   , Allocator AllocatorT                                   = std::allocator<__range_to_alloc_type<RangeT>>
 >
 map(RangeT&&,
@@ -524,7 +524,7 @@ map(RangeT&&,
 template <
     class KeyT
   , class ValueT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT               = std::allocator<MapValue<KeyT, ValueT>>
 >
 map(
@@ -546,7 +546,7 @@ map(IteratorT, SentinelT, AllocatorT)
 -> map<
     __iter_key_type<IteratorT>
   , __iter_mapped_type<IteratorT>
-  , CompareThreeWay
+  , compare_three_way
   , AllocatorT
 >;
 
@@ -555,7 +555,7 @@ map(RangeT&&, AllocatorT)
 -> map<
        __range_key_type<RangeT>
      , __range_mapped_type<RangeT>
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -564,7 +564,7 @@ map(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 -> map<
        std::remove_const_t<KeyT>
      , ValueT
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -959,7 +959,7 @@ public:
 template <
     std::input_iterator IteratorT
   , std::sentinel_for<IteratorT> Sentinel
-  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<__iter_key_type<IteratorT>> CompareT = compare_three_way
   , Allocator AllocatorT                                     = std::allocator<__iter_to_alloc_type<IteratorT>>
 >
 multimap(IteratorT, Sentinel, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -972,7 +972,7 @@ multimap(IteratorT, Sentinel, CompareT = CompareT(), AllocatorT = AllocatorT())
 
 template <
     std::ranges::input_range RangeT
-  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<__range_key_type<RangeT>> CompareT = compare_three_way
   , Allocator AllocatorT                                   = std::allocator<__range_to_alloc_type<RangeT>>
 >
 multimap(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -986,7 +986,7 @@ multimap(RangeT&&, CompareT = CompareT(), AllocatorT = AllocatorT())
 template <
     class KeyT
   , class ValueT
-  , OrdersAtLeastWeakly<KeyT> CompareT = CompareThreeWay
+  , OrdersAtLeastWeakly<KeyT> CompareT = compare_three_way
   , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
 multimap(std::initializer_list<MapValue<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -1001,7 +1001,7 @@ multimap(IteratorT, Sentinel, AllocatorT)
 -> multimap<
        __iter_key_type<IteratorT>
      , __iter_mapped_type<IteratorT>
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -1010,7 +1010,7 @@ multimap(RangeT&&, AllocatorT)
 -> multimap<
        __range_key_type<RangeT>
      , __range_mapped_type<RangeT>
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -1019,7 +1019,7 @@ multimap(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 -> multimap<
        std::remove_const_t<KeyT>
      , ValueT
-     , CompareThreeWay
+     , compare_three_way
      , AllocatorT
    >;
 
@@ -1070,9 +1070,9 @@ erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& container, PredicateT pre
 
 namespace mstd {
 namespace pmr {
-    template <class KeyT, class ValueT, class _CompareT = CompareThreeWay>
+    template <class KeyT, class ValueT, class _CompareT = compare_three_way>
     using map = mstd::map<KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<MapValue<KeyT, ValueT>>>;
-    template <class KeyT, class ValueT, class _CompareT = CompareThreeWay>
+    template <class KeyT, class ValueT, class _CompareT = compare_three_way>
     using multimap = mstd::multimap<KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<MapValue<KeyT, ValueT>>>;
 } // namespace pmr
 } // namespace mstd

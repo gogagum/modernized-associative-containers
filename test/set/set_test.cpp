@@ -37,9 +37,9 @@ TEST(SetCompare, Test1)
     static_assert(std::totally_ordered<set<int>>);
 
     static_assert(std::three_way_comparable<set<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::partial_ordering>);
+    static_assert(!std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::partial_ordering>);
 
     struct E
     {

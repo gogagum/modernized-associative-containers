@@ -1,3 +1,4 @@
+#include "detail/utility/compare_three_way.hpp"
 #include <gtest/gtest.h>
 #include <rval_struct.hpp>
 #include <counter_type.hpp>
@@ -6,8 +7,6 @@
 #include <tracker_allocator.hpp>
 
 #include <map.hpp>
-#include <utility/compare_three_way.hpp>
-
 #include <string>
 #include <test_values.hpp>
 

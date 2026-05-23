@@ -23,8 +23,8 @@ TEST(MultimapCompareTests, CompareNumeric)
     static_assert(std::totally_ordered<multimap<int, int>>);
 
     static_assert(std::three_way_comparable<multimap<int, int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<multimap<float, float, FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<multimap<float, float, FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(!std::three_way_comparable<multimap<float, float, fp_compare_three_way<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<multimap<float, float, fp_compare_three_way<float>>, std::weak_ordering>);
     static_assert(std::three_way_comparable<multimap<int, float>, std::weak_ordering>);
 
     static_assert(std::totally_ordered<multimap<test::AllEqual, int>>);
