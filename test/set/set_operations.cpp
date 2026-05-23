@@ -1,104 +1,11 @@
 #include <gtest/gtest.h>
 #include <rval_struct.hpp>
 
+#include <test_values.hpp>
+
 #include <set.hpp>
 
 namespace mstd {
-
-TEST(SetConstructorTests, FromVector)
-{
-    std::vector nums{1, 2, 2, 3};
-    auto c1 = set(nums.begin(), nums.end());
-    auto c2 = set(nums);
-    auto c3 = nums | std::ranges::to<set>();
-}
-
-TEST(SetFromVector, Test1)
-{
-    std::vector<int> nums{1, 2, 2, 3};
-
-    auto c1 = set(nums.begin(), nums.end());
-}
-
-TEST(SetCompare, Test1)
-{
-    set<int> c1{1, 2, 3};
-    set<int> c2{1, 2, 3, 4};
-    set<int> c3{1, 2, 4};
-    EXPECT_EQ(c1, c1);
-    EXPECT_TRUE(std::is_eq(c1 <=> c1));
-    EXPECT_LT(c1, c2);
-    EXPECT_TRUE(std::is_lt(c1 <=> c2));
-    EXPECT_LT(c1, c3);
-    EXPECT_TRUE(std::is_lt(c1 <=> c3));
-    EXPECT_LT(c2, c3);
-    EXPECT_TRUE(std::is_lt(c2 <=> c3));
-
-    static_assert(std::totally_ordered<set<int>>);
-
-    static_assert(std::three_way_comparable<set<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<set<float, fp_compare_three_way<float>>, std::partial_ordering>);
-
-    struct E
-    {
-        bool operator==(E) { return true; }
-    };
-    struct Cmp
-    {
-        auto operator()(E, E) const noexcept { return std::weak_ordering::equivalent; }
-    };
-    static_assert(std::totally_ordered<set<E, Cmp>>);
-    static_assert(!std::three_way_comparable<E>);
-    static_assert(std::three_way_comparable<set<E, Cmp>>);
-}
-
-TEST(SetCompare, Test2)
-{
-    struct W
-    {
-        int value = 0;
-
-        bool operator==(W rhs) const noexcept
-        {
-            return (value | 1) == (rhs.value | 1);
-        }
-
-        std::weak_ordering
-        operator<=>(W rhs) const noexcept
-        {
-            return (value | 1) <=> (rhs.value | 1);
-        }
-    };
-
-    static_assert(std::totally_ordered<set<W>>);
-
-    set<W> c1{{1}, {2}, {3}};
-    set<W> c2{{0}, {3}, {3}};
-    static_assert(std::same_as<decltype(c1 <=> c1), std::weak_ordering>);
-    EXPECT_EQ(c1, c2);
-    EXPECT_TRUE(std::is_eq(c1 <=> c2));
-}
-
-TEST(SetCompare, Test3)
-{
-    struct L
-    {
-        int value = 0;
-
-        std::weak_ordering operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
-        bool operator==(const L &other) const = default;
-        // bool operator!=(const L& other) const = default;
-    };
-
-    static_assert(std::totally_ordered<set<L>>);
-
-    set<L> c{{1}, {2}, {3}};
-    set<L> d{{1}, {2}, {3}, {4}};
-    static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
-    EXPECT_TRUE(std::is_lt(c <=> d));
-}
 
 // Associative container iterators are not random access
 static_assert(!std::totally_ordered<set<int>::iterator>);
@@ -229,32 +136,9 @@ TEST(SetEqualRange, Test1)
     (void)cs.equal_range(x);
 }
 
-class PathPoint
-{
-public:
-    PathPoint(char t, const std::vector<double> &c)
-        : type(t), coords(c) {}
-    PathPoint(char t, std::vector<double> &&c)
-        : type(t), coords(std::move(c)) {}
-    char getType() const { return type; }
-    const std::vector<double> &getCoords() const { return coords; }
-
-private:
-    char type;
-    std::vector<double> coords;
-};
-
-struct PathPointLess
-{
-    auto operator()(const PathPoint &lhs, const PathPoint &rhs) const
-    {
-        return lhs.getType() <=> rhs.getType();
-    }
-};
-
 TEST(SetEmplace, Test1)
 {
-    using Set = set<PathPoint, PathPointLess>;
+    using Set = set<test::PathPoint, test::PathPointCmp>;
     Set s;
 
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
@@ -495,11 +379,6 @@ struct Cmp
 };
 
 int Cmp::count = 0;
-
-// using test_type = set<int, Cmp>;
-//
-// test_type x{1, 3, 5};
-// const test_type &cx = x;
 
 TEST(SetOperations, Test2)
 {

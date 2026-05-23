@@ -249,9 +249,9 @@ public:
         );
     }
 
-    void insert(std::initializer_list<value_type> init_list) {
-        insert(init_list.begin(), init_list.end());
-    }
+    //void insert(std::initializer_list<value_type> init_list) {
+    //    insert(init_list.begin(), init_list.end());
+    //}
     
     iterator erase(const_iterator pos) {
         return tree_.erase(pos);

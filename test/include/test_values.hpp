@@ -76,6 +76,26 @@ private:
     std::vector<double> coords;
 };
 
+struct PathPointCmp
+{
+    auto operator()(const PathPoint &__lhs, const PathPoint &__rhs) const
+    {
+        return __lhs.getType() <=> __rhs.getType();
+    }
+};
+
+struct Zero
+{
+};
+inline auto operator<=>(Zero, int i) { return 0 <=> i; }
+inline auto operator<=>(int i, Zero) { return i <=> 0; }
+
+struct  One
+{
+};
+inline auto operator<=>(One, int i) { return 1 <=> i; }
+inline auto operator<=>(int i, One) { return i <=> 1; }
+
 struct Mapped
 {
     Mapped() = default;

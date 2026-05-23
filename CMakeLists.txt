@@ -20,11 +20,17 @@ add_executable(tree-test test/tree_test.cpp)
 target_include_directories(tree-test PRIVATE test/include)
 target_link_libraries(tree-test GTest::gtest_main modernized-associative-containers)
 
-add_executable(multiset-test test/set/multiset_test.cpp)
+add_executable(multiset-test
+    test/set/multiset_compare.cpp
+    test/set/multiset_constructor.cpp
+    test/set/multiset_operations.cpp)
 target_include_directories(multiset-test PRIVATE test/include)
 target_link_libraries(multiset-test GTest::gtest_main modernized-associative-containers)
 
-add_executable(set-test test/set/set_test.cpp)
+add_executable(set-test
+    test/set/set_compare.cpp
+    test/set/set_constructor.cpp
+    test/set/set_operations.cpp)
 target_include_directories(set-test PRIVATE test/include)
 target_link_libraries(set-test GTest::gtest_main modernized-associative-containers)
 
