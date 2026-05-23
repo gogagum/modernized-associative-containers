@@ -3,24 +3,28 @@
 
 #include <set.hpp>
 
+namespace mstd {
+
 TEST(SetConstructorTests, FromVector)
 {
     std::vector nums{1, 2, 2, 3};
-    auto c1 = mstd::set(nums.begin(), nums.end());
-    auto c2 = mstd::set(nums);
-    auto c3 = nums | std::ranges::to<mstd::set>();
+    auto c1 = set(nums.begin(), nums.end());
+    auto c2 = set(nums);
+    auto c3 = nums | std::ranges::to<set>();
 }
 
 TEST(SetFromVector, Test1)
 {
     std::vector<int> nums{1, 2, 2, 3};
 
-    auto c1 = mstd::set(nums.begin(), nums.end());
+    auto c1 = set(nums.begin(), nums.end());
 }
 
 TEST(SetCompare, Test1)
 {
-    mstd::set<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};
+    set<int> c1{1, 2, 3};
+    set<int> c2{1, 2, 3, 4};
+    set<int> c3{1, 2, 4};
     EXPECT_EQ(c1, c1);
     EXPECT_TRUE(std::is_eq(c1 <=> c1));
     EXPECT_LT(c1, c2);
@@ -30,12 +34,12 @@ TEST(SetCompare, Test1)
     EXPECT_LT(c2, c3);
     EXPECT_TRUE(std::is_lt(c2 <=> c3));
 
-    static_assert(std::totally_ordered<mstd::set<int>>);
+    static_assert(std::totally_ordered<set<int>>);
 
-    static_assert(std::three_way_comparable<mstd::set<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::set<float, mstd::FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<mstd::set<float, mstd::FpCompareThreeWay<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<mstd::set<float, mstd::FpCompareThreeWay<float>>, std::partial_ordering>);
+    static_assert(std::three_way_comparable<set<int>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<set<float, FpCompareThreeWay<float>>, std::partial_ordering>);
 
     struct E
     {
@@ -45,9 +49,9 @@ TEST(SetCompare, Test1)
     {
         auto operator()(E, E) const noexcept { return std::weak_ordering::equivalent; }
     };
-    static_assert(std::totally_ordered<mstd::set<E, Cmp>>);
+    static_assert(std::totally_ordered<set<E, Cmp>>);
     static_assert(!std::three_way_comparable<E>);
-    static_assert(std::three_way_comparable<mstd::set<E, Cmp>>);
+    static_assert(std::three_way_comparable<set<E, Cmp>>);
 }
 
 TEST(SetCompare, Test2)
@@ -68,9 +72,10 @@ TEST(SetCompare, Test2)
         }
     };
 
-    static_assert(std::totally_ordered<mstd::set<W>>);
+    static_assert(std::totally_ordered<set<W>>);
 
-    mstd::set<W> c1{{1}, {2}, {3}}, c2{{0}, {3}, {3}};
+    set<W> c1{{1}, {2}, {3}};
+    set<W> c2{{0}, {3}, {3}};
     static_assert(std::same_as<decltype(c1 <=> c1), std::weak_ordering>);
     EXPECT_EQ(c1, c2);
     EXPECT_TRUE(std::is_eq(c1 <=> c2));
@@ -87,20 +92,21 @@ TEST(SetCompare, Test3)
         // bool operator!=(const L& other) const = default;
     };
 
-    static_assert(std::totally_ordered<mstd::set<L>>);
+    static_assert(std::totally_ordered<set<L>>);
 
-    mstd::set<L> c{{1}, {2}, {3}}, d{{1}, {2}, {3}, {4}};
+    set<L> c{{1}, {2}, {3}};
+    set<L> d{{1}, {2}, {3}, {4}};
     static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
     EXPECT_TRUE(std::is_lt(c <=> d));
 }
 
 // Associative container iterators are not random access
-static_assert(!std::totally_ordered<mstd::set<int>::iterator>);
-static_assert(!std::three_way_comparable<mstd::set<int>::iterator>);
+static_assert(!std::totally_ordered<set<int>::iterator>);
+static_assert(!std::three_way_comparable<set<int>::iterator>);
 
 TEST(SetContains, Test1)
 {
-    mstd::set<int> m;
+    set<int> m;
     EXPECT_FALSE(m.contains(0));
     EXPECT_FALSE(m.contains(1));
     m.insert(0);
@@ -125,7 +131,7 @@ auto operator<=>(int i, One) { return i <=> 1; }
 
 TEST(SetContains, Test2)
 {
-    mstd::set<int> m;
+    set<int> m;
     EXPECT_FALSE(m.contains(Zero{}));
     EXPECT_FALSE(m.contains(One{}));
     m.insert(0);
@@ -138,7 +144,7 @@ TEST(SetContains, Test2)
 
 TEST(SetCount, Test1)
 {
-    mstd::set<int> s0;
+    set<int> s0;
     EXPECT_EQ(s0.count(0), 0);
     EXPECT_EQ(s0.count(1), 0);
 
@@ -164,7 +170,7 @@ TEST(SetCount, Test1)
     s0.erase(0);
     EXPECT_EQ(s0.count(0), 0);
 
-    mstd::set<int> s1(s0);
+    set<int> s1(s0);
     EXPECT_EQ(s1.count(0), 0);
     EXPECT_EQ(s1.count(1), 1);
     EXPECT_EQ(s1.count(2), 0);
@@ -216,10 +222,10 @@ struct X
 
 TEST(SetEqualRange, Test1)
 {
-    mstd::set<X> s;
+    set<X> s;
     X x;
     (void)s.equal_range(x);
-    const mstd::set<X> &cs = s;
+    const set<X> &cs = s;
     (void)cs.equal_range(x);
 }
 
@@ -248,7 +254,7 @@ struct PathPointLess
 
 TEST(SetEmplace, Test1)
 {
-    typedef mstd::set<PathPoint, PathPointLess> Set;
+    using Set = set<PathPoint, PathPointLess>;
     Set s;
 
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
@@ -279,8 +285,8 @@ TEST(SetEmplace, Test1)
 
 TEST(SetInsert, Test1)
 {
-    mstd::set<int> s0, s1;
-    mstd::set<int>::iterator iter1;
+    set<int> s0, s1;
+    set<int>::iterator iter1;
 
     s0.insert(1);
     s1.insert(s1.end(), 1);
@@ -329,11 +335,11 @@ TEST(SetInsert, Test1)
 
 TEST(SetInsert, Test2)
 {
-    typedef mstd::set<mstd::test::rvalstruct> Set;
+    using Set = set<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    auto p = s.insert(mstd::test::rvalstruct(1));
+    auto p = s.insert(test::rvalstruct(1));
     EXPECT_TRUE(p.inserted);
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
@@ -343,12 +349,12 @@ TEST(SetInsert, Test2)
 
 TEST(SetInsert, Test3)
 {
-    typedef mstd::set<mstd::test::rvalstruct> Set;
+    using Set = set<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    auto p1 = s.insert(mstd::test::rvalstruct(2));
-    auto p2 = s.insert(mstd::test::rvalstruct(2));
+    auto p1 = s.insert(test::rvalstruct(2));
+    auto p2 = s.insert(test::rvalstruct(2));
     EXPECT_TRUE(p1.inserted);
     EXPECT_FALSE(p2.inserted);
     EXPECT_EQ(s.size(), 1);
@@ -358,11 +364,11 @@ TEST(SetInsert, Test3)
 
 TEST(SetInsert, Test4)
 {
-    typedef mstd::set<mstd::test::rvalstruct> Set;
+    using Set = set<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p = s.insert(s.begin(), mstd::test::rvalstruct(1));
+    Set::iterator p = s.insert(s.begin(), test::rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(p, s.begin());
@@ -371,12 +377,12 @@ TEST(SetInsert, Test4)
 
 TEST(SetInsert, Test5)
 {
-    typedef mstd::set<mstd::test::rvalstruct> Set;
+    using Set = set<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p1 = s.insert(s.begin(), mstd::test::rvalstruct(2));
-    Set::iterator p2 = s.insert(p1, mstd::test::rvalstruct(2));
+    Set::iterator p1 = s.insert(s.begin(), test::rvalstruct(2));
+    Set::iterator p2 = s.insert(p1, test::rvalstruct(2));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(p1, p2);
     EXPECT_EQ(p1->val, 2);
@@ -384,9 +390,9 @@ TEST(SetInsert, Test5)
 
 TEST(SetOperations, Test1)
 {
-    mstd::set<int> s0;
-    typedef mstd::set<int>::iterator iterator;
-    typedef mstd::set<int>::const_iterator const_iterator;
+    set<int> s0;
+    using iterator = set<int>::iterator;
+    using const_iterator = set<int>::const_iterator;
 
     std::ranges::input_range auto pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 0);
@@ -465,7 +471,7 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp0.begin(), s0.begin());
     EXPECT_EQ(pp0.end(), irt0.position);
 
-    const mstd::set<int> &s1 = s0;
+    const set<int> &s1 = s0;
     auto pp1 = s1.equal_range(1);
     EXPECT_EQ(s1.count(1), 1);
     EXPECT_EQ(*pp1.begin(), 1);
@@ -490,7 +496,7 @@ struct Cmp
 
 int Cmp::count = 0;
 
-// using test_type = mstd::set<int, Cmp>;
+// using test_type = set<int, Cmp>;
 //
 // test_type x{1, 3, 5};
 // const test_type &cx = x;
@@ -499,7 +505,7 @@ TEST(SetOperations, Test2)
 {
     Cmp::count = 0;
 
-    using test_type = mstd::set<int, Cmp>;
+    using test_type = set<int, Cmp>;
 
     test_type x{1, 3, 5};
     const test_type &cx = x;
@@ -528,7 +534,7 @@ TEST(SetOperations, Test3)
 {
     Cmp::count = 0;
 
-    using test_type = mstd::set<int, Cmp>;
+    using test_type = set<int, Cmp>;
 
     test_type x{1, 3, 5};
     const test_type &cx = x;
@@ -550,7 +556,7 @@ TEST(SetOperations, Test4)
 {
     Cmp::count = 0;
 
-    using test_type = mstd::set<int, Cmp>;
+    using test_type = set<int, Cmp>;
 
     test_type x{1, 3, 5};
     const test_type &cx = x;
@@ -581,7 +587,7 @@ TEST(SetOperations, Test5)
 {
     Cmp::count = 0;
 
-    using test_type = mstd::set<int, Cmp>;
+    using test_type = set<int, Cmp>;
 
     test_type x{1, 3, 5};
     const test_type &cx = x;
@@ -610,7 +616,7 @@ TEST(SetOperations, Test6)
 {
     Cmp::count = 0;
 
-    using test_type = mstd::set<int, Cmp>;
+    using test_type = set<int, Cmp>;
 
     test_type x{1, 3, 5};
     const test_type &cx = x;
@@ -645,7 +651,7 @@ TEST(SetOperations, Test7)
         operator int() const { return i; }
     };
 
-    mstd::set<int> s;
+    set<int> s;
     I i = {};
     [[maybe_unused]] auto iter = s.find(i);
 }
@@ -678,8 +684,10 @@ TEST(SetOperations, Test8)
         }
     };
 
-    mstd::set<int, C> s{1, 2, 3, 4, 5};
+    set<int, C> s{1, 2, 3, 4, 5};
 
     auto n = s.count(C::Partition{});
     EXPECT_EQ(n, 3);
 }
+
+} // namespace mstd

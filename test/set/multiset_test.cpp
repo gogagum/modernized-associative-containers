@@ -4,17 +4,19 @@
 
 #include <set.hpp>
 
+namespace mstd {
+
 TEST(MultisetConstructorTests, FromVector)
 {
     std::vector nums{1, 2, 2, 3};
-    auto c1 = mstd::multiset(nums.begin(), nums.end());
-    auto c2 = mstd::multiset(nums);
-    auto c3 = nums | std::ranges::to<mstd::multiset>();
+    auto c1 = multiset(nums.begin(), nums.end());
+    auto c2 = multiset(nums);
+    auto c3 = nums | std::ranges::to<multiset>();
 }
 
 TEST(MultisetCompare, Test1)
 {
-    mstd::multiset<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};
+    multiset<int> c1{1, 2, 3}, c2{1, 2, 3, 4}, c3{1, 2, 4};
     EXPECT_EQ(c1, c1);
     EXPECT_TRUE(std::is_eq(c1 <=> c1));
     EXPECT_LT(c1, c2);
@@ -24,12 +26,12 @@ TEST(MultisetCompare, Test1)
     EXPECT_LT(c2, c3);
     EXPECT_TRUE(std::is_lt(c2 <=> c3));
 
-    static_assert(std::totally_ordered<mstd::multiset<int>>);
+    static_assert(std::totally_ordered<multiset<int>>);
 
-    static_assert(std::three_way_comparable<mstd::multiset<int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<mstd::multiset<float, mstd::FpCompareThreeWay<float>>, std::partial_ordering>);
+    static_assert(std::three_way_comparable<multiset<int>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::strong_ordering>);
+    static_assert(std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<multiset<float, FpCompareThreeWay<float>>, std::partial_ordering>);
 
     struct E
     {
@@ -39,9 +41,9 @@ TEST(MultisetCompare, Test1)
     {
         std::weak_ordering operator()(E, E) const { return std::weak_ordering::equivalent; }
     };
-    static_assert(std::totally_ordered<mstd::multiset<E, Cmp>>);
+    static_assert(std::totally_ordered<multiset<E, Cmp>>);
     static_assert(!std::three_way_comparable<E>);
-    static_assert(std::three_way_comparable<mstd::multiset<E, Cmp>>);
+    static_assert(std::three_way_comparable<multiset<E, Cmp>>);
 }
 
 TEST(MultisetCompare, Test2)
@@ -62,9 +64,9 @@ TEST(MultisetCompare, Test2)
         }
     };
 
-    static_assert(std::totally_ordered<mstd::multiset<W>>);
+    static_assert(std::totally_ordered<multiset<W>>);
 
-    mstd::multiset<W> c1{{1}, {2}, {3}}, c2{{0}, {3}, {3}};
+    multiset<W> c1{{1}, {2}, {3}}, c2{{0}, {3}, {3}};
     static_assert(std::same_as<decltype(c1 <=> c1), std::weak_ordering>);
     EXPECT_EQ(c1, c2);
     EXPECT_TRUE(std::is_eq(c1 <=> c2));
@@ -79,22 +81,22 @@ TEST(MultisetCompare, Test3)
         auto operator<=>(L rhs) const noexcept { return value <=> rhs.value; }
     };
 
-    static_assert(std::totally_ordered<mstd::multiset<L>>);
+    static_assert(std::totally_ordered<multiset<L>>);
 
-    mstd::multiset<L> c{{1}, {2}, {3}}, d{{1}, {2}, {3}, {4}};
+    multiset<L> c{{1}, {2}, {3}}, d{{1}, {2}, {3}, {4}};
     static_assert(std::same_as<decltype(c <=> c), std::strong_ordering>);
     EXPECT_TRUE(std::is_lt(c <=> d));
 }
 
 // Associative container iterators are not random access
-static_assert(!std::totally_ordered<mstd::multiset<int>::iterator>);
-static_assert(!std::three_way_comparable<mstd::multiset<int>::iterator>);
+static_assert(!std::totally_ordered<multiset<int>::iterator>);
+static_assert(!std::three_way_comparable<multiset<int>::iterator>);
 
 TEST(MultisetOperationsTest, Test1)
 {
-    mstd::multiset<int> ms0;
-    typedef mstd::multiset<int>::iterator iterator;
-    typedef mstd::multiset<int>::const_iterator const_iterator;
+    multiset<int> ms0;
+    using iterator = multiset<int>::iterator;
+    using const_iterator = multiset<int>::const_iterator;
     std::pair<iterator, iterator> pp0;
 
     pp0 = ms0.equal_range(1);
@@ -174,7 +176,7 @@ TEST(MultisetOperationsTest, Test1)
     EXPECT_EQ(pp0.first, ms0.begin());
     EXPECT_EQ(pp0.second, iter0);
 
-    const mstd::multiset<int> &ms1 = ms0;
+    const multiset<int> &ms1 = ms0;
     std::pair<const_iterator, const_iterator> pp1 = ms1.equal_range(1);
     EXPECT_EQ(ms1.count(1), 5);
     EXPECT_EQ(*pp1.first, 1);
@@ -186,7 +188,7 @@ TEST(MultisetOperationsTest, Test1)
 
 TEST(MultisetCompareTest, Test1)
 {
-    mstd::multiset<int> m;
+    multiset<int> m;
     EXPECT_FALSE(m.contains(0));
     EXPECT_FALSE(m.contains(1));
     m.emplace(0);
@@ -214,7 +216,7 @@ auto operator<=>(int i, One) { return i <=> 1; }
 
 TEST(MultisetCompareTest, Test2)
 {
-    mstd::multiset<int> m;
+    multiset<int> m;
     EXPECT_FALSE(m.contains(Zero{}));
     EXPECT_FALSE(m.contains(One{}));
     m.emplace(0);
@@ -326,7 +328,7 @@ struct PathPointCmp
 
 TEST(MultisetEmplaceTest, Test1)
 {
-    typedef mstd::multiset<PathPoint, PathPointCmp> Mset;
+    using Mset = multiset<PathPoint, PathPointCmp>;
     Mset ms;
 
     std::vector<double> coord1 = {0.0, 1.0, 2.0};
@@ -366,7 +368,7 @@ auto operator<=>(const aggressive_aggregate &a, const aggressive_aggregate &b)
 
 TEST(MultisetEmplaceTest, Test2)
 {
-    mstd::multiset<aggressive_aggregate> x;
+    multiset<aggressive_aggregate> x;
     auto it = x.emplace(1, 2);
     EXPECT_EQ(it->a, 1);
     EXPECT_EQ(it->b, 2);
@@ -380,7 +382,7 @@ TEST(MultisetEmplaceTest, Test2)
 
 TEST(MultisetEmplaceTest, TestHint)
 {
-    mstd::multiset<aggressive_aggregate> x;
+    multiset<aggressive_aggregate> x;
     auto it = x.emplace_hint(x.begin(), 3, 2);
     EXPECT_EQ(it->a, 3);
     EXPECT_EQ(it->b, 2);
@@ -394,8 +396,8 @@ TEST(MultisetEmplaceTest, TestHint)
 
 TEST(MultisetInsertTest, Test1)
 {
-    mstd::multiset<int> ms0, ms1;
-    mstd::multiset<int>::iterator iter1;
+    multiset<int> ms0, ms1;
+    multiset<int>::iterator iter1;
 
     ms0.insert(1);
     ms1.insert(ms1.end(), 1);
@@ -444,8 +446,8 @@ TEST(MultisetInsertTest, Test1)
 
 TEST(MultisetInsertTest, Test2)
 {
-    mstd::multiset<int> ms0, ms1;
-    mstd::multiset<int>::iterator iter1;
+    multiset<int> ms0, ms1;
+    multiset<int>::iterator iter1;
 
     ms0.insert(1);
     ms1.insert(ms1.end(), 1);
@@ -494,11 +496,11 @@ TEST(MultisetInsertTest, Test2)
 
 TEST(MultisetInsertTest, TestRvalStruct1)
 {
-    typedef mstd::multiset<mstd::test::rvalstruct> Set;
+    using Set = multiset<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator i = s.insert(mstd::test::rvalstruct(1));
+    Set::iterator i = s.insert(test::rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(i, s.begin());
@@ -507,12 +509,12 @@ TEST(MultisetInsertTest, TestRvalStruct1)
 
 TEST(MultisetInsertTest, TestRvalStruct2)
 {
-    typedef mstd::multiset<mstd::test::rvalstruct> Set;
+    using Set = multiset<test::rvalstruct>;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    s.insert(mstd::test::rvalstruct(2));
-    Set::iterator i = s.insert(mstd::test::rvalstruct(2));
+    s.insert(test::rvalstruct(2));
+    Set::iterator i = s.insert(test::rvalstruct(2));
     EXPECT_EQ(s.size(), 2);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 2);
     EXPECT_EQ((*i).val, 2);
@@ -523,3 +525,5 @@ TEST(MultisetInsertTest, TestRvalStruct2)
     EXPECT_EQ(s.begin()->val, 2);
     EXPECT_EQ(i->val, 2);
 }
+
+} // namespace mstd
