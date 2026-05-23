@@ -44,6 +44,7 @@ add_executable(multimap-test
     test/map/multimap_allocator.cpp
     test/map/multimap_compare.cpp
     test/map/multimap_constructor.cpp
+    test/map/multimap_insertion.cpp
     test/map/multimap_operations.cpp
     test/src/tracker_allocator.cpp)
 

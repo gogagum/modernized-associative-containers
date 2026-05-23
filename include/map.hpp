@@ -796,7 +796,7 @@ public:
 
     template <class... ArgsT>
     iterator emplace_hint(const_iterator pos, ArgsT&&... args) {
-        return tree_.emplaceHintMulti(pos.i_, std::forward<ArgsT>(args)...);
+        return tree_.emplaceHintMulti(pos, std::forward<ArgsT>(args)...);
     }
 
     template <class _Pp>
@@ -808,7 +808,7 @@ public:
     template <class _Pp>
     requires std::is_constructible_v<value_type, _Pp>
     iterator insert(const_iterator pos, _Pp&& val) {
-        return tree_.emplaceHintMulti(pos.i_, std::forward<_Pp>(val));
+        return tree_.emplaceHintMulti(pos, std::forward<_Pp>(val));
     }
 
     iterator insert(value_type&& value) {
@@ -816,7 +816,7 @@ public:
     }
 
     iterator insert(const_iterator pos, value_type&& __v) {
-        return tree_.emplaceHintMulti(pos.i_, std::move(__v));
+        return tree_.emplaceHintMulti(pos, std::move(__v));
     }
 
     void insert(std::initializer_list<value_type> init_list) {
@@ -828,7 +828,7 @@ public:
     }
 
     iterator insert(const_iterator pos, const value_type& __v) {
-        return tree_.emplaceHintMulti(pos.i_, __v);
+        return tree_.emplaceHintMulti(pos, __v);
     }
 
     template <
@@ -845,11 +845,11 @@ public:
     }
 
     iterator erase(const_iterator pos) {
-        return tree_.erase(pos.i_);
+        return tree_.erase(pos);
     }
 
     iterator erase(iterator pos) {
-        return tree_.erase(pos.i_);
+        return tree_.erase(pos);
     }
 
     size_type erase(const key_type& k) {
@@ -857,7 +857,7 @@ public:
     }
 
     iterator erase(const_iterator begin, const_iterator end) {
-        return tree_.erase(begin.i_, end.i_);
+        return tree_.erase(begin, end);
     }
 
     iterator insert(node_type&& nh) {
