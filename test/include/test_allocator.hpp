@@ -18,8 +18,6 @@
 #include <climits>
 #include <cassert>
 
-#include "test_macros.hpp"
-
 template <class Alloc>
 constexpr inline typename std::allocator_traits<Alloc>::size_type alloc_max_size(Alloc const& a) {
   typedef std::allocator_traits<Alloc> AT;

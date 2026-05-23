@@ -329,11 +329,11 @@ TEST(SetInsert, Test1)
 
 TEST(SetInsert, Test2)
 {
-    typedef mstd::set<rvalstruct> Set;
+    typedef mstd::set<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    auto p = s.insert(rvalstruct(1));
+    auto p = s.insert(mstd::test::rvalstruct(1));
     EXPECT_TRUE(p.inserted);
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
@@ -343,12 +343,12 @@ TEST(SetInsert, Test2)
 
 TEST(SetInsert, Test3)
 {
-    typedef mstd::set<rvalstruct> Set;
+    typedef mstd::set<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    auto p1 = s.insert(rvalstruct(2));
-    auto p2 = s.insert(rvalstruct(2));
+    auto p1 = s.insert(mstd::test::rvalstruct(2));
+    auto p2 = s.insert(mstd::test::rvalstruct(2));
     EXPECT_TRUE(p1.inserted);
     EXPECT_FALSE(p2.inserted);
     EXPECT_EQ(s.size(), 1);
@@ -358,11 +358,11 @@ TEST(SetInsert, Test3)
 
 TEST(SetInsert, Test4)
 {
-    typedef mstd::set<rvalstruct> Set;
+    typedef mstd::set<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p = s.insert(s.begin(), rvalstruct(1));
+    Set::iterator p = s.insert(s.begin(), mstd::test::rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(p, s.begin());
@@ -371,12 +371,12 @@ TEST(SetInsert, Test4)
 
 TEST(SetInsert, Test5)
 {
-    typedef mstd::set<rvalstruct> Set;
+    typedef mstd::set<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p1 = s.insert(s.begin(), rvalstruct(2));
-    Set::iterator p2 = s.insert(p1, rvalstruct(2));
+    Set::iterator p1 = s.insert(s.begin(), mstd::test::rvalstruct(2));
+    Set::iterator p2 = s.insert(p1, mstd::test::rvalstruct(2));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(p1, p2);
     EXPECT_EQ(p1->val, 2);

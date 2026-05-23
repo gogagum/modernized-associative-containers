@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
+namespace mstd::test {
+
 struct rvalstruct
 {
     int val;
@@ -53,6 +55,8 @@ inline std::weak_ordering
 operator<=>(const rvalstruct &lhs, const rvalstruct &rhs)
 {
     return lhs.val <=> rhs.val;
+}
+
 }
 
 #endif

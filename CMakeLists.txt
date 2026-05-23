@@ -28,11 +28,24 @@ add_executable(set-test test/set/set_test.cpp)
 target_include_directories(set-test PRIVATE test/include)
 target_link_libraries(set-test GTest::gtest_main modernized-associative-containers)
 
-add_executable(map-test test/map/map_test.cpp)
+add_executable(map-test
+    test/map/map_allocator.cpp
+    test/map/map_compare.cpp
+    test/map/map_constructor.cpp
+    test/map/map_insertion.cpp
+    test/map/map_lookup.cpp
+    test/map/map_operations.cpp)
+
 target_include_directories(map-test PRIVATE test/include)
 target_link_libraries(map-test GTest::gtest_main modernized-associative-containers)
 
-add_executable(multimap-test test/map/multimap_test.cpp test/src/tracker_allocator.cpp)
+add_executable(multimap-test
+    test/map/multimap_allocator.cpp
+    test/map/multimap_compare.cpp
+    test/map/multimap_constructor.cpp
+    test/map/multimap_operations.cpp
+    test/src/tracker_allocator.cpp)
+
 target_include_directories(multimap-test PRIVATE test/include)
 target_link_libraries(multimap-test GTest::gtest_main modernized-associative-containers)
 

@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <compare>
 
+namespace mstd::test {
+
 struct counter_type
 {
     // Constructor counters:
@@ -99,5 +101,7 @@ struct counter_type_hasher
         return c.val;
     }
 };
+
+} // namespace mstd::test
 
 #endif

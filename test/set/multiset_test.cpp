@@ -494,11 +494,11 @@ TEST(MultisetInsertTest, Test2)
 
 TEST(MultisetInsertTest, TestRvalStruct1)
 {
-    typedef mstd::multiset<rvalstruct> Set;
+    typedef mstd::multiset<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    Set::iterator i = s.insert(rvalstruct(1));
+    Set::iterator i = s.insert(mstd::test::rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(i, s.begin());
@@ -507,12 +507,12 @@ TEST(MultisetInsertTest, TestRvalStruct1)
 
 TEST(MultisetInsertTest, TestRvalStruct2)
 {
-    typedef mstd::multiset<rvalstruct> Set;
+    typedef mstd::multiset<mstd::test::rvalstruct> Set;
     Set s;
     EXPECT_TRUE(s.empty());
 
-    s.insert(rvalstruct(2));
-    Set::iterator i = s.insert(rvalstruct(2));
+    s.insert(mstd::test::rvalstruct(2));
+    Set::iterator i = s.insert(mstd::test::rvalstruct(2));
     EXPECT_EQ(s.size(), 2);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 2);
     EXPECT_EQ((*i).val, 2);
