@@ -1983,34 +1983,33 @@ void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
         }
     }
 
-    template <class _Tp, class _Compare, class _Allocator>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator Tree<_Tp, _Compare, _Allocator>::erase(const_iterator __p) {
-        __node_pointer __np    = __p.__get_np();
-        iterator __r           = __remove_node_pointer(__np);
-        __node_allocator& __na = __node_alloc();
-        __node_traits::destroy(__na, std::addressof(const_cast<value_type&>(*__p)));
-        __node_traits::deallocate(__na, __np, 1);
-        return __r;
-    }
+template <class _Tp, class _Compare, class _Allocator>
+auto Tree<_Tp, _Compare, _Allocator>::erase(const_iterator pos) -> iterator {
+    auto node_ptr        = pos.__get_np();
+    auto ret             = __remove_node_pointer(node_ptr);
+    auto& node_allocator = __node_alloc();
+    __node_traits::destroy(node_allocator, std::addressof(const_cast<value_type&>(*pos)));
+    __node_traits::deallocate(node_allocator, node_ptr, 1);
+    return ret;
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::erase(const_iterator __f, const_iterator __l) {
-        while (__f != __l)
-            __f = erase(__f);
-        return iterator(__l.__ptr_);
+template <class _Tp, class _Compare, class _Allocator>
+auto Tree<_Tp, _Compare, _Allocator>::erase(const_iterator begin, const_iterator end) -> iterator {
+    while (begin != end) {
+        begin = erase(begin);
     }
+    return iterator(end.__ptr_);
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class KeyT>
-    typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& __k) {
-        iterator __i = find(__k);
-        if (__i == end())
-            return 0;
-        erase(__i);
+template <class _Tp, class _Compare, class _Allocator>
+template <class KeyT>
+auto Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& key) -> size_type {
+    if (const auto iter = find(key); iter != end()) {
+        erase(iter);
         return 1;
     }
+    return 0;
+}
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class KeyT>
