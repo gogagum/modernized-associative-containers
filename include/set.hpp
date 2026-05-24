@@ -596,14 +596,14 @@ public:
     : tree_(__comp) {}
 
     explicit set(const value_compare& __comp, const allocator_type& __a) : tree_(__comp, __a) {}
-    template <class _InputIterator>
-    set(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    template <class InputIteratorT>
+    set(InputIteratorT __f, InputIteratorT __l, const value_compare& __comp = value_compare())
     : tree_(__comp) {
         insert(__f, __l);
     }
 
-    template <class _InputIterator>
-    set(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
+    template <class InputIteratorT>
+    set(InputIteratorT __f, InputIteratorT __l, const value_compare& __comp, const allocator_type& __a)
     : tree_(__comp, __a) {
         insert(__f, __l);
     }
@@ -617,8 +617,8 @@ public:
         insert_range(std::forward<RangeT>(__range));
     }
     
-    template <class _InputIterator>
-    set(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    template <class InputIteratorT>
+    set(InputIteratorT __f, InputIteratorT __l, const allocator_type& __a)
     : set(__f, __l, key_compare(), __a) {}
     
     template <_ContainerCompatibleRange<value_type> RangeT>
@@ -698,8 +698,8 @@ public:
         return tree_.__emplace_hint_unique(__p, __v).first;
     }
 
-    template <class _InputIterator>
-    void insert(_InputIterator __first, _InputIterator __last) {
+    template <class InputIteratorT>
+    void insert(InputIteratorT __first, InputIteratorT __last) {
         tree_.__insert_range_unique(__first, __last);
     }
 
@@ -852,14 +852,14 @@ public:
     friend struct __specialized_algorithm;
 };
 
-template <class _InputIterator,
-class _Compare   = std::less<__iterator_value_type<_InputIterator>>,
-class _Allocator = std::allocator<__iterator_value_type<_InputIterator>>,
-class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+template <class InputIteratorT,
+class _Compare   = std::less<__iterator_value_type<InputIteratorT>>,
+class _Allocator = std::allocator<__iterator_value_type<InputIteratorT>>,
+class            = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
-set(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
--> set<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
+set(InputIteratorT, InputIteratorT, _Compare = _Compare(), _Allocator = _Allocator())
+-> set<__iterator_value_type<InputIteratorT>, _Compare, _Allocator>;
 
 template <std::ranges::input_range RangeT,
 class _Compare   = std::less<std::ranges::range_value_t<RangeT>>,
@@ -876,12 +876,12 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>>
 set(std::initializer_list<KeyT>, _Compare = _Compare(), _Allocator = _Allocator()) -> set<KeyT, _Compare, _Allocator>;
 
-template <class _InputIterator,
+template <class InputIteratorT,
 class _Allocator,
-class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value>,
+class = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value>,
 class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-set(_InputIterator, _InputIterator, _Allocator)
--> set<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
+set(InputIteratorT, InputIteratorT, _Allocator)
+-> set<__iterator_value_type<InputIteratorT>, std::less<__iterator_value_type<InputIteratorT>>, _Allocator>;
 
 template <std::ranges::input_range RangeT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 set(std::from_range_t, RangeT&&, _Allocator)
@@ -991,18 +991,18 @@ public:
 
     explicit multiset(const value_compare& __comp, const allocator_type& __a)
     : tree_(__comp, __a) {}
-    template <class _InputIterator>
-    multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp = value_compare())
+    template <class InputIteratorT>
+    multiset(InputIteratorT __f, InputIteratorT __l, const value_compare& __comp = value_compare())
     : tree_(__comp) {
         insert(__f, __l);
     }
 
-    template <class _InputIterator>
-    multiset(_InputIterator __f, _InputIterator __l, const allocator_type& __a)
+    template <class InputIteratorT>
+    multiset(InputIteratorT __f, InputIteratorT __l, const allocator_type& __a)
     : multiset(__f, __l, key_compare(), __a) {}
 
-    template <class _InputIterator>
-    multiset(_InputIterator __f, _InputIterator __l, const value_compare& __comp, const allocator_type& __a)
+    template <class InputIteratorT>
+    multiset(InputIteratorT __f, InputIteratorT __l, const value_compare& __comp, const allocator_type& __a)
     : tree_(__comp, __a) {
         insert(__f, __l);
     }
@@ -1093,8 +1093,8 @@ public:
         return tree_.__emplace_hint_multi(__p, __v);
     }
 
-    template <class _InputIterator>
-    void insert(_InputIterator __first, _InputIterator __last) {
+    template <class InputIteratorT>
+    void insert(InputIteratorT __first, InputIteratorT __last) {
         tree_.__insert_range_multi(__first, __last);
     }
 
@@ -1245,14 +1245,14 @@ public:
     friend struct __specialized_algorithm;
 };
 
-template <class _InputIterator,
-class _Compare   = std::less<__iterator_value_type<_InputIterator>>,
-class _Allocator = std::allocator<__iterator_value_type<_InputIterator>>,
-class            = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+template <class InputIteratorT,
+class _Compare   = std::less<__iterator_value_type<InputIteratorT>>,
+class _Allocator = std::allocator<__iterator_value_type<InputIteratorT>>,
+class            = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>,
 class            = std::enable_if_t<__is_allocator_v<_Allocator>>,
 class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
-multiset(_InputIterator, _InputIterator, _Compare = _Compare(), _Allocator = _Allocator())
--> multiset<__iterator_value_type<_InputIterator>, _Compare, _Allocator>;
+multiset(InputIteratorT, InputIteratorT, _Compare = _Compare(), _Allocator = _Allocator())
+-> multiset<__iterator_value_type<InputIteratorT>, _Compare, _Allocator>;
 
 template <std::ranges::input_range RangeT,
 class _Compare   = std::less<std::ranges::range_value_t<RangeT>>,
@@ -1270,12 +1270,12 @@ class            = std::enable_if_t<!__is_allocator_v<_Compare>>>
 multiset(std::initializer_list<KeyT>, _Compare = _Compare(), _Allocator = _Allocator())
 -> multiset<KeyT, _Compare, _Allocator>;
 
-template <class _InputIterator,
+template <class InputIteratorT,
 class _Allocator,
-class = std::enable_if_t<__has_input_iterator_category<_InputIterator>::value, void>,
+class = std::enable_if_t<__has_input_iterator_category<InputIteratorT>::value, void>,
 class = std::enable_if_t<__is_allocator_v<_Allocator>>>
-multiset(_InputIterator, _InputIterator, _Allocator)
--> multiset<__iterator_value_type<_InputIterator>, std::less<__iterator_value_type<_InputIterator>>, _Allocator>;
+multiset(InputIteratorT, InputIteratorT, _Allocator)
+-> multiset<__iterator_value_type<InputIteratorT>, std::less<__iterator_value_type<InputIteratorT>>, _Allocator>;
 
 template <std::ranges::input_range RangeT, class _Allocator, class = std::enable_if_t<__is_allocator_v<_Allocator>>>
 multiset(std::from_range_t, RangeT&&, _Allocator)
