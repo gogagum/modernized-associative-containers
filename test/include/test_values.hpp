@@ -120,4 +120,15 @@ struct DefaultConstructibleType
     }
 };
 
+struct aggressive_aggregate
+{
+    int a;
+    int b;
+};
+
+inline auto operator<=>(const aggressive_aggregate &a, const aggressive_aggregate &b)
+{
+    return a.a <=> b.a;
+};
+
 } // namespace mstd::test

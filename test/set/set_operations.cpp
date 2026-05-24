@@ -11,6 +11,34 @@ namespace mstd {
 static_assert(!std::totally_ordered<set<int>::iterator>);
 static_assert(!std::three_way_comparable<set<int>::iterator>);
 
+TEST(SetEmplaceTest, Test2)
+{
+    set<test::aggressive_aggregate> x;
+    auto [it, was_emplaced] = x.emplace(1, 2);
+    EXPECT_EQ(it->a, 1);
+    EXPECT_EQ(it->b, 2);
+    it = x.emplace(2).position;
+    EXPECT_EQ(it->a, 2);
+    EXPECT_EQ(it->b, 0);
+    it = x.emplace().position;
+    EXPECT_EQ(it->a, 0);
+    EXPECT_EQ(it->b, 0);
+}
+
+TEST(SetEmplaceTest, TestHint)
+{
+    set<test::aggressive_aggregate> x;
+    auto it = x.emplace_hint(x.begin(), 3, 2);
+    EXPECT_EQ(it->a, 3);
+    EXPECT_EQ(it->b, 2);
+    it = x.emplace_hint(x.begin(), 4);
+    EXPECT_EQ(it->a, 4);
+    EXPECT_EQ(it->b, 0);
+    it = x.emplace_hint(x.begin());
+    EXPECT_EQ(it->a, 0);
+    EXPECT_EQ(it->b, 0);
+}
+
 TEST(SetContains, Test1)
 {
     set<int> m;
@@ -24,29 +52,17 @@ TEST(SetContains, Test1)
     EXPECT_TRUE(m.contains(1));
 }
 
-struct Zero
-{
-};
-auto operator<=>(Zero, int i) { return 0 <=> i; }
-auto operator<=>(int i, Zero) { return i <=> 0; }
-
-struct One
-{
-};
-auto operator<=>(One, int i) { return 1 <=> i; }
-auto operator<=>(int i, One) { return i <=> 1; }
-
 TEST(SetContains, Test2)
 {
     set<int> m;
-    EXPECT_FALSE(m.contains(Zero{}));
-    EXPECT_FALSE(m.contains(One{}));
+    EXPECT_FALSE(m.contains(test::Zero{}));
+    EXPECT_FALSE(m.contains(test::One{}));
     m.insert(0);
-    EXPECT_TRUE(m.contains(Zero{}));
-    EXPECT_FALSE(m.contains(One{}));
+    EXPECT_TRUE(m.contains(test::Zero{}));
+    EXPECT_FALSE(m.contains(test::One{}));
     m.insert(1);
-    EXPECT_TRUE(m.contains(Zero{}));
-    EXPECT_TRUE(m.contains(One{}));
+    EXPECT_TRUE(m.contains(test::Zero{}));
+    EXPECT_TRUE(m.contains(test::One{}));
 }
 
 TEST(SetCount, Test1)
@@ -131,17 +147,14 @@ TEST(SetEqualRange, Test1)
 {
     set<X> s;
     X x;
-    (void)s.equal_range(x);
-    const set<X> &cs = s;
-    (void)cs.equal_range(x);
+    std::ignore = s.equal_range(x);
+    std::ignore = std::as_const(s).equal_range(x);
 }
 
 TEST(SetEmplace, Test1)
 {
-    using Set = set<test::PathPoint, test::PathPointCmp>;
-    Set s;
-
-    std::vector<double> coord1 = {0.0, 1.0, 2.0};
+    auto s = set<test::PathPoint, test::PathPointCmp>{};
+    auto coord1 = std::vector{0.0, 1.0, 2.0};
 
     auto ret = s.emplace('a', coord1);
     EXPECT_TRUE(ret.inserted);
@@ -170,7 +183,6 @@ TEST(SetEmplace, Test1)
 TEST(SetInsert, Test1)
 {
     set<int> s0, s1;
-    set<int>::iterator iter1;
 
     s0.insert(1);
     s1.insert(s1.end(), 1);
@@ -181,7 +193,7 @@ TEST(SetInsert, Test1)
     EXPECT_EQ(s0, s1);
 
     s0.insert(4);
-    iter1 = s1.insert(s1.end(), 4);
+    auto iter1 = s1.insert(s1.end(), 4);
     EXPECT_EQ(s0, s1);
 
     s0.insert(6);
@@ -219,8 +231,7 @@ TEST(SetInsert, Test1)
 
 TEST(SetInsert, Test2)
 {
-    using Set = set<test::rvalstruct>;
-    Set s;
+    auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
     auto p = s.insert(test::rvalstruct(1));
@@ -233,8 +244,7 @@ TEST(SetInsert, Test2)
 
 TEST(SetInsert, Test3)
 {
-    using Set = set<test::rvalstruct>;
-    Set s;
+    auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
     auto p1 = s.insert(test::rvalstruct(2));
@@ -248,11 +258,10 @@ TEST(SetInsert, Test3)
 
 TEST(SetInsert, Test4)
 {
-    using Set = set<test::rvalstruct>;
-    Set s;
+    auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p = s.insert(s.begin(), test::rvalstruct(1));
+    auto p = s.insert(s.begin(), test::rvalstruct(1));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
     EXPECT_EQ(p, s.begin());
@@ -261,12 +270,11 @@ TEST(SetInsert, Test4)
 
 TEST(SetInsert, Test5)
 {
-    using Set = set<test::rvalstruct>;
-    Set s;
+    auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
-    Set::iterator p1 = s.insert(s.begin(), test::rvalstruct(2));
-    Set::iterator p2 = s.insert(p1, test::rvalstruct(2));
+    auto p1 = s.insert(s.begin(), test::rvalstruct(2));
+    auto p2 = s.insert(p1, test::rvalstruct(2));
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(p1, p2);
     EXPECT_EQ(p1->val, 2);
@@ -274,9 +282,7 @@ TEST(SetInsert, Test5)
 
 TEST(SetOperations, Test1)
 {
-    set<int> s0;
-    using iterator = set<int>::iterator;
-    using const_iterator = set<int>::const_iterator;
+    auto s0 = set<int>{};
 
     std::ranges::input_range auto pp0 = s0.equal_range(1);
     EXPECT_EQ(s0.count(1), 0);
@@ -403,29 +409,24 @@ TEST(SetOperations, Test2)
 
     EXPECT_EQ(Cmp::count, 2);
 
-    static_assert(std::is_same<decltype(it), test_type::iterator>::value,
-                  "find returns iterator");
-    static_assert(std::is_same<decltype(cit), test_type::const_iterator>::value,
-                  "const find returns const_iterator");
+    static_assert(std::same_as<decltype(it), test_type::iterator>);
+    static_assert(std::same_as<decltype(cit), test_type::const_iterator>);
 }
 
 TEST(SetOperations, Test3)
 {
     Cmp::count = 0;
 
-    using test_type = set<int, Cmp>;
-
-    test_type x{1, 3, 5};
-    const test_type &cx = x;
+    auto x = set<int, Cmp>{1, 3, 5};
 
     auto n = x.count(1L);
     EXPECT_EQ(n, 1);
     n = x.count(2L);
     EXPECT_EQ(n, 0);
 
-    auto cn = cx.count(3L);
+    auto cn = std::as_const(x).count(3L);
     EXPECT_EQ(cn, 1);
-    cn = cx.count(2L);
+    cn = std::as_const(x).count(2L);
     EXPECT_EQ(cn, 0);
 
     EXPECT_EQ(Cmp::count, 2);
@@ -435,10 +436,7 @@ TEST(SetOperations, Test4)
 {
     Cmp::count = 0;
 
-    using test_type = set<int, Cmp>;
-
-    test_type x{1, 3, 5};
-    const test_type &cx = x;
+    auto x = set<int, Cmp>{1, 3, 5};
 
     auto it = x.lower_bound(1L);
     EXPECT_NE(it, x.end());
@@ -447,19 +445,17 @@ TEST(SetOperations, Test4)
     EXPECT_NE(it, x.end());
     EXPECT_EQ(*it, 3);
 
-    auto cit = cx.lower_bound(1L);
-    EXPECT_NE(cit, cx.end());
+    auto cit = std::as_const(x).lower_bound(1L);
+    EXPECT_NE(cit, std::as_const(x).end());
     EXPECT_EQ(*cit, 1);
-    cit = cx.lower_bound(2L);
-    EXPECT_NE(cit, cx.end());
+    cit = std::as_const(x).lower_bound(2L);
+    EXPECT_NE(cit, std::as_const(x).end());
     EXPECT_EQ(*cit, 3);
 
     EXPECT_EQ(Cmp::count, 2);
 
-    static_assert(std::is_same<decltype(it), test_type::iterator>::value,
-                  "lower_bound returns iterator");
-    static_assert(std::is_same<decltype(cit), test_type::const_iterator>::value,
-                  "const lower_bound returns const_iterator");
+    static_assert(std::same_as<decltype(it), set<int, Cmp>::iterator>);
+    static_assert(std::same_as<decltype(cit), set<int, Cmp>::const_iterator>);
 }
 
 TEST(SetOperations, Test5)
