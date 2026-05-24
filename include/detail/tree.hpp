@@ -2011,56 +2011,59 @@ auto Tree<_Tp, _Compare, _Allocator>::__erase_unique(const KeyT& key) -> size_ty
     return 0;
 }
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class KeyT>
-    typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__erase_multi(const KeyT& __k) {
-        std::pair<iterator, iterator> __p = __equal_range_multi(__k);
-        size_type __r                = 0;
-        for (; __p.first != __p.second; ++__r)
-            __p.first = erase(__p.first);
-        return __r;
+template <class _Tp, class _Compare, class _Allocator>
+template <class KeyT>
+auto Tree<_Tp, _Compare, _Allocator>::__erase_multi(const KeyT& key) -> size_type {
+    auto [begin, end] = __equal_range_multi(key);
+    size_type ret_cnt = 0;
+    for (; begin != end; ++ret_cnt) {
+        begin = erase(begin);
     }
+    return ret_cnt;
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class KeyT>
-    typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__count_unique(const KeyT& __k) const {
-        __node_pointer __rt = __root();
-        auto __comp         = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-        while (__rt != nullptr) {
-            auto __comp_res = __comp(__k, __rt->__get_value());
-            if (__comp_res.__less()) {
-                __rt = static_cast<__node_pointer>(__rt->__left_);
-            } else if (__comp_res.__greater())
-                __rt = static_cast<__node_pointer>(__rt->__right_);
-            else
-                return 1;
+template <class _Tp, class _Compare, class _Allocator>
+template <class KeyT>
+auto Tree<_Tp, _Compare, _Allocator>::__count_unique(const KeyT& key) const
+  -> size_type {
+    auto root = __root();
+    auto comp         = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+    while (root != nullptr) {
+        const auto comp_res = comp(key, root->__get_value());
+        if (comp_res.__less()) {
+            root = static_cast<__node_pointer>(root->__left_);
+        } else if (comp_res.__greater()) {
+            root = static_cast<__node_pointer>(root->__right_);
+        } else {
+            return 1;
         }
-        return 0;
     }
+    return 0;
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class KeyT>
-    typename Tree<_Tp, _Compare, _Allocator>::size_type
-    Tree<_Tp, _Compare, _Allocator>::__count_multi(const KeyT& __k) const {
-        __end_node_pointer __result = __end_node();
-        __node_pointer __rt         = __root();
-        auto __comp                 = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
-        while (__rt != nullptr) {
-            auto __comp_res = __comp(__k, __rt->__get_value());
-            if (__comp_res.__less()) {
-                __result = static_cast<__end_node_pointer>(__rt);
-                __rt     = static_cast<__node_pointer>(__rt->__left_);
-            } else if (__comp_res.__greater())
-                __rt = static_cast<__node_pointer>(__rt->__right_);
-            else
-                return std::distance(
-                    __lower_bound_multi(__k, static_cast<__node_pointer>(__rt->__left_), static_cast<__end_node_pointer>(__rt)),
-                                     __upper_bound_multi(__k, static_cast<__node_pointer>(__rt->__right_), __result));
+template <class _Tp, class _Compare, class _Allocator>
+template <class KeyT>
+auto Tree<_Tp, _Compare, _Allocator>::__count_multi(const KeyT& key) const
+  -> size_type {
+    auto result = __end_node();
+    auto root   = __root();
+    auto comp   = LazySynthThreeWayComparator<value_compare, KeyT, value_type>(value_comp());
+    while (root != nullptr) {
+        const auto comp_res = comp(key, root->__get_value());
+        if (comp_res.__less()) {
+            result = static_cast<__end_node_pointer>(root);
+            root   = static_cast<__node_pointer>(root->__left_);
+        } else if (comp_res.__greater()) {
+            root = static_cast<__node_pointer>(root->__right_);
+        } else {
+            return std::distance(
+                __lower_bound_multi(key, static_cast<__node_pointer>(root->__left_), static_cast<__end_node_pointer>(root)),
+                __upper_bound_multi(key, static_cast<__node_pointer>(root->__right_), result)
+            );
         }
-        return 0;
     }
+    return 0;
+}
 
 template <class _Tp, class _Compare, class _Allocator>
 template <class KeyT>
