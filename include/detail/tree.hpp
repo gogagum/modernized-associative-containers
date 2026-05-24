@@ -1815,159 +1815,158 @@ Tree<_Tp, _Compare, _Allocator>::__find_equal(const_iterator __hint, __node_base
 
 template <class _Tp, class _Compare, class _Allocator>
 void Tree<_Tp, _Compare, _Allocator>::__insert_node_at(
-    __end_node_pointer __parent, __node_base_pointer& __child, __node_base_pointer __new_node) noexcept {
-        __new_node->__left_   = nullptr;
-        __new_node->__right_  = nullptr;
-        __new_node->__parent_ = __parent;
-        // __new_node->__is_black_ is initialized in __tree_balance_after_insert
-        __child = __new_node;
-        if (__begin_node_->__left_ != nullptr)
-            __begin_node_ = static_cast<__end_node_pointer>(__begin_node_->__left_);
-        mstd::__tree_balance_after_insert(__end_node()->__left_, __child);
-        ++__size_;
+__end_node_pointer parent, __node_base_pointer& child, __node_base_pointer __new_node) noexcept {
+    __new_node->__left_   = nullptr;
+    __new_node->__right_  = nullptr;
+    __new_node->__parent_ = parent;
+    // __new_node->__is_black_ is initialized in __tree_balance_after_insert
+    child = __new_node;
+    if (__begin_node_->__left_ != nullptr)
+        __begin_node_ = static_cast<__end_node_pointer>(__begin_node_->__left_);
+    mstd::__tree_balance_after_insert(__end_node()->__left_, child);
+    ++__size_;
+}
+
+template <class _Tp, class _Compare, class _Allocator>
+template <class... _Args>
+auto Tree<_Tp, _Compare, _Allocator>::__construct_node(_Args&&... args) -> __node_holder {
+    __node_allocator& __na = __node_alloc();
+    __node_holder __h(__node_traits::allocate(__na, 1), _Dp(__na));
+    std::construct_at(std::addressof(*__h), __na, std::forward<_Args>(args)...);
+    __h.get_deleter().__value_constructed = true;
+    return __h;
+}
+
+template <class _Tp, class _Compare, class _Allocator>
+template <class... _Args>
+auto Tree<_Tp, _Compare, _Allocator>::__emplace_multi(_Args&&... args) -> iterator {
+    __node_holder __h = __construct_node(std::forward<_Args>(args)...);
+    __end_node_pointer parent;
+    __node_base_pointer& child = __find_leaf_high(parent, __h->__get_value());
+    __insert_node_at(parent, child, static_cast<__node_base_pointer>(__h.get()));
+    return iterator(static_cast<__node_pointer>(__h.release()));
+}
+
+template <class _Tp, class _Compare, class _Allocator>
+template <class... _Args>
+auto Tree<_Tp, _Compare, _Allocator>::__emplace_hint_multi(const_iterator pos, _Args&&... args) -> iterator {
+    __node_holder __h = __construct_node(std::forward<_Args>(args)...);
+    __end_node_pointer parent;
+    __node_base_pointer& child = __find_leaf(pos, parent, __h->__get_value());
+    __insert_node_at(parent, child, static_cast<__node_base_pointer>(__h.get()));
+    return iterator(static_cast<__node_pointer>(__h.release()));
+}
+
+template <class _Tp, class _Compare, class _Allocator>
+auto Tree<_Tp, _Compare, _Allocator>::__remove_node_pointer(__node_pointer ptr) noexcept -> iterator {
+    iterator ret(ptr);
+    ++ret;
+    if (__begin_node_ == ptr) {
+        __begin_node_ = ret.__ptr_;
     }
+    --__size_;
+    mstd::__tree_remove(__end_node()->__left_, static_cast<__node_base_pointer>(ptr));
+    return ret;
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class... _Args>
-    typename Tree<_Tp, _Compare, _Allocator>::__node_holder
-    Tree<_Tp, _Compare, _Allocator>::__construct_node(_Args&&... __args) {
-        __node_allocator& __na = __node_alloc();
-        __node_holder __h(__node_traits::allocate(__na, 1), _Dp(__na));
-        std::construct_at(std::addressof(*__h), __na, std::forward<_Args>(__args)...);
-        __h.get_deleter().__value_constructed = true;
-        return __h;
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle, class _InsertReturnType>
+_InsertReturnType
+Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(_NodeHandle&& nh) {
+    if (nh.empty()) {
+        return _InsertReturnType{end(), false, _NodeHandle()};
     }
-
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class... _Args>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__emplace_multi(_Args&&... __args) {
-        __node_holder __h = __construct_node(std::forward<_Args>(__args)...);
-        __end_node_pointer __parent;
-        __node_base_pointer& __child = __find_leaf_high(__parent, __h->__get_value());
-        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
-        return iterator(static_cast<__node_pointer>(__h.release()));
+    auto ptr = nh.__ptr_;
+    auto [parent, child] = __find_equal(ptr->__get_value());
+    if (child != nullptr) {
+        return _InsertReturnType{iterator(static_cast<__node_pointer>(child)), false, std::move(nh)};
     }
+    __insert_node_at(parent, child, static_cast<__node_base_pointer>(ptr));
+    nh.__release_ptr();
+    return _InsertReturnType{iterator(ptr), true, _NodeHandle()};
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class... _Args>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__emplace_hint_multi(const_iterator __p, _Args&&... __args) {
-        __node_holder __h = __construct_node(std::forward<_Args>(__args)...);
-        __end_node_pointer __parent;
-        __node_base_pointer& __child = __find_leaf(__p, __parent, __h->__get_value());
-        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__h.get()));
-        return iterator(static_cast<__node_pointer>(__h.release()));
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle>
+auto Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(const_iterator hint, _NodeHandle&& nh)
+  -> iterator {
+    if (nh.empty()) {
+        return end();
     }
-
-    template <class _Tp, class _Compare, class _Allocator>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__remove_node_pointer(__node_pointer __ptr) noexcept {
-        iterator __r(__ptr);
-        ++__r;
-        if (__begin_node_ == __ptr)
-            __begin_node_ = __r.__ptr_;
-        --__size_;
-        mstd::__tree_remove(__end_node()->__left_, static_cast<__node_base_pointer>(__ptr));
-        return __r;
+    auto ptr = nh.__ptr_;
+    __node_base_pointer dummy;
+    auto [parent, child] = __find_equal(hint, dummy, ptr->__get_value());
+    auto ret             = static_cast<__node_pointer>(child);
+    if (child == nullptr) {
+        __insert_node_at(parent, child, static_cast<__node_base_pointer>(ptr));
+        ret = ptr;
+        nh.__release_ptr();
     }
+    return iterator(ret);
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle, class _InsertReturnType>
-    _InsertReturnType
-    Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(_NodeHandle&& __nh) {
-        if (__nh.empty())
-            return _InsertReturnType{end(), false, _NodeHandle()};
-
-        __node_pointer __ptr = __nh.__ptr_;
-        auto [__parent, __child] = __find_equal(__ptr->__get_value());
-        if (__child != nullptr)
-            return _InsertReturnType{iterator(static_cast<__node_pointer>(__child)), false, std::move(__nh)};
-
-        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
-        __nh.__release_ptr();
-        return _InsertReturnType{iterator(__ptr), true, _NodeHandle()};
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle>
+_NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& key) {
+    if (const auto iter = find(key); iter != end()) {
+        return __node_handle_extract<_NodeHandle>(iter);
     }
+    return _NodeHandle();
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_unique(const_iterator __hint, _NodeHandle&& __nh) {
-        if (__nh.empty())
-            return end();
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle>
+_NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator pos) {
+    auto node_ptr = pos.__get_np();
+    __remove_node_pointer(node_ptr);
+    return _NodeHandle(node_ptr, __alloc());
+}
 
-        __node_pointer __ptr = __nh.__ptr_;
-        __node_base_pointer __dummy;
-        auto [__parent, __child] = __find_equal(__hint, __dummy, __ptr->__get_value());
-        __node_pointer __r       = static_cast<__node_pointer>(__child);
-        if (__child == nullptr) {
-            __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
-            __r = __ptr;
-            __nh.__release_ptr();
+template <class _Tp, class _Compare, class _Allocator>
+template <class _Comp2>
+void Tree<_Tp, _Compare, _Allocator>::__node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& source) {
+    for (iterator iter = source.begin(); iter != source.end();) {
+        auto src_ptr = iter.__get_np();
+        auto [parent, child] = __find_equal(src_ptr->__get_value());
+        ++iter;
+        if (child != nullptr) {
+            continue;
         }
-        return iterator(__r);
+        source.__remove_node_pointer(src_ptr);
+        __insert_node_at(parent, child, static_cast<__node_base_pointer>(src_ptr));
     }
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle>
-    _NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(key_type const& __key) {
-        iterator __it = find(__key);
-        if (__it == end())
-            return _NodeHandle();
-        return __node_handle_extract<_NodeHandle>(__it);
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle>
+auto Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(_NodeHandle&& nh)
+  -> iterator {
+    if (nh.empty()) {
+        return end();
     }
+    auto ptr = nh.__ptr_;
+    __end_node_pointer parent;
+    auto& child = __find_leaf_high(parent, ptr->__get_value());
+    __insert_node_at(parent, child, static_cast<__node_base_pointer>(ptr));
+    nh.__release_ptr();
+    return iterator(ptr);
+}
 
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle>
-    _NodeHandle Tree<_Tp, _Compare, _Allocator>::__node_handle_extract(const_iterator __p) {
-        __node_pointer __np = __p.__get_np();
-        __remove_node_pointer(__np);
-        return _NodeHandle(__np, __alloc());
+template <class _Tp, class _Compare, class _Allocator>
+template <class _NodeHandle>
+auto
+Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(const_iterator hint, _NodeHandle&& nh)
+  -> iterator {
+    if (nh.empty()) {
+        return end();
     }
-
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _Comp2>
-    void
-    Tree<_Tp, _Compare, _Allocator>::__node_handle_merge_unique(Tree<_Tp, _Comp2, _Allocator>& __source) {
-        for (iterator __i = __source.begin(); __i != __source.end();) {
-            __node_pointer __src_ptr = __i.__get_np();
-            auto [__parent, __child] = __find_equal(__src_ptr->__get_value());
-            ++__i;
-            if (__child != nullptr)
-                continue;
-            __source.__remove_node_pointer(__src_ptr);
-            __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__src_ptr));
-        }
-    }
-
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(_NodeHandle&& __nh) {
-        if (__nh.empty())
-            return end();
-        __node_pointer __ptr = __nh.__ptr_;
-        __end_node_pointer __parent;
-        __node_base_pointer& __child = __find_leaf_high(__parent, __ptr->__get_value());
-        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
-        __nh.__release_ptr();
-        return iterator(__ptr);
-    }
-
-    template <class _Tp, class _Compare, class _Allocator>
-    template <class _NodeHandle>
-    typename Tree<_Tp, _Compare, _Allocator>::iterator
-    Tree<_Tp, _Compare, _Allocator>::__node_handle_insert_multi(const_iterator __hint, _NodeHandle&& __nh) {
-        if (__nh.empty())
-            return end();
-
-        __node_pointer __ptr = __nh.__ptr_;
-        __end_node_pointer __parent;
-        __node_base_pointer& __child = __find_leaf(__hint, __parent, __ptr->__get_value());
-        __insert_node_at(__parent, __child, static_cast<__node_base_pointer>(__ptr));
-        __nh.__release_ptr();
-        return iterator(__ptr);
-    }
+    auto ptr = nh.__ptr_;
+    __end_node_pointer parent;
+    auto& child = __find_leaf(hint, parent, ptr->__get_value());
+    __insert_node_at(parent, child, static_cast<__node_base_pointer>(ptr));
+    nh.__release_ptr();
+    return iterator(ptr);
+}
 
     template <class _Tp, class _Compare, class _Allocator>
     template <class _Comp2>
