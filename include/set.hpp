@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <detail/node_handle.hpp>
@@ -48,7 +49,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_        = Tree<value_type, value_compare, allocator_type>;
+    using Tree_        = Tree<value_type, std::identity, value_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
@@ -467,7 +468,7 @@ public:
                   "Allocator::value_type must be same type as value_type");
 
 private:
-    using Tree_        = Tree<value_type, value_compare, allocator_type>;
+    using Tree_        = Tree<value_type, std::identity, value_compare, allocator_type>;
     using AllocTraits_ = std::allocator_traits<allocator_type> ;
 
     Tree_ tree_;
@@ -490,7 +491,7 @@ public:
 
     template <class /*Key*/, class /*Compare*/, class /*Alloc*/>
     friend class set;
-    template <class /*Key2*/, class /*Compare*/, class /*Alloc*/>
+    template <class /*Key*/, class /*Compare*/, class /*Alloc*/>
     friend class multiset;
 
     // construct/copy/destroy:

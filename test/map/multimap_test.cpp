@@ -1,3 +1,4 @@
+#include "detail/utility/compare_three_way.hpp"
 #include <gtest/gtest.h>
 #include <rval_struct.hpp>
 #include <counter_type.hpp>
@@ -26,8 +27,8 @@ TEST(MultimapTest, Compare1)
     static_assert(std::totally_ordered<mstd::multimap<int, int>>);
 
     static_assert(std::three_way_comparable<mstd::multimap<int, int>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<int, float>, std::strong_ordering>);
-    static_assert(!std::three_way_comparable<mstd::multimap<int, float>, std::weak_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multimap<float, float>, std::strong_ordering>);
+    static_assert(!std::three_way_comparable<mstd::multimap<float, float>, std::weak_ordering>);
     static_assert(std::three_way_comparable<mstd::multimap<int, float>, std::partial_ordering>);
 
     struct E
@@ -59,12 +60,12 @@ TEST(MultimapTest, Compare2)
 
     static_assert(std::totally_ordered<mstd::multimap<int, W>>);
 
-    using P = std::pair<const W, W>;
-    mstd::multimap<W, W> c1{P{1, 1}, P{2, 2}, P{3, 3}}, c2{P{1, 0}, P{3, 2}, P{3, 3}};
+    mstd::multimap<W, W> c1{{1, 1}, {2, 2}, {3, 3}}, c2{{1, 0}, {3, 2}, {3, 3}};
     static_assert(std::same_as<decltype(c1 <=> c1), std::weak_ordering>);
     EXPECT_EQ(c1, c2);
     EXPECT_TRUE(std::is_eq(c1 <=> c2));
 }
+
 
 TEST(MultimapTest, Compare3)
 {
@@ -78,11 +79,12 @@ TEST(MultimapTest, Compare3)
 
     static_assert(std::totally_ordered<mstd::multimap<int, L>>);
 
-    using P = std::pair<const L, L>;
-    mstd::multimap<L, L> c{P{1, 1}, P{2, 2}, P{3, 3}}, d{P{1, 1}, P{2, 2}, P{3, 4}};
+    mstd::multimap<L, L> c{{1, 1}, {2, 2}, {3, 3}}, d{{1, 1}, {2, 2}, {3, 4}};
+
     static_assert(std::same_as<decltype(c <=> c), std::weak_ordering>);
     EXPECT_TRUE(std::is_lt(c <=> d));
 }
+    
 
 // Associative container iterators are not random access
 static_assert(!std::totally_ordered<mstd::multimap<int, int>::iterator>);
@@ -198,9 +200,10 @@ struct U
 {
 };
 
+
 TEST(MultimapUneqAllocMove, Test1)
 {
-    typedef uneq_allocator<std::pair<const T, U>> alloc_type;
+    typedef uneq_allocator<mstd::MapValue<T, U>> alloc_type;
     typedef mstd::multimap<T, U, Cmp, alloc_type> test_type;
     test_type v1(alloc_type(1));
     v1 = {test_type::value_type{}};
@@ -215,7 +218,7 @@ TEST(MultimapUneqAllocMove, Test1)
 
 TEST(MultimapUneqAllocMove, Test2)
 {
-    typedef uneq_allocator<std::pair<const T, U>> alloc_type;
+    typedef uneq_allocator<mstd::MapValue<T, U>> alloc_type;
     typedef mstd::multimap<T, U, Cmp, alloc_type> test_type;
     test_type v1(alloc_type(1));
     v1 = {test_type::value_type{}};
@@ -226,7 +229,7 @@ TEST(MultimapUneqAllocMove, Test2)
 
 TEST(MultimapUneqAllocMoveAssign, Test1)
 {
-    typedef propagating_allocator<std::pair<const T, U>, false> alloc_type;
+    typedef propagating_allocator<mstd::MapValue<T, U>, false> alloc_type;
     typedef mstd::multimap<T, U, Cmp, alloc_type> test_type;
     test_type v1(alloc_type(1));
     v1 = {test_type::value_type{}};
@@ -239,7 +242,7 @@ TEST(MultimapUneqAllocMoveAssign, Test1)
 
 TEST(MultimapUneqAllocMoveAssign, Test2)
 {
-    typedef propagating_allocator<std::pair<const T, U>, true> alloc_type;
+    typedef propagating_allocator<mstd::MapValue<T, U>, true> alloc_type;
     typedef mstd::multimap<T, U, Cmp, alloc_type> test_type;
     test_type v1(alloc_type(1));
     v1 = {test_type::value_type{}};
@@ -255,10 +258,10 @@ TEST(MultimapUneqAllocMoveAssign, Test2)
 TEST(MultimapUneqAllocMoveAssign, Test3)
 {
 
-    typedef propagating_allocator<std::pair<const int, int>, false,
-                                  tracker_allocator<std::pair<const int, int>>>
+    typedef propagating_allocator<mstd::MapValue<int, int>, false,
+                                  tracker_allocator<mstd::MapValue<int, int>>>
         alloc_type;
-    typedef mstd::multimap<int, int, std::less<int>, alloc_type> test_type;
+    typedef mstd::multimap<int, int, mstd::CompareThreeWay, alloc_type> test_type;
 
     tracker_allocator_counter::reset();
 

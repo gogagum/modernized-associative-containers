@@ -29,36 +29,9 @@
 #include <tuple>
 #include <version>
 #include <initializer_list>
+#include <detail/map_value.hpp>
 
 namespace mstd {
-
-template <class KeyT, class _CP, class CompareT>
-class MapValueCompare {
-    CompareT comp_;
-
-public:
-    MapValueCompare() noexcept(std::is_nothrow_default_constructible<CompareT>::value)
-    : comp_() {}
-    MapValueCompare(CompareT c) noexcept(std::is_nothrow_copy_constructible<CompareT>::value)
-    : comp_(c) {}
-    const CompareT& key_comp() const noexcept { return comp_; }
-
-    auto operator()(const _CP& x, const _CP& y) const { return comp_(x.first, y.first); }
-    void swap(MapValueCompare& y) noexcept(std::is_nothrow_swappable_v<CompareT>) { std::swap(comp_, y.comp_); }
-
-    template <typename TransparentKey>
-    auto operator()(const TransparentKey& x, const _CP& y) const { return comp_(x, y.first); }
-
-    template <typename TransparentKey>
-    auto operator()(const _CP& x, const TransparentKey& y) const { return comp_(x.first, y); }
-};
-
-template <class KeyT, class _CP, class CompareT>
-inline void
-swap(MapValueCompare<KeyT, _CP, CompareT>& x, MapValueCompare<KeyT, _CP, CompareT>& y)
-noexcept(noexcept(x.swap(y))) {
-    x.swap(y);
-}
 
 template <class AllocatorT>
 class MapNodeDestructor {
@@ -101,9 +74,6 @@ public:
         }
     }
 };
-
-template <class KeyT, class ValueT>
-struct ValueType;
 
 template <class TreeIteratorT>
 class MapIterator {
@@ -212,16 +182,16 @@ public:
     friend class TreeConstIterator;
 };
 
-template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<std::pair<const KeyT, ValueT> > >
+template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<MapValue<KeyT, ValueT>>>
 class multimap;
 
-template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<std::pair<const KeyT, ValueT> > >
+template <class KeyT, class ValueT, class CompareT = CompareThreeWay, class AllocatorT = std::allocator<MapValue<KeyT, ValueT>>>
 class map {
 public:
     // types:
     using key_type = KeyT;
     using mapped_type = ValueT;
-    using value_type = std::pair<const key_type, mapped_type>;
+    using value_type = MapValue<KeyT, ValueT>;
     using key_compare = std::type_identity_t<CompareT>;
     using allocator_type = std::type_identity_t<AllocatorT>;
     using reference = value_type&;
@@ -245,9 +215,8 @@ public:
     };
 
 private:
-    using ValueType_    = ValueType<key_type, mapped_type>;
-    using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
-    using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
+    using ValueType_    = MapValue<KeyT, ValueT>;
+    using Tree_         = mstd::Tree<ValueType_, typename ValueType_::KeyProj, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
@@ -279,16 +248,16 @@ public:
     && std::is_nothrow_default_constructible<key_compare>::value
     && std::is_nothrow_copy_constructible<key_compare>::value
     )
-    : tree_(ValueCompare_(key_compare())) {}
+    : tree_(key_compare()) {}
 
     explicit map(const key_compare& comp) noexcept(
        std::is_nothrow_default_constructible<allocator_type>::value 
     && std::is_nothrow_copy_constructible<key_compare>::value
     )
-    : tree_(ValueCompare_(comp)) {}
+    : tree_(comp) {}
 
     explicit map(const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {}
+    : tree_(comp, typename Tree_::allocator_type(alloc)) {}
 
     template <class IteratorT>
     map(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
@@ -525,7 +494,7 @@ public:
         auto result = tree_.emplaceUnique(k, std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
-            iter->second = std::forward<_Vp>(v);
+            iter->value() = std::forward<_Vp>(v);
         }
         return result;
     }
@@ -535,7 +504,7 @@ public:
         auto result = tree_.emplaceUnique(std::move(k), std::forward<_Vp>(v));
         auto& [iter, inserted] = result;
         if (!inserted) {
-            iter->second = std::forward<_Vp>(v);
+            iter->value() = std::forward<_Vp>(v);
         }
         return result;
     }
@@ -544,7 +513,7 @@ public:
     iterator insert_or_assign(const_iterator hint, const key_type& k, _Vp&& v) {
         auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, k, std::forward<_Vp>(v));
         if (!inserted) {
-            r->second = std::forward<_Vp>(v);
+            r->value() = std::forward<_Vp>(v);
         }
         return r;
     }
@@ -553,7 +522,7 @@ public:
     iterator insert_or_assign(const_iterator hint, key_type&& k, _Vp&& v) {
         auto [r, inserted] = tree_.emplaceHintUnique(hint.i_, std::move(k), std::forward<_Vp>(v));
         if (!inserted) {
-            r->second = std::forward<_Vp>(v);
+            r->value() = std::forward<_Vp>(v);
         }
         return r;
     }
@@ -649,7 +618,7 @@ public:
     }
 
     template <class Self, typename TransparentKey>
-    [[nodiscard]] std::pair<iterator, iterator> equal_range(this Self& self, const TransparentKey& k) {
+    [[nodiscard]] SelfSubrange<Self> equal_range(this Self& self, const TransparentKey& k) {
         return self.tree_.equalRangeMulti(k);
     }
 
@@ -702,11 +671,11 @@ template <
     class KeyT
   , class ValueT
   , class CompareT   = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
+  , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
 requires (!Allocator<CompareT>)
 map(
-    std::initializer_list<std::pair<KeyT, ValueT>>,
+    std::initializer_list<MapValue<KeyT, ValueT>>,
     CompareT = CompareT(),
     AllocatorT = AllocatorT()
 ) -> map<
@@ -752,7 +721,7 @@ ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](const key_type& key)
             std::forward_as_tuple()
         )
         .first
-        ->second;
+        ->value();
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -764,7 +733,7 @@ ValueT& map<KeyT, ValueT, CompareT, AllocatorT>::operator[](key_type&& key) {
             std::forward_as_tuple()
         )
         .first
-        ->second;
+        ->value();
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -792,8 +761,22 @@ operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, Val
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 auto
 operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x, const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
-    return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(),
-    [cmp = CompareThreeWay{}](const auto& val1, const auto& val2){ return cmp(val1.first, val2.first); });
+    using Map = map<KeyT, ValueT, CompareT, AllocatorT>;
+    
+    return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), [](const Map::value_type& val1, const Map::value_type& val2) {
+        const auto key_cmp = CompareT{}(val1.key(), val2.key());
+        using CmpRes = decltype(key_cmp);
+        if (key_cmp == 0) {
+            if (val1.value() < val2.value()) {
+                return CmpRes::less;
+            } else if (val2.value() < val1.value()) {
+                return CmpRes::greater;
+            } else {
+                return CmpRes::equivalent;
+            }
+        }
+        return key_cmp;
+    });
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -815,7 +798,7 @@ public:
     // types:
     using key_type        = KeyT;
     using mapped_type     = ValueT;
-    using value_type      = std::pair<const key_type, mapped_type>;
+    using value_type      = MapValue<KeyT, ValueT>;
     using key_compare     = std::type_identity_t<CompareT>;
     using allocator_type  = std::type_identity_t<AllocatorT>;
     using reference       = value_type& ;
@@ -836,9 +819,8 @@ public:
     };
 
 private:
-    using ValueType_    = ValueType<key_type, mapped_type>;
-    using ValueCompare_ = MapValueCompare<key_type, value_type, key_compare>;
-    using Tree_         = Tree<ValueType_, ValueCompare_, allocator_type>;
+    using ValueType_    = MapValue<key_type, mapped_type>;
+    using Tree_         = Tree<ValueType_, typename ValueType_::KeyProj, key_compare, allocator_type>;
     using AllocTraits_  = std::allocator_traits<allocator_type>;
 
     Tree_ tree_;
@@ -869,26 +851,26 @@ public:
      && std::is_nothrow_default_constructible<key_compare>::value
      && std::is_nothrow_copy_constructible<key_compare>::value
     )
-    : tree_(ValueCompare_(key_compare())) {}
+    : tree_(key_compare()) {}
 
     explicit multimap(const key_compare& comp) noexcept(
         std::is_nothrow_default_constructible<allocator_type>::value
      && std::is_nothrow_copy_constructible<key_compare>::value
     )
-    : tree_(ValueCompare_(comp)) {}
+    : tree_(comp) {}
 
     explicit multimap(const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {}
+    : tree_(comp, typename Tree_::allocator_type(alloc)) {}
 
     template <class IteratorT>
     multimap(IteratorT begin, IteratorT end, const key_compare& comp = key_compare())
-    : tree_(ValueCompare_(comp)) {
+    : tree_(comp) {
         insert(begin, end);
     }
 
     template <class IteratorT>
     multimap(IteratorT begin, IteratorT end, const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert(begin, end);
     }
 
@@ -897,7 +879,7 @@ public:
              RangeT&& range,
              const key_compare& comp = key_compare(),
              const allocator_type& alloc = allocator_type())
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert_range(std::forward<RangeT>(range));
     }
 
@@ -921,12 +903,12 @@ public:
     multimap& operator=(multimap&& other) = default;
 
     multimap(std::initializer_list<value_type> init_list, const key_compare& comp = key_compare())
-    : tree_(ValueCompare_(comp)) {
+    : tree_(comp) {
         insert(init_list.begin(), init_list.end());
     }
 
     multimap(std::initializer_list<value_type> init_list, const key_compare& comp, const allocator_type& alloc)
-    : tree_(ValueCompare_(comp), typename Tree_::allocator_type(alloc)) {
+    : tree_(comp, typename Tree_::allocator_type(alloc)) {
         insert(init_list.begin(), init_list.end());
     }
 
@@ -1185,7 +1167,7 @@ template <
     class KeyT
   , class ValueT
   , class CompareT   = CompareThreeWay
-  , Allocator AllocatorT = std::allocator<std::pair<const KeyT, ValueT>>
+  , Allocator AllocatorT = std::allocator<MapValue<KeyT, ValueT>>
 >
 requires (!Allocator<CompareT>)
 multimap(std::initializer_list<std::pair<KeyT, ValueT>>, CompareT = CompareT(), AllocatorT = AllocatorT())
@@ -1221,14 +1203,29 @@ multimap(std::initializer_list<std::pair<KeyT, ValueT>>, AllocatorT)
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool
 operator==(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x, const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
-    return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
+    return std::ranges::equal(x, y);
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 auto
 operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
             const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
-    return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), CompareThreeWay{});
+    using Map = multimap<KeyT, ValueT, CompareT, AllocatorT>;
+
+    return std::lexicographical_compare_three_way(x.begin(), x.end(), y.begin(), y.end(), [](const Map::value_type& val1, const Map::value_type& val2) {
+        const auto key_cmp = CompareT{}(val1.key(), val2.key());
+        using CmpRes = decltype(key_cmp);
+        if (key_cmp == 0) {
+            if (val1.value() < val2.value()) {
+                return CmpRes::less;
+            } else if (val2.value() < val1.value()) {
+                return CmpRes::greater;
+            } else {
+                return CmpRes::equivalent;
+            }
+        }
+        return key_cmp;
+    });
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -1248,10 +1245,10 @@ erase_if(multimap<KeyT, ValueT, CompareT, AllocatorT>& container, PredicateT pre
 
 namespace mstd {
 namespace pmr {
-    template <class _KeyT, class ValueT, class _CompareT = CompareThreeWay>
-    using map = mstd::map<_KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, ValueT>>>;
-    template <class _KeyT, class ValueT, class _CompareT = CompareThreeWay>
-    using multimap = mstd::multimap<_KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<std::pair<const _KeyT, ValueT>>>;
+    template <class KeyT, class ValueT, class _CompareT = CompareThreeWay>
+    using map = mstd::map<KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<MapValue<KeyT, ValueT>>>;
+    template <class KeyT, class ValueT, class _CompareT = CompareThreeWay>
+    using multimap = mstd::multimap<KeyT, ValueT, _CompareT, std::pmr::polymorphic_allocator<MapValue<KeyT, ValueT>>>;
 } // namespace pmr
 } // namespace mstd
 
