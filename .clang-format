@@ -23,13 +23,11 @@ BraceWrapping:
 # Indent
 IndentCaseLabels: true
 IndentGotoLabels: false
-IndentPPDirectives: None
 IndentWrappedFunctionNames: true
 IndentFunctionDeclarationAfterType: false
 ConstructorInitializerIndentWidth: 0
 
 # Spaces
-SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
 SpaceBeforeAssignmentOperators: true
@@ -40,7 +38,6 @@ SpaceInEmptyBlock: false
 SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: Never
-SpacesInCStyleCastParentheses: false
 SpacesInConditionalStatement: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
@@ -87,7 +84,6 @@ SortUsingDeclarations: true
 # Line breaks
 BreakTemplateDeclarations: Yes
 BreakBeforeBinaryOperators: All
-BreakBeforeInlineASMColon: OnlyMultiline
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: BeforeColon
 BreakStringLiterals: true
@@ -105,6 +101,5 @@ PenaltyIndentedWhitespace: 0
 PenaltyReturnTypeOnItsOwnLine: 60
 
 # Function style
-DeriveLineEnding: true
 DerivePointerAlignment: false
 Cpp11BracedListStyle: true

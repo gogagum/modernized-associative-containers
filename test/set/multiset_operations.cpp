@@ -13,24 +13,23 @@ namespace mstd {
 static_assert(!std::totally_ordered<multiset<int>::iterator>);
 static_assert(!std::three_way_comparable<multiset<int>::iterator>);
 
-static_assert(requires (multiset<int>& x) {
+static_assert(requires(multiset<int>& x) {
     { x.find(1L) } -> std::same_as<multiset<int>::iterator>;
     { x.upper_bound(1L) } -> std::same_as<multiset<int>::iterator>;
     { x.lower_bound(1L) } -> std::same_as<multiset<int>::iterator>;
     { x.equal_range(1L) } -> std::ranges::input_range;
 });
 
-static_assert(requires (const multiset<int>& x) {
+static_assert(requires(const multiset<int>& x) {
     { x.find(1L) } -> std::same_as<multiset<int>::const_iterator>;
     { x.upper_bound(1L) } -> std::same_as<multiset<int>::const_iterator>;
     { x.lower_bound(1L) } -> std::same_as<multiset<int>::const_iterator>;
     { x.equal_range(1L) } -> std::ranges::input_range;
 });
 
-TEST(MultisetEmplaceTest, Test2)
-{
+TEST(MultisetEmplaceTest, Test2) {
     multiset<test::aggressive_aggregate> x;
-    auto it = x.emplace(1, 2);
+    auto                                 it = x.emplace(1, 2);
     EXPECT_EQ(it->a, 1);
     EXPECT_EQ(it->b, 2);
     it = x.emplace(2);
@@ -41,10 +40,9 @@ TEST(MultisetEmplaceTest, Test2)
     EXPECT_EQ(it->b, 0);
 }
 
-TEST(MultisetEmplaceTest, TestHint)
-{
+TEST(MultisetEmplaceTest, TestHint) {
     multiset<test::aggressive_aggregate> x;
-    auto it = x.emplace_hint(x.begin(), 3, 2);
+    auto                                 it = x.emplace_hint(x.begin(), 3, 2);
     EXPECT_EQ(it->a, 3);
     EXPECT_EQ(it->b, 2);
     it = x.emplace_hint(x.begin(), 4);
@@ -55,9 +53,8 @@ TEST(MultisetEmplaceTest, TestHint)
     EXPECT_EQ(it->b, 0);
 }
 
-TEST(MultisetEmplaceTest, Test1)
-{
-    auto ms = multiset<test::PathPoint, test::PathPointCmp>{};
+TEST(MultisetEmplaceTest, Test1) {
+    auto ms     = multiset<test::PathPoint, test::PathPointCmp>{};
     auto coord1 = std::vector{0.0, 1.0, 2.0};
 
     auto it = ms.emplace('a', coord1);
@@ -65,7 +62,7 @@ TEST(MultisetEmplaceTest, Test1)
     EXPECT_EQ(it->getType(), 'a');
 
     coord1[0] = 3.0;
-    it = ms.emplace('a', coord1);
+    it        = ms.emplace('a', coord1);
     EXPECT_EQ(ms.size(), 2);
     EXPECT_EQ(it->getType(), 'a');
     EXPECT_EQ(it->getCoords()[0], 3.0);
@@ -75,15 +72,14 @@ TEST(MultisetEmplaceTest, Test1)
     EXPECT_EQ(it->getType(), 'b');
     EXPECT_EQ(it->getCoords()[0], 3.0);
 
-    double *px = &coord1[0];
-    it = ms.emplace('c', std::move(coord1));
+    double* px = &coord1[0];
+    it         = ms.emplace('c', std::move(coord1));
     EXPECT_EQ(ms.size(), 4);
     EXPECT_EQ(it->getType(), 'c');
     EXPECT_EQ(&(it->getCoords()[0]), px);
 }
 
-TEST(MultisetInsertTest, Test1)
-{
+TEST(MultisetInsertTest, Test1) {
     multiset<int> ms0, ms1;
 
     ms0.insert(1);
@@ -131,8 +127,7 @@ TEST(MultisetInsertTest, Test1)
     EXPECT_EQ(ms0, ms1);
 }
 
-TEST(MultisetInsertTest, Test2)
-{
+TEST(MultisetInsertTest, Test2) {
     multiset<int> ms0, ms1;
 
     ms0.insert(1);
@@ -180,8 +175,7 @@ TEST(MultisetInsertTest, Test2)
     EXPECT_EQ(ms0, ms1);
 }
 
-TEST(MultisetInsertTest, TestRvalStruct1)
-{
+TEST(MultisetInsertTest, TestRvalStruct1) {
     auto s = multiset<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -192,8 +186,7 @@ TEST(MultisetInsertTest, TestRvalStruct1)
     EXPECT_EQ((*i).val, 1);
 }
 
-TEST(MultisetInsertTest, TestRvalStruct2)
-{
+TEST(MultisetInsertTest, TestRvalStruct2) {
     auto s = multiset<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -210,10 +203,9 @@ TEST(MultisetInsertTest, TestRvalStruct2)
     EXPECT_EQ(i->val, 2);
 }
 
-TEST(MultisetOperationsTest, Test1)
-{
+TEST(MultisetOperationsTest, Test1) {
     multiset<int> ms0;
-    
+
     {
         auto [begin, end] = ms0.equal_range(1);
         EXPECT_EQ(ms0.count(1), 0);
@@ -316,8 +308,7 @@ TEST(MultisetOperationsTest, Test1)
     }
 }
 
-TEST(MultisetOperationsTest, Test2)
-{
+TEST(MultisetOperationsTest, Test2) {
     multiset<int> m;
     EXPECT_FALSE(m.contains(0));
     EXPECT_FALSE(m.contains(1));
@@ -332,8 +323,7 @@ TEST(MultisetOperationsTest, Test2)
     EXPECT_TRUE(m.contains(1));
 }
 
-TEST(MultisetOperationsTest, Test3)
-{
+TEST(MultisetOperationsTest, Test3) {
     multiset<int> m;
     EXPECT_FALSE(m.contains(test::Zero{}));
     EXPECT_FALSE(m.contains(test::One{}));
@@ -348,8 +338,7 @@ TEST(MultisetOperationsTest, Test3)
     EXPECT_TRUE(m.contains(test::One{}));
 }
 
-TEST(MultisetOperationsTest, Test4)
-{
+TEST(MultisetOperationsTest, Test4) {
     multiset<int> ms0;
     EXPECT_EQ(ms0.count(0), 0);
     EXPECT_EQ(ms0.count(1), 0);
@@ -421,12 +410,14 @@ TEST(MultisetOperationsTest, Test4)
     EXPECT_EQ(ms1.count(5), 0);
 }
 
-struct Cmp
-{
-    auto operator()(int i, long l) const { return i <=> l; }
-    auto operator()(long l, int i) const { return l <=> i; }
-    auto operator()(int i, int j) const
-    {
+struct Cmp {
+    auto operator()(int i, long l) const {
+        return i <=> l;
+    }
+    auto operator()(long l, int i) const {
+        return l <=> i;
+    }
+    auto operator()(int i, int j) const {
         ++count;
         return i <=> j;
     }
@@ -436,12 +427,11 @@ struct Cmp
 
 int Cmp::count = 0;
 
-TEST(MultisetOperations, Test2)
-{
+TEST(MultisetOperations, Test2) {
     Cmp::count = 0;
 
-    auto x = multiset<int, Cmp>{1, 3, 5};
-    const auto &cx = x;
+    auto        x  = multiset<int, Cmp>{1, 3, 5};
+    const auto& cx = x;
 
     auto it = x.find(1L);
     EXPECT_NE(it, x.end());
@@ -458,8 +448,7 @@ TEST(MultisetOperations, Test2)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(MultisetOperations, Test3)
-{
+TEST(MultisetOperations, Test3) {
     Cmp::count = 0;
 
     auto x = multiset<int, Cmp>{1, 3, 5};
@@ -477,8 +466,7 @@ TEST(MultisetOperations, Test3)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(MultisetOperations, Test4)
-{
+TEST(MultisetOperations, Test4) {
     Cmp::count = 0;
 
     auto x = multiset<int, Cmp>{1, 3, 5};
@@ -500,12 +488,11 @@ TEST(MultisetOperations, Test4)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(MultisetOperations, Test5)
-{
+TEST(MultisetOperations, Test5) {
     Cmp::count = 0;
 
-    auto x = multiset<int, Cmp>{1, 3, 5};
-    const auto &cx = x;
+    auto        x  = multiset<int, Cmp>{1, 3, 5};
+    const auto& cx = x;
 
     auto it = x.upper_bound(1L);
     EXPECT_NE(it, x.end());
@@ -522,8 +509,7 @@ TEST(MultisetOperations, Test5)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(MultisetOperations, Test6)
-{
+TEST(MultisetOperations, Test6) {
     Cmp::count = 0;
 
     auto x = multiset<int, Cmp>{1, 3, 5};
@@ -545,15 +531,13 @@ TEST(MultisetOperations, Test6)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(MultisetOperations, Test7)
-{
-    multiset<int> s;
-    test::I i = {};
+TEST(MultisetOperations, Test7) {
+    multiset<int>         s;
+    test::I               i    = {};
     [[maybe_unused]] auto iter = s.find(i);
 }
 
-TEST(MultisetOperations, Test8)
-{
+TEST(MultisetOperations, Test8) {
     auto s = multiset<int, test::WithPartition>{1, 2, 3, 3, 4, 5};
 
     auto n = s.count(test::WithPartition::Partition{});

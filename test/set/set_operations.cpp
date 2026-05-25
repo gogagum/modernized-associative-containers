@@ -13,22 +13,21 @@ namespace mstd {
 static_assert(!std::totally_ordered<set<int>::iterator>);
 static_assert(!std::three_way_comparable<set<int>::iterator>);
 
-static_assert(requires (set<int>& x) {
+static_assert(requires(set<int>& x) {
     { x.find(1L) } -> std::same_as<set<int>::iterator>;
     { x.upper_bound(1L) } -> std::same_as<set<int>::iterator>;
     { x.lower_bound(1L) } -> std::same_as<set<int>::iterator>;
     { x.equal_range(1L) } -> std::ranges::input_range;
 });
 
-static_assert(requires (const set<int>& x) {
+static_assert(requires(const set<int>& x) {
     { x.find(1L) } -> std::same_as<set<int>::const_iterator>;
     { x.upper_bound(1L) } -> std::same_as<set<int>::const_iterator>;
     { x.lower_bound(1L) } -> std::same_as<set<int>::const_iterator>;
     { x.equal_range(1L) } -> std::ranges::input_range;
 });
 
-TEST(SetEmplaceTest, Test2)
-{
+TEST(SetEmplaceTest, Test2) {
     set<test::aggressive_aggregate> x;
     auto [it, was_emplaced] = x.emplace(1, 2);
     EXPECT_EQ(it->a, 1);
@@ -41,10 +40,9 @@ TEST(SetEmplaceTest, Test2)
     EXPECT_EQ(it->b, 0);
 }
 
-TEST(SetEmplaceTest, TestHint)
-{
+TEST(SetEmplaceTest, TestHint) {
     set<test::aggressive_aggregate> x;
-    auto it = x.emplace_hint(x.begin(), 3, 2);
+    auto                            it = x.emplace_hint(x.begin(), 3, 2);
     EXPECT_EQ(it->a, 3);
     EXPECT_EQ(it->b, 2);
     it = x.emplace_hint(x.begin(), 4);
@@ -55,8 +53,7 @@ TEST(SetEmplaceTest, TestHint)
     EXPECT_EQ(it->b, 0);
 }
 
-TEST(SetContains, Test1)
-{
+TEST(SetContains, Test1) {
     set<int> m;
     EXPECT_FALSE(m.contains(0));
     EXPECT_FALSE(m.contains(1));
@@ -68,8 +65,7 @@ TEST(SetContains, Test1)
     EXPECT_TRUE(m.contains(1));
 }
 
-TEST(SetContains, Test2)
-{
+TEST(SetContains, Test2) {
     set<int> m;
     EXPECT_FALSE(m.contains(test::Zero{}));
     EXPECT_FALSE(m.contains(test::One{}));
@@ -81,8 +77,7 @@ TEST(SetContains, Test2)
     EXPECT_TRUE(m.contains(test::One{}));
 }
 
-TEST(SetCount, Test1)
-{
+TEST(SetCount, Test1) {
     set<int> s0;
     EXPECT_EQ(s0.count(0), 0);
     EXPECT_EQ(s0.count(1), 0);
@@ -154,17 +149,15 @@ TEST(SetCount, Test1)
     EXPECT_EQ(s1.count(5), 0);
 }
 
-TEST(SetEqualRange, Test1)
-{
+TEST(SetEqualRange, Test1) {
     set<test::AllEqual> s;
-    test::AllEqual x;
+    test::AllEqual      x;
     std::ignore = s.equal_range(x);
     std::ignore = std::as_const(s).equal_range(x);
 }
 
-TEST(SetEmplace, Test1)
-{
-    auto s = set<test::PathPoint, test::PathPointCmp>{};
+TEST(SetEmplace, Test1) {
+    auto s      = set<test::PathPoint, test::PathPointCmp>{};
     auto coord1 = std::vector{0.0, 1.0, 2.0};
 
     auto ret = s.emplace('a', coord1);
@@ -173,7 +166,7 @@ TEST(SetEmplace, Test1)
     EXPECT_EQ(ret.position->getType(), 'a');
 
     coord1[0] = 3.0;
-    ret = s.emplace('a', coord1);
+    ret       = s.emplace('a', coord1);
     EXPECT_FALSE(ret.inserted);
     EXPECT_EQ(s.size(), 1);
     EXPECT_EQ(ret.position->getType(), 'a');
@@ -184,15 +177,14 @@ TEST(SetEmplace, Test1)
     EXPECT_EQ(it->getType(), 'b');
     EXPECT_EQ(it->getCoords()[0], 3.0);
 
-    double *px = &coord1[0];
-    ret = s.emplace('c', std::move(coord1));
+    double* px = &coord1[0];
+    ret        = s.emplace('c', std::move(coord1));
     EXPECT_TRUE(ret.inserted);
     EXPECT_EQ(ret.position->getType(), 'c');
     EXPECT_EQ(&(ret.position->getCoords()[0]), px);
 }
 
-TEST(SetInsert, Test1)
-{
+TEST(SetInsert, Test1) {
     set<int> s0, s1;
 
     s0.insert(1);
@@ -240,8 +232,7 @@ TEST(SetInsert, Test1)
     EXPECT_EQ(s0, s1);
 }
 
-TEST(SetInsert, Test2)
-{
+TEST(SetInsert, Test2) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -253,8 +244,7 @@ TEST(SetInsert, Test2)
     EXPECT_EQ((*p.position).val, 1);
 }
 
-TEST(SetInsert, Test3)
-{
+TEST(SetInsert, Test3) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -267,8 +257,7 @@ TEST(SetInsert, Test3)
     EXPECT_EQ((*p1.position).val, 2);
 }
 
-TEST(SetInsert, Test4)
-{
+TEST(SetInsert, Test4) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -279,8 +268,7 @@ TEST(SetInsert, Test4)
     EXPECT_EQ(p->val, 1);
 }
 
-TEST(SetInsert, Test5)
-{
+TEST(SetInsert, Test5) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -291,9 +279,7 @@ TEST(SetInsert, Test5)
     EXPECT_EQ(p1->val, 2);
 }
 
-
-TEST(SetInsertTest, TestRvalStruct1)
-{
+TEST(SetInsertTest, TestRvalStruct1) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -304,8 +290,7 @@ TEST(SetInsertTest, TestRvalStruct1)
     EXPECT_EQ(i->val, 1);
 }
 
-TEST(SetInsertTest, TestRvalStruct2)
-{
+TEST(SetInsertTest, TestRvalStruct2) {
     auto s = set<test::rvalstruct>{};
     EXPECT_TRUE(s.empty());
 
@@ -321,8 +306,7 @@ TEST(SetInsertTest, TestRvalStruct2)
     EXPECT_EQ(i->val, 2);
 }
 
-TEST(SetOperations, Test1)
-{
+TEST(SetOperations, Test1) {
     auto s0 = set<int>{};
 
     std::ranges::input_range auto pp0 = s0.equal_range(1);
@@ -402,8 +386,8 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp0.begin(), s0.begin());
     EXPECT_EQ(pp0.end(), irt0.position);
 
-    const set<int> &s1 = s0;
-    auto pp1 = s1.equal_range(1);
+    const set<int>& s1  = s0;
+    auto            pp1 = s1.equal_range(1);
     EXPECT_EQ(s1.count(1), 1);
     EXPECT_EQ(*pp1.begin(), 1);
     EXPECT_EQ(*pp1.end(), 2);
@@ -412,8 +396,7 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp1.end(), irt1.position);
 }
 
-TEST(SetOperationsTest, Test2)
-{
+TEST(SetOperationsTest, Test2) {
     auto m = set<int>{};
     EXPECT_FALSE(m.contains(0));
     EXPECT_FALSE(m.contains(1));
@@ -428,8 +411,7 @@ TEST(SetOperationsTest, Test2)
     EXPECT_TRUE(m.contains(1));
 }
 
-TEST(SetOperationsTest, Test3)
-{
+TEST(SetOperationsTest, Test3) {
     auto m = set<int>{};
     EXPECT_FALSE(m.contains(test::Zero{}));
     EXPECT_FALSE(m.contains(test::One{}));
@@ -444,8 +426,7 @@ TEST(SetOperationsTest, Test3)
     EXPECT_TRUE(m.contains(test::One{}));
 }
 
-TEST(SetOperationsTest, Test4)
-{
+TEST(SetOperationsTest, Test4) {
     set<int> ms0;
     EXPECT_EQ(ms0.count(0), 0);
     EXPECT_EQ(ms0.count(1), 0);
@@ -517,12 +498,14 @@ TEST(SetOperationsTest, Test4)
     EXPECT_EQ(ms1.count(5), 0);
 }
 
-struct Cmp
-{
-    auto operator()(int i, long l) const { return i <=> l; }
-    auto operator()(long l, int i) const { return l <=> i; }
-    auto operator()(int i, int j) const
-    {
+struct Cmp {
+    auto operator()(int i, long l) const {
+        return i <=> l;
+    }
+    auto operator()(long l, int i) const {
+        return l <=> i;
+    }
+    auto operator()(int i, int j) const {
         ++count;
         return i <=> j;
     }
@@ -532,8 +515,7 @@ struct Cmp
 
 int Cmp::count = 0;
 
-TEST(SetOperations, Test2)
-{
+TEST(SetOperations, Test2) {
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
@@ -553,8 +535,7 @@ TEST(SetOperations, Test2)
     EXPECT_EQ(Cmp::count, 2);
 }
 
-TEST(SetOperations, Test3)
-{
+TEST(SetOperations, Test3) {
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
@@ -572,8 +553,7 @@ TEST(SetOperations, Test3)
     EXPECT_EQ(Cmp::count, 2);
 }
 
-TEST(SetOperations, Test4)
-{
+TEST(SetOperations, Test4) {
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
@@ -595,8 +575,7 @@ TEST(SetOperations, Test4)
     EXPECT_EQ(Cmp::count, 2);
 }
 
-TEST(SetOperations, Test5)
-{
+TEST(SetOperations, Test5) {
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
@@ -616,8 +595,7 @@ TEST(SetOperations, Test5)
     EXPECT_EQ(Cmp::count, 2);
 }
 
-TEST(SetOperations, Test6)
-{
+TEST(SetOperations, Test6) {
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
@@ -639,15 +617,13 @@ TEST(SetOperations, Test6)
     EXPECT_EQ(Cmp::count, 2);
 }
 
-TEST(SetOperations, Test7)
-{
-    set<int> s;
-    test::I i = {};
+TEST(SetOperations, Test7) {
+    set<int>              s;
+    test::I               i    = {};
     [[maybe_unused]] auto iter = s.find(i);
 }
 
-TEST(SetOperations, Test8)
-{
+TEST(SetOperations, Test8) {
     auto s = set<int, test::WithPartition>{1, 2, 3, 4, 5};
 
     auto n = s.count(test::WithPartition::Partition{});
