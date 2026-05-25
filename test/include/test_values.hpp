@@ -120,6 +120,38 @@ struct DefaultConstructibleType
     }
 };
 
+struct WithPartition
+{
+    auto operator()(int l, int r) const { return l <=> r; }
+
+    struct Partition
+    {
+    };
+
+    std::weak_ordering operator()(int l, Partition) const
+    {
+        if (l <= 4 && l >= 2)
+        {
+            return std::weak_ordering::equivalent;
+        }
+        return l <=> 3;
+    }
+    std::weak_ordering operator()(Partition, int r) const
+    {
+        if (r <= 4 && r >= 2)
+        {
+            return std::weak_ordering::equivalent;
+        }
+        return 3 <=> r;
+    }
+};
+
+struct I
+    {
+        int i;
+        operator int() const { return i; }
+    };
+
 struct aggressive_aggregate
 {
     int a;

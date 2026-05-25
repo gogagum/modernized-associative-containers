@@ -909,7 +909,7 @@ public:
         auto root_node = root();
         while (root_node != nullptr) {
             const auto& root_key = key_proj_(root_node->get_value());
-            const auto comp_res      = key_comp_(key, root_key);
+            const auto comp_res  = key_comp_(key, root_key);
             if (comp_res < 0) {
                 root_node = static_cast<node_pointer>(root_node->left_);
             } else if (comp_res > 0) {
@@ -927,7 +927,7 @@ public:
         auto root_node = root();
         while (root_node != nullptr) {
             const auto& root_key = key_proj_(root_node->get_value());
-            const auto comp_res = key_comp_(key, root_key);
+            const auto comp_res  = key_comp_(key, root_key);
             if (comp_res < 0) {
                 result    = static_cast<end_node_pointer>(root_node);
                 root_node = static_cast<node_pointer>(root_node->left_);

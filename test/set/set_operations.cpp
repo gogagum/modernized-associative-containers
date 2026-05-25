@@ -138,15 +138,10 @@ TEST(SetCount, Test1)
     EXPECT_EQ(s1.count(5), 0);
 }
 
-struct X
-{
-    auto operator<=>(const X &) const { return std::weak_ordering::equivalent; }
-};
-
 TEST(SetEqualRange, Test1)
 {
-    set<X> s;
-    X x;
+    set<test::AllEqual> s;
+    test::AllEqual x;
     std::ignore = s.equal_range(x);
     std::ignore = std::as_const(s).equal_range(x);
 }
@@ -280,6 +275,36 @@ TEST(SetInsert, Test5)
     EXPECT_EQ(p1->val, 2);
 }
 
+
+TEST(SetInsertTest, TestRvalStruct1)
+{
+    auto s = set<test::rvalstruct>{};
+    EXPECT_TRUE(s.empty());
+
+    auto [i, was_inserted] = s.insert(test::rvalstruct(1));
+    EXPECT_EQ(s.size(), 1);
+    EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
+    EXPECT_EQ(i, s.begin());
+    EXPECT_EQ(i->val, 1);
+}
+
+TEST(SetInsertTest, TestRvalStruct2)
+{
+    auto s = set<test::rvalstruct>{};
+    EXPECT_TRUE(s.empty());
+
+    s.insert(test::rvalstruct(2));
+    auto [i, wa_inserted] = s.insert(test::rvalstruct(2));
+    EXPECT_EQ(s.size(), 1);
+    EXPECT_EQ(std::distance(s.begin(), s.end()), 1);
+    EXPECT_EQ(i->val, 2);
+
+    auto i2 = s.begin();
+    ++i2;
+    EXPECT_EQ(s.begin()->val, 2);
+    EXPECT_EQ(i->val, 2);
+}
+
 TEST(SetOperations, Test1)
 {
     auto s0 = set<int>{};
@@ -369,6 +394,111 @@ TEST(SetOperations, Test1)
     EXPECT_EQ(pp1.begin(), irt0.position);
     EXPECT_EQ(--pp1.begin(), irt7.position);
     EXPECT_EQ(pp1.end(), irt1.position);
+}
+
+TEST(SetOperationsTest, Test2)
+{
+    auto m = set<int>{};
+    EXPECT_FALSE(m.contains(0));
+    EXPECT_FALSE(m.contains(1));
+    m.emplace(0);
+    EXPECT_TRUE(m.contains(0));
+    EXPECT_FALSE(m.contains(1));
+    m.emplace(0);
+    EXPECT_TRUE(m.contains(0));
+    EXPECT_FALSE(m.contains(1));
+    m.emplace(1);
+    EXPECT_TRUE(m.contains(0));
+    EXPECT_TRUE(m.contains(1));
+}
+
+TEST(SetOperationsTest, Test3)
+{
+    auto m = set<int>{};
+    EXPECT_FALSE(m.contains(test::Zero{}));
+    EXPECT_FALSE(m.contains(test::One{}));
+    m.emplace(0);
+    EXPECT_TRUE(m.contains(test::Zero{}));
+    EXPECT_FALSE(m.contains(test::One{}));
+    m.emplace(0);
+    EXPECT_TRUE(m.contains(test::Zero{}));
+    EXPECT_FALSE(m.contains(test::One{}));
+    m.emplace(1);
+    EXPECT_TRUE(m.contains(test::Zero{}));
+    EXPECT_TRUE(m.contains(test::One{}));
+}
+
+TEST(SetOperationsTest, Test4)
+{
+    set<int> ms0;
+    EXPECT_EQ(ms0.count(0), 0);
+    EXPECT_EQ(ms0.count(1), 0);
+
+    ms0.insert(1);
+    EXPECT_EQ(ms0.count(0), 0);
+    EXPECT_EQ(ms0.count(1), 1);
+
+    ms0.insert(1);
+    EXPECT_EQ(ms0.count(0), 0);
+    EXPECT_EQ(ms0.count(1), 1);
+
+    ms0.insert(2);
+    EXPECT_EQ(ms0.count(2), 1);
+
+    ms0.insert(3);
+    ms0.insert(3);
+    ms0.insert(3);
+    EXPECT_EQ(ms0.count(3), 1);
+
+    ms0.erase(2);
+    EXPECT_EQ(ms0.count(2), 0);
+
+    ms0.erase(0);
+    EXPECT_EQ(ms0.count(0), 0);
+
+    set<int> ms1(ms0);
+    EXPECT_EQ(ms1.count(0), 0);
+    EXPECT_EQ(ms1.count(1), 1);
+    EXPECT_EQ(ms1.count(2), 0);
+    EXPECT_EQ(ms1.count(3), 1);
+
+    ms0.clear();
+    EXPECT_EQ(ms0.count(0), 0);
+    EXPECT_EQ(ms0.count(1), 0);
+    EXPECT_EQ(ms0.count(2), 0);
+    EXPECT_EQ(ms0.count(3), 0);
+
+    ms1.insert(4);
+    ms1.insert(5);
+    ms1.insert(5);
+    ms1.insert(5);
+    ms1.insert(5);
+    EXPECT_EQ(ms1.count(4), 1);
+    EXPECT_EQ(ms1.count(5), 1);
+
+    ms1.erase(1);
+    EXPECT_EQ(ms1.count(1), 0);
+
+    ms1.erase(ms1.find(5));
+    EXPECT_EQ(ms1.count(5), 0);
+
+    ms1.insert(1);
+    ms1.insert(1);
+    EXPECT_EQ(ms1.count(1), 1);
+
+    ms1.erase(5);
+    EXPECT_EQ(ms1.count(5), 0);
+
+    ms1.erase(ms1.find(4));
+    EXPECT_EQ(ms1.count(4), 0);
+
+    ms1.clear();
+    EXPECT_EQ(ms1.count(0), 0);
+    EXPECT_EQ(ms1.count(1), 0);
+    EXPECT_EQ(ms1.count(2), 0);
+    EXPECT_EQ(ms1.count(3), 0);
+    EXPECT_EQ(ms1.count(4), 0);
+    EXPECT_EQ(ms1.count(5), 0);
 }
 
 struct Cmp
@@ -462,10 +592,8 @@ TEST(SetOperations, Test5)
 {
     Cmp::count = 0;
 
-    using test_type = set<int, Cmp>;
-
-    test_type x{1, 3, 5};
-    const test_type &cx = x;
+    auto x = set<int, Cmp>{1, 3, 5};
+    const auto &cx = x;
 
     auto it = x.upper_bound(1L);
     EXPECT_NE(it, x.end());
@@ -481,20 +609,15 @@ TEST(SetOperations, Test5)
 
     EXPECT_EQ(Cmp::count, 2);
 
-    static_assert(std::is_same<decltype(it), test_type::iterator>::value,
-                  "upper_bound returns iterator");
-    static_assert(std::is_same<decltype(cit), test_type::const_iterator>::value,
-                  "const upper_bound returns const_iterator");
+    static_assert(std::same_as<decltype(it), set<int, Cmp>::iterator>);
+    static_assert(std::same_as<decltype(cit), set<int, Cmp>::const_iterator>);
 }
 
 TEST(SetOperations, Test6)
 {
     Cmp::count = 0;
 
-    using test_type = set<int, Cmp>;
-
-    test_type x{1, 3, 5};
-    const test_type &cx = x;
+    auto x = set<int, Cmp>{1, 3, 5};
 
     auto r = x.equal_range(1L);
     EXPECT_FALSE(r.empty());
@@ -503,65 +626,31 @@ TEST(SetOperations, Test6)
     EXPECT_TRUE(r.empty());
     EXPECT_NE(r.begin(), x.end());
 
-    auto cr = cx.equal_range(1L);
+    auto cr = std::as_const(x).equal_range(1L);
     EXPECT_FALSE(cr.empty());
     EXPECT_EQ(*cr.begin(), 1);
-    cr = cx.equal_range(2L);
+    cr = std::as_const(x).equal_range(2L);
     EXPECT_TRUE(cr.empty());
-    EXPECT_NE(cr.begin(), cx.end());
+    EXPECT_NE(cr.begin(), std::as_const(x).end());
 
     EXPECT_EQ(Cmp::count, 2);
 
-    static_assert(std::ranges::range<decltype(r)>,
-                  "equal_range returns a range");
-    static_assert(std::ranges::range<decltype(cr)>,
-                  "const equal_range returns a range");
+    static_assert(std::ranges::range<decltype(r)>);
+    static_assert(std::ranges::range<decltype(cr)>);
 }
 
 TEST(SetOperations, Test7)
 {
-    struct I
-    {
-        int i;
-        operator int() const { return i; }
-    };
-
     set<int> s;
-    I i = {};
+    test::I i = {};
     [[maybe_unused]] auto iter = s.find(i);
 }
 
 TEST(SetOperations, Test8)
 {
-    struct C
-    {
-        auto operator()(int l, int r) const { return l <=> r; }
+    auto s = set<int, test::WithPartition>{1, 2, 3, 4, 5};
 
-        struct Partition
-        {
-        };
-
-        std::weak_ordering operator()(int l, Partition) const
-        {
-            if (l <= 4 && l >= 2)
-            {
-                return std::weak_ordering::equivalent;
-            }
-            return l <=> 3;
-        }
-        std::weak_ordering operator()(Partition, int r) const
-        {
-            if (r <= 4 && r >= 2)
-            {
-                return std::weak_ordering::equivalent;
-            }
-            return 3 <=> r;
-        }
-    };
-
-    set<int, C> s{1, 2, 3, 4, 5};
-
-    auto n = s.count(C::Partition{});
+    auto n = s.count(test::WithPartition::Partition{});
     EXPECT_EQ(n, 3);
 }
 

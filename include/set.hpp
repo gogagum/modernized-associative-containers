@@ -489,7 +489,7 @@ public:
     using const_pointer          = Tree_::const_pointer;
     using size_type              = Tree_::size_type;
     using difference_type        = Tree_::difference_type;
-    using iterator               = Tree_::const_iterator;
+    using iterator               = Tree_::iterator;
     using const_iterator         = Tree_::const_iterator;
     using reverse_iterator       = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
