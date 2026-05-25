@@ -6,13 +6,15 @@
 namespace mstd {
 
 template <class CompareT, class Key1T, class Key2T, class Ordering>
-concept OrdersWithAtLeast = requires (const CompareT& comp, Key1T key1, Key2T key2) {
-    { comp(key1, key2) } -> std::convertible_to<Ordering>;
-    { comp(key2, key1) } -> std::convertible_to<Ordering>;
-};
+concept OrdersWithAtLeast
+    = requires(const CompareT& comp, Key1T key1, Key2T key2) {
+          { comp(key1, key2) } -> std::convertible_to<Ordering>;
+          { comp(key2, key1) } -> std::convertible_to<Ordering>;
+      };
 
 template <class CompareT, class Key1T, class Key2T>
-concept OrdersWithAtLeastWeakly = OrdersWithAtLeast<CompareT, Key1T, Key2T, std::weak_ordering>;
+concept OrdersWithAtLeastWeakly
+    = OrdersWithAtLeast<CompareT, Key1T, Key2T, std::weak_ordering>;
 
 template <class CompareT, class Key, class Ordering>
 concept OrdersAtLeast = OrdersWithAtLeast<CompareT, Key, Key, Ordering>;
@@ -20,6 +22,6 @@ concept OrdersAtLeast = OrdersWithAtLeast<CompareT, Key, Key, Ordering>;
 template <class CompareT, class Key>
 concept OrdersAtLeastWeakly = OrdersAtLeast<CompareT, Key, std::weak_ordering>;
 
-}
+} // namespace mstd
 
 #endif // MSTD_COMPARE_TRAITS_HPP

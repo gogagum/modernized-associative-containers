@@ -17,14 +17,14 @@
 namespace mstd {
 
 template <class RangeT, class _Tp>
-concept _ContainerCompatibleRange =
-    std::ranges::input_range<RangeT> && std::convertible_to<std::ranges::range_reference_t<RangeT>, _Tp>;
+concept _ContainerCompatibleRange
+    = std::ranges::input_range<RangeT>
+      && std::convertible_to<std::ranges::range_reference_t<RangeT>, _Tp>;
 
 template <class IteratorT, class _Tp>
-concept _ContainerCompatibleIterator =
-    std::input_iterator<IteratorT> &&
-    std::convertible_to<std::iter_reference_t<IteratorT>, _Tp>;
-
+concept _ContainerCompatibleIterator
+    = std::input_iterator<IteratorT>
+      && std::convertible_to<std::iter_reference_t<IteratorT>, _Tp>;
 
 } // namespace mstd
 

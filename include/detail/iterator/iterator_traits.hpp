@@ -18,21 +18,17 @@
 namespace mstd {
 
 template <class IteratorT>
-using __iter_key_type 
-    = std::remove_const_t<
-        std::tuple_element_t<0, std::iter_value_t<IteratorT>>
-      >;
+using __iter_key_type = std::remove_const_t<
+    std::tuple_element_t<0, std::iter_value_t<IteratorT>>>;
 
 template <class IteratorT>
 using __iter_mapped_type
     = std::tuple_element_t<1, std::iter_value_t<IteratorT>>;
 
 template <class IteratorT>
-using __iter_to_alloc_type
-  = MapValue<
-      std::remove_const_t<std::tuple_element_t<0, std::iter_value_t<IteratorT>>>
-    , std::tuple_element_t<1, std::iter_value_t<IteratorT>>
-    >;
+using __iter_to_alloc_type = MapValue<
+    std::remove_const_t<std::tuple_element_t<0, std::iter_value_t<IteratorT>>>,
+    std::tuple_element_t<1, std::iter_value_t<IteratorT>>>;
 
 } // namespace mstd
 

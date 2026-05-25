@@ -14,8 +14,10 @@
 namespace mstd {
 
 template <class T>
-concept Allocator = requires (T& alloc, std::size_t alloc_size) { alloc.allocate(alloc_size); typename T::value_type; };
-
+concept Allocator = requires(T& alloc, std::size_t alloc_size) {
+    alloc.allocate(alloc_size);
+    typename T::value_type;
+};
 
 } // namespace mstd
 
