@@ -564,7 +564,13 @@ map(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool operator==(const map<KeyT, ValueT, CompareT, AllocatorT>& x,
                        const map<KeyT, ValueT, CompareT, AllocatorT>& y) {
-    return x.size() == y.size() && std::equal(x.begin(), x.end(), y.begin());
+    using Map = map<KeyT, ValueT, CompareT, AllocatorT>;
+
+    return std::ranges::equal(
+        x, y, [](const Map::value_type& val1, const Map::value_type& val2) {
+            return std::tie(val1.key(), val1.value())
+                   == std::tie(val2.key(), val2.value());
+        });
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -578,7 +584,8 @@ auto operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x,
         y.begin(),
         y.end(),
         [](const Map::value_type& val1, const Map::value_type& val2) {
-            return std::tie(val1.key(), val1.value()) <=> std::tie(val2.key(), val2.value());
+            return std::tie(val1.key(), val1.value())
+                   <=> std::tie(val2.key(), val2.value());
         });
 }
 
@@ -1022,7 +1029,13 @@ multimap(std::initializer_list<MapValue<KeyT, ValueT>>, AllocatorT)
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
 inline bool operator==(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
                        const multimap<KeyT, ValueT, CompareT, AllocatorT>& y) {
-    return std::ranges::equal(x, y);
+    using Map = multimap<KeyT, ValueT, CompareT, AllocatorT>;
+
+    return std::ranges::equal(
+        x, y, [](const Map::value_type& val1, const Map::value_type& val2) {
+            return std::tie(val1.key(), val1.value())
+                   == std::tie(val2.key(), val2.value());
+        });
 }
 
 template <class KeyT, class ValueT, class CompareT, class AllocatorT>
@@ -1036,7 +1049,8 @@ auto operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
         y.begin(),
         y.end(),
         [](const Map::value_type& val1, const Map::value_type& val2) {
-            return std::tie(val1.key(), val1.value()) <=> std::tie(val2.key(), val2.value());
+            return std::tie(val1.key(), val1.value())
+                   <=> std::tie(val2.key(), val2.value());
         });
 }
 

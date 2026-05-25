@@ -18,8 +18,10 @@ namespace mstd {
 
     pp0 = mm0.equal_range(2);
     EXPECT_EQ(mm0.count(2), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(2, 2));
-    EXPECT_EQ(*pp0.end(), value_type(3, 3));
+    EXPECT_EQ(pp0.begin()->key(), 2);
+    EXPECT_EQ(pp0.begin()->value(), 2);
+    EXPECT_EQ(pp0.end()->key(), 3);
+    EXPECT_EQ(pp0.end()->value(), 3);
     EXPECT_EQ(pp0.begin(), iter1);
     EXPECT_EQ(--pp0.begin(), iter0);
     EXPECT_EQ(pp0.end(), iter2);
@@ -29,8 +31,10 @@ namespace mstd {
 
     pp0 = mm0.equal_range(3);
     EXPECT_EQ(mm0.count(3), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(3, 3));
-    EXPECT_EQ(*pp0.end(), value_type(4, 6));
+    EXPECT_EQ(pp0.begin()->key(), 3);
+    EXPECT_EQ(pp0.begin()->value(), 3);
+    EXPECT_EQ(pp0.end()->key(), 4);
+    EXPECT_EQ(pp0.end()->value(), 6);
     EXPECT_EQ(pp0.begin(), iter2);
     EXPECT_EQ(--pp0.begin(), iter1);
     EXPECT_EQ(pp0.end(), iter4);
@@ -42,8 +46,10 @@ namespace mstd {
 
     pp0 = mm0.equal_range(1);
     EXPECT_EQ(mm0.count(1), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(1, 1));
-    EXPECT_EQ(*pp0.end(), value_type(2, 2));
+    EXPECT_EQ(pp0.begin()->key(), 1);
+    EXPECT_EQ(pp0.begin()->value(), 1);
+    EXPECT_EQ(pp0.end()->key(), 2);
+    EXPECT_EQ(pp0.end()->value(), 2);
     EXPECT_EQ(pp0.begin(), iter0);
     EXPECT_EQ(--pp0.begin(), iter5);
     EXPECT_EQ(pp0.end(), iter1);
@@ -54,7 +60,8 @@ namespace mstd {
 
     pp0 = mm0.equal_range(5);
     EXPECT_EQ(mm0.count(5), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(5, 11));
+    EXPECT_EQ(pp0.begin()->key(), 5);
+    EXPECT_EQ(pp0.begin()->value(), 11);
     EXPECT_EQ(pp0.begin(), iter6);
     EXPECT_EQ(--pp0.begin(), iter4);
     EXPECT_EQ(pp0.end(), mm0.end());
@@ -65,8 +72,10 @@ namespace mstd {
 
     pp0 = mm0.equal_range(4);
     EXPECT_EQ(mm0.count(4), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(4, 6));
-    EXPECT_EQ(*pp0.end(), value_type(5, 11));
+    EXPECT_EQ(pp0.begin()->key(), 4);
+    EXPECT_EQ(pp0.begin()->value(), 6);
+    EXPECT_EQ(pp0.end()->key(), 5);
+    EXPECT_EQ(pp0.end()->value(), 11);
     EXPECT_EQ(pp0.begin(), iter4);
     EXPECT_EQ(--pp0.begin(), iter3);
     EXPECT_EQ(pp0.end(), iter6);
@@ -77,8 +86,10 @@ namespace mstd {
 
     pp0 = mm0.equal_range(0);
     EXPECT_EQ(mm0.count(0), 1);
-    EXPECT_EQ(*pp0.begin(), value_type(0, 7));
-    EXPECT_EQ(*pp0.end(), value_type(1, 1));
+    EXPECT_EQ(pp0.begin()->key(), 0);
+    EXPECT_EQ(pp0.begin()->value(), 7);
+    EXPECT_EQ(pp0.end()->key(), 1);
+    EXPECT_EQ(pp0.end()->value(), 1);
     EXPECT_EQ(pp0.begin(), iter5);
     EXPECT_EQ(pp0.begin(), mm0.begin());
     EXPECT_EQ(pp0.end(), iter0);
@@ -86,8 +97,10 @@ namespace mstd {
     const map<int, int> &mm1 = mm0;
     auto pp1 = mm1.equal_range(1);
     EXPECT_EQ(mm1.count(1), 1);
-    EXPECT_EQ(*pp1.begin(), value_type(1, 1));
-    EXPECT_EQ(*pp1.end(), value_type(2, 2));
+    EXPECT_EQ(pp1.begin()->key(), 1);
+    EXPECT_EQ(pp1.begin()->value(), 1);
+    EXPECT_EQ(pp1.end()->key(), 2);
+    EXPECT_EQ(pp1.end()->value(), 2);
     EXPECT_EQ(pp1.begin(), iter0);
     EXPECT_EQ(--pp1.begin(), iter7);
     EXPECT_EQ(pp1.end(), iter1);

@@ -65,9 +65,6 @@ class MapValue {
     const ValueT& value() const {
         return value_;
     }
-    bool operator==(const MapValue& other) const {
-        return key_ == other.key_ && value_ == other.value_;
-    }
 
   private:
     struct key_proj_ {
