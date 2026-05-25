@@ -1,3 +1,4 @@
+#include <compare>
 #include <gtest/gtest.h>
 
 #include <map.hpp>
@@ -24,8 +25,9 @@ TEST(MapCompareTests, CompareNumeric)
 
     static_assert(std::three_way_comparable<map<int, int>, std::strong_ordering>);
     static_assert(!std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::strong_ordering>);
-    static_assert(std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::weak_ordering>);
-    static_assert(std::three_way_comparable<map<int, float>, std::weak_ordering>);
+    static_assert(!std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::weak_ordering>);
+    static_assert(std::three_way_comparable<map<float, float, fp_compare_three_way<float>>, std::partial_ordering>);
+    static_assert(std::three_way_comparable<map<int, float>, std::partial_ordering>);
 
     static_assert(std::totally_ordered<map<test::AllEqual, int>>);
     static_assert(!std::three_way_comparable<test::AllEqual>);
@@ -62,7 +64,7 @@ TEST(MapCompareTests, WeaklyOrderedKey)
 
         auto c1 = Map{{1, 1}, {2, 2}, {3, 3}};
         auto c2 = Map{{1, 1}, {2, 2}, {3, 4}};
-        // static_assert(std::same_as<decltype(c1 <=> c2), std::weak_ordering>); // TODO(gogagum)
+        static_assert(std::same_as<decltype(c1 <=> c2), std::weak_ordering>);
         EXPECT_TRUE(std::is_lt(c1 <=> c2));
     }
 }

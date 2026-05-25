@@ -578,18 +578,7 @@ auto operator<=>(const map<KeyT, ValueT, CompareT, AllocatorT>& x,
         y.begin(),
         y.end(),
         [](const Map::value_type& val1, const Map::value_type& val2) {
-            const auto key_cmp = CompareT{}(val1.key(), val2.key());
-            using CmpRes       = decltype(key_cmp);
-            if (key_cmp == 0) {
-                if (val1.value() < val2.value()) {
-                    return CmpRes::less;
-                } else if (val2.value() < val1.value()) {
-                    return CmpRes::greater;
-                } else {
-                    return CmpRes::equivalent;
-                }
-            }
-            return key_cmp;
+            return std::tie(val1.key(), val1.value()) <=> std::tie(val2.key(), val2.value());
         });
 }
 
@@ -1047,18 +1036,7 @@ auto operator<=>(const multimap<KeyT, ValueT, CompareT, AllocatorT>& x,
         y.begin(),
         y.end(),
         [](const Map::value_type& val1, const Map::value_type& val2) {
-            const auto key_cmp = CompareT{}(val1.key(), val2.key());
-            using CmpRes       = decltype(key_cmp);
-            if (key_cmp == 0) {
-                if (val1.value() < val2.value()) {
-                    return CmpRes::less;
-                } else if (val2.value() < val1.value()) {
-                    return CmpRes::greater;
-                } else {
-                    return CmpRes::equivalent;
-                }
-            }
-            return key_cmp;
+            return std::tie(val1.key(), val1.value()) <=> std::tie(val2.key(), val2.value());
         });
 }
 
