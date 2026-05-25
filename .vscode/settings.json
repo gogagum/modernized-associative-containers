@@ -29,5 +29,6 @@
         "XCOFF",
         "XXYYZZ",
         "XXYZ"
-    ]
+    ],
+    "editor.rulers": [80]
 }

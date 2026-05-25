@@ -1,0 +1,110 @@
+---
+Language: Cpp
+Standard: c++20
+IndentWidth: 4
+UseTab: Never
+
+# Column limit
+ColumnLimit: 80
+
+# Braces
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+
+# Indent
+IndentCaseLabels: true
+IndentGotoLabels: false
+IndentPPDirectives: None
+IndentWrappedFunctionNames: true
+IndentFunctionDeclarationAfterType: false
+ConstructorInitializerIndentWidth: 0
+
+# Spaces
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Breaking
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: MultiLine
+
+# Pointer alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Packing
+BinPackArguments: false
+BinPackParameters: false
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignEscapedNewlines: Right
+AlignTrailingComments: true 
+
+# Comments
+ReflowComments: true
+CommentPragmas: '^ IWYU pragma:|^// NOLINTBEGIN|^// NOLINTEND'
+
+# Template-related
+CompactNamespaces: false
+EmptyLineBeforeAccessModifier: LogicalBlock
+
+# Sorting
+SortIncludes: CaseSensitive
+SortUsingDeclarations: true
+
+# Line breaks
+BreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: All
+BreakBeforeInlineASMColon: OnlyMultiline
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
+BreakConstructorInitializersBeforeComma: true
+
+# Penalties
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyBreakTemplateDeclaration: 10
+PenaltyExcessCharacter: 1000000
+PenaltyIndentedWhitespace: 0
+PenaltyReturnTypeOnItsOwnLine: 60
+
+# Function style
+DeriveLineEnding: true
+DerivePointerAlignment: false
+Cpp11BracedListStyle: true
