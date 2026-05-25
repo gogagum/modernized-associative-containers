@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
-#include <rval_struct.hpp>
 
+#include <concepts>
+#include <ranges>
+#include <rval_struct.hpp>
 #include <test_values.hpp>
 
 #include <set.hpp>
@@ -10,6 +12,20 @@ namespace mstd {
 // Associative container iterators are not random access
 static_assert(!std::totally_ordered<set<int>::iterator>);
 static_assert(!std::three_way_comparable<set<int>::iterator>);
+
+static_assert(requires (set<int>& x) {
+    { x.find(1L) } -> std::same_as<set<int>::iterator>;
+    { x.upper_bound(1L) } -> std::same_as<set<int>::iterator>;
+    { x.lower_bound(1L) } -> std::same_as<set<int>::iterator>;
+    { x.equal_range(1L) } -> std::ranges::input_range;
+});
+
+static_assert(requires (const set<int>& x) {
+    { x.find(1L) } -> std::same_as<set<int>::const_iterator>;
+    { x.upper_bound(1L) } -> std::same_as<set<int>::const_iterator>;
+    { x.lower_bound(1L) } -> std::same_as<set<int>::const_iterator>;
+    { x.equal_range(1L) } -> std::ranges::input_range;
+});
 
 TEST(SetEmplaceTest, Test2)
 {
@@ -520,10 +536,7 @@ TEST(SetOperations, Test2)
 {
     Cmp::count = 0;
 
-    using test_type = set<int, Cmp>;
-
-    test_type x{1, 3, 5};
-    const test_type &cx = x;
+    auto x = set<int, Cmp>{1, 3, 5};
 
     auto it = x.find(1L);
     EXPECT_NE(it, x.end());
@@ -531,16 +544,13 @@ TEST(SetOperations, Test2)
     it = x.find(2L);
     EXPECT_EQ(it, x.end());
 
-    auto cit = cx.find(3L);
-    EXPECT_NE(cit, cx.end());
+    auto cit = std::as_const(x).find(3L);
+    EXPECT_NE(cit, std::as_const(x).end());
     EXPECT_EQ(*cit, 3);
-    cit = cx.find(2L);
-    EXPECT_EQ(cit, cx.end());
+    cit = std::as_const(x).find(2L);
+    EXPECT_EQ(cit, std::as_const(x).end());
 
     EXPECT_EQ(Cmp::count, 2);
-
-    static_assert(std::same_as<decltype(it), test_type::iterator>);
-    static_assert(std::same_as<decltype(cit), test_type::const_iterator>);
 }
 
 TEST(SetOperations, Test3)
@@ -583,9 +593,6 @@ TEST(SetOperations, Test4)
     EXPECT_EQ(*cit, 3);
 
     EXPECT_EQ(Cmp::count, 2);
-
-    static_assert(std::same_as<decltype(it), set<int, Cmp>::iterator>);
-    static_assert(std::same_as<decltype(cit), set<int, Cmp>::const_iterator>);
 }
 
 TEST(SetOperations, Test5)
@@ -593,7 +600,6 @@ TEST(SetOperations, Test5)
     Cmp::count = 0;
 
     auto x = set<int, Cmp>{1, 3, 5};
-    const auto &cx = x;
 
     auto it = x.upper_bound(1L);
     EXPECT_NE(it, x.end());
@@ -601,16 +607,13 @@ TEST(SetOperations, Test5)
     it = x.upper_bound(5L);
     EXPECT_EQ(it, x.end());
 
-    auto cit = cx.upper_bound(1L);
-    EXPECT_NE(cit, cx.end());
+    auto cit = std::as_const(x).upper_bound(1L);
+    EXPECT_NE(cit, std::as_const(x).end());
     EXPECT_EQ(*cit, 3);
-    cit = cx.upper_bound(5L);
-    EXPECT_EQ(cit, cx.end());
+    cit = std::as_const(x).upper_bound(5L);
+    EXPECT_EQ(cit, std::as_const(x).end());
 
     EXPECT_EQ(Cmp::count, 2);
-
-    static_assert(std::same_as<decltype(it), set<int, Cmp>::iterator>);
-    static_assert(std::same_as<decltype(cit), set<int, Cmp>::const_iterator>);
 }
 
 TEST(SetOperations, Test6)
@@ -634,9 +637,6 @@ TEST(SetOperations, Test6)
     EXPECT_NE(cr.begin(), std::as_const(x).end());
 
     EXPECT_EQ(Cmp::count, 2);
-
-    static_assert(std::ranges::range<decltype(r)>);
-    static_assert(std::ranges::range<decltype(cr)>);
 }
 
 TEST(SetOperations, Test7)

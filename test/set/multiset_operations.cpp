@@ -1,5 +1,7 @@
-#include "gtest/gtest.h"
 #include <gtest/gtest.h>
+
+#include <concepts>
+#include <ranges>
 #include <rval_struct.hpp>
 #include <test_values.hpp>
 
@@ -10,6 +12,20 @@ namespace mstd {
 // Associative container iterators are not random access
 static_assert(!std::totally_ordered<multiset<int>::iterator>);
 static_assert(!std::three_way_comparable<multiset<int>::iterator>);
+
+static_assert(requires (multiset<int>& x) {
+    { x.find(1L) } -> std::same_as<multiset<int>::iterator>;
+    { x.upper_bound(1L) } -> std::same_as<multiset<int>::iterator>;
+    { x.lower_bound(1L) } -> std::same_as<multiset<int>::iterator>;
+    { x.equal_range(1L) } -> std::ranges::input_range;
+});
+
+static_assert(requires (const multiset<int>& x) {
+    { x.find(1L) } -> std::same_as<multiset<int>::const_iterator>;
+    { x.upper_bound(1L) } -> std::same_as<multiset<int>::const_iterator>;
+    { x.lower_bound(1L) } -> std::same_as<multiset<int>::const_iterator>;
+    { x.equal_range(1L) } -> std::ranges::input_range;
+});
 
 TEST(MultisetEmplaceTest, Test2)
 {
@@ -420,7 +436,7 @@ struct Cmp
 
 int Cmp::count = 0;
 
-TEST(SetOperations, Test2)
+TEST(MultisetOperations, Test2)
 {
     Cmp::count = 0;
 
@@ -440,12 +456,9 @@ TEST(SetOperations, Test2)
     EXPECT_EQ(cit, cx.end());
 
     EXPECT_EQ(Cmp::count, 5);
-
-    static_assert(std::same_as<decltype(it), multiset<int, Cmp>::iterator>);
-    static_assert(std::same_as<decltype(cit), multiset<int, Cmp>::const_iterator>);
 }
 
-TEST(SetOperations, Test3)
+TEST(MultisetOperations, Test3)
 {
     Cmp::count = 0;
 
@@ -464,7 +477,7 @@ TEST(SetOperations, Test3)
     EXPECT_EQ(Cmp::count, 5);
 }
 
-TEST(SetOperations, Test4)
+TEST(MultisetOperations, Test4)
 {
     Cmp::count = 0;
 
@@ -485,12 +498,9 @@ TEST(SetOperations, Test4)
     EXPECT_EQ(*cit, 3);
 
     EXPECT_EQ(Cmp::count, 5);
-
-    static_assert(std::same_as<decltype(it), multiset<int, Cmp>::iterator>);
-    static_assert(std::same_as<decltype(cit), multiset<int, Cmp>::const_iterator>);
 }
 
-TEST(SetOperations, Test5)
+TEST(MultisetOperations, Test5)
 {
     Cmp::count = 0;
 
@@ -510,12 +520,9 @@ TEST(SetOperations, Test5)
     EXPECT_EQ(cit, cx.end());
 
     EXPECT_EQ(Cmp::count, 5);
-
-    static_assert(std::same_as<decltype(it), multiset<int, Cmp>::iterator>);
-    static_assert(std::same_as<decltype(cit), multiset<int, Cmp>::const_iterator>);
 }
 
-TEST(SetOperations, Test6)
+TEST(MultisetOperations, Test6)
 {
     Cmp::count = 0;
 
@@ -536,9 +543,6 @@ TEST(SetOperations, Test6)
     EXPECT_NE(cr.begin(), std::as_const(x).end());
 
     EXPECT_EQ(Cmp::count, 5);
-
-    static_assert(std::ranges::range<decltype(r)>);
-    static_assert(std::ranges::range<decltype(cr)>);
 }
 
 TEST(MultisetOperations, Test7)
